@@ -25,7 +25,15 @@ make
 The binary mbolc is created in the bin directory, you may optionally decide to install it if you have root privilages:
 sudo make install
 
-To understand what this tool does, look at samples/X.tex and the created samples/X.hpp (for some X, there are several examples). Try running the created binary samples/main and look at samples/main.tex, samples/main.pdf, and samples/graph.pdf. Examining samples/main.cpp shows what you as the user must provide in addition to the mathematical representation of the optimization program.
+To understand what this tool does, look at samples/X.tex and the created samples/X.hpp (for some X, there are several examples). Try running the created binary samples/main. Running samples/main shows you the result of the samples. Examining samples/main.cpp shows what you as the user must provide in addition to the mathematical representation of the optimization program.
+
+If you have pdflatex you can try the following to see the pdf version of the optimization programs:
+cd samples
+make main.pdf
+
+If you have graphviz you can try the following to see the graph that the samples use:
+cd samples
+make graph.pdf
 
 
 COMING SOON:
