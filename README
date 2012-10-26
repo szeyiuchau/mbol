@@ -1,0 +1,35 @@
+ABOUT:
+
+Math-Based Optimization Language (MBOL) is a programming language for optimization problems which aims to be identical to the high-level math-based representation of the optimization program. This repository includes a compiler that converts latex source of an optimization problem into C++ code which can be compiled and executed with the popular optimizer, CPLEX.
+
+This tool was initially created by me (Andrew Newell) to more efficiently create mathematical programs to run on CPLEX. This tool has been exteremely useful in my research at Purdue University, and I wanted to share the tool with others.
+
+
+DEPENDENCIES:
+
+The tools lex, yacc, and g++ are used to compile mbolc (the MBOL compiler).
+
+The tool pdflatex is highly recommended as the most important advantage of using MBOL is that the MBOL source is compilable by pdflatex into publishable typesetted mathematics.
+
+Currently, mbolc only creates c++ code which requires the CPLEX library. This library is currently part of IBM's Academic Initiative, so other researchers are able to freely obtain this library. Also, companies can purchase this software. Future plans to create other backends for the mbolc compiler such that code can be generated which can be used by other solvers which may be easier to obtain.
+
+
+GETTING STARTED:
+
+CPLEX_HOME should be set to the home directory of CPLEX, e.g.:
+export EXPORT_HOME=~/ILOG/CPLEX/
+
+To compile mbolc as well as the samples just call make:
+make
+
+The binary mbolc is created in the bin directory, you may optionally decide to install it if you have root privilages:
+sudo make install
+
+To understand what this tool does, look at samples/X.tex and the created samples/X.hpp (for some X, there are several examples). Try running the created binary samples/main and look at samples/main.tex, samples/main.pdf, and samples/graph.pdf. Examining samples/main.cpp shows what you as the user must provide in addition to the mathematical representation of the optimization program.
+
+
+COMING SOON:
+
+Full documentation has not been created yet.
+
+Type checking is lacking. Typically, if you use a variable as two different types, something bad will happen either in the mbolc execution or when the resulting c++ code is attempted to be compiled.

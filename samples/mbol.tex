@@ -1,0 +1,23 @@
+\usepackage{amssymb}
+\usepackage{amsmath}
+\newcounter{subjto}
+\newcommand{\maxf}[2]{&\underset{#1}{\text{maximize}}&&#2\\}
+\newcommand{\minf}[2]{&\underset{#1}{\text{minimize}}&&#2\\}
+\newcommand{\con}[1]{
+\ifnum \value{subjto}>0 
+\setcounter{subjto}{0}
+&\text{subject to}&&#1\\
+\else
+&&&#1\\
+\fi
+}
+\newenvironment{mbol}
+{
+\setcounter{subjto}{1}
+\begin{equation*}
+\begin{aligned}
+}
+{
+\end{aligned}
+\end{equation*}
+}
