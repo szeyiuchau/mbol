@@ -44,31 +44,32 @@
   31                    | number_expression number_subexpression
   32                    | number_expression operator number_subexpression
 
-  33  element_subexpression : '\{' number_expression '\}'
-  34                        | '(' element_expression ')'
-  35                        | VARIABLE
+  33  element_subexpression : '\{' VARIABLE ':' qualifiers '\}'
+  34                        | '\{' number_expression '\}'
+  35                        | '(' element_expression ')'
+  36                        | VARIABLE
 
-  36  number_subexpression : sum
-  37                       | '|' element_expression '|'
-  38                       | '\frac' '{' number_expression '}' '{' number_expression '}'
-  39                       | '(' number_expression ')'
-  40                       | NUMBER
-  41                       | VARIABLE
-  42                       | VARIABLE '_' '{' indices '}'
-  43                       | VARIABLE '_' element_expression
+  37  number_subexpression : sum
+  38                       | '|' element_expression '|'
+  39                       | '\frac' '{' number_expression '}' '{' number_expression '}'
+  40                       | '(' number_expression ')'
+  41                       | NUMBER
+  42                       | VARIABLE
+  43                       | VARIABLE '_' '{' indices '}'
+  44                       | VARIABLE '_' element_expression
 
-  44  operator : '+'
-  45           | '-'
-  46           | '/'
-  47           | '*'
+  45  operator : '+'
+  46           | '-'
+  47           | '/'
+  48           | '*'
 
-  48  indices : element_expression
-  49          | indices ',' element_expression
+  49  indices : element_expression
+  50          | indices ',' element_expression
 
-  50  sum : sum_product sum_product_qualifiers '(' number_expression ')'
+  51  sum : sum_product sum_product_qualifiers '(' number_expression ')'
 
-  51  sum_product : '\sum'
-  52              | '\prod'
+  52  sum_product : '\sum'
+  53              | '\prod'
 
-  53  sum_product_qualifiers : '_' '{' VARIABLE '=' number_subexpression '}' '^' '{' number_subexpression '}'
-  54                         | '_' '{' qualifiers '}'
+  54  sum_product_qualifiers : '_' '{' VARIABLE '=' number_subexpression '}' '^' '{' number_subexpression '}'
+  55                         | '_' '{' qualifiers '}'

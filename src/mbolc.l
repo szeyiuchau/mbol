@@ -6,6 +6,7 @@ int li=0;
 %}
 %%
 \\ne return NE;
+":" return CL;
 "<" return LT;
 ">" return GT;
 \\prod return PR;

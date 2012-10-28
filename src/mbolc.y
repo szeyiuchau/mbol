@@ -10,7 +10,7 @@
     #include<list>
     using namespace std;
 %}
-%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR PR GT LT NE LJ CN
+%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR PR GT LT NE LJ CN CL
 %union {
     int ival;
     char* sval;
@@ -211,7 +211,7 @@ AA objective constraints BB {
     hppCode="#include<set>\n#include<map>\n#include<ilcplex/ilocplex.h>\n#include<mbol.hpp>\nusing namespace std;\n#ifndef MBOL_"+functionName+"\n#define MBOL_"+functionName+"\nclass "+functionName+" {\npublic:\nbool init();\nbool solve();\n"+functionName+"();\n~"+functionName+"();\nbool hasInitialized;\nIloCplex cplex;\nIloEnv env;\ndouble objValue;\nIloExpr objExp;\n";
     
     // create struct for returning variables 
-hppCode+="// Variable results\n";
+    hppCode+="// Variable results\n";
     for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
         if(declType[i->first]=="variable") {
             string retName=i->first.substr(0,i->first.size()-4);
@@ -221,7 +221,7 @@ hppCode+="// Variable results\n";
     
     
     // making arguments which are constants in the program
-hppCode+="// Constants in the program that you must initialize\n";
+    hppCode+="// Constants in the program that you must initialize\n";
     for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
         if(i->second!="constant"&&declType[i->first]=="") {
             hppCode+="TYPE_"+i->first+"_ "+i->first+";\n";
@@ -229,7 +229,7 @@ hppCode+="// Constants in the program that you must initialize\n";
     }
     
     // declare CPLEX variables (actual variables in program)
-hppCode+="// Variables used by the CPLEX program\n";
+    hppCode+="// Variables used by the CPLEX program\n";
     for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
         if(declType[i->first]=="variable") {
             hppCode+="TYPE_"+i->first+"_ "+i->first+";\n";
@@ -348,7 +348,7 @@ hppCode+="// Variables used by the CPLEX program\n";
 objective:
 objective_type LC program_variables RC LC number_expression RC {
     int n=strs.size();
-    strs[n]=scopeStuff[$6]+"IloExpr tempObjExp(env);\nobjExp=tempObjExp;\nobjExp=objExp+"+strs[$6]+";\n"+strs[$1]+"\n";
+    strs[n]="{\n"+scopeStuff[$6]+"IloExpr tempObjExp(env);\nobjExp=tempObjExp;\nobjExp=objExp+"+strs[$6]+";\n"+strs[$1]+"\n}\n";
     $$=n;
 };
 program_variables:
@@ -406,7 +406,7 @@ equation CO qualifiers {
     for(int i=0;i<numbrackets;i++) {
         strs[n]=strs[n]+"\n}";
     }
-strs[n]+="\n";
+    strs[n]+="\n";
     $$=n;
 };
 equation:
@@ -558,6 +558,27 @@ number_expression operator number_subexpression {
     $$=n;
 };
 element_subexpression:
+LR VA CL qualifiers RR {
+    int n=strs.size();
+    string tv="t"+convert(tempVar++);
+    scopeStuff[n]="TYPE_"+tv+"_ "+tv+";\n"+strs[$4]+"\n"+tv+".insert("+string($2)+");";
+    setGraphEdge(string($2),tv,1);
+    int numbrackets=0;
+    for(int i=0;i<scopeStuff[n].size();i++) {
+        if(scopeStuff[n][i]=='}') {
+            numbrackets--;
+        }
+        if(scopeStuff[n][i]=='{') { 
+            numbrackets++;
+        }
+    }
+    for(int i=0;i<numbrackets;i++) {
+        scopeStuff[n]=scopeStuff[n]+"\n}";
+    }
+    scopeStuff[n]+="\n";
+    strs[n]=tv;
+    $$=n;
+}|
 LR number_expression RR {
     int n=strs.size();
     string tv="t"+convert(tempVar++);
@@ -597,14 +618,19 @@ LI element_expression LJ {
 }|
 FR LC number_expression RC LC number_expression RC {
     int n=strs.size();
-    scopeStuff[n]=scopeStuff[$3]+scopeStuff[$6];
-    strs[n]="("+strs[$3]+"/"+strs[$6]+")";
+    string tv1="t"+convert(tempVar++);
+    string tv2="t"+convert(tempVar++);
+    string tv3="t"+convert(tempVar++);
+    scopeStuff[n]=scopeStuff[$3]+scopeStuff[$6]+"IloExpr "+tv1+"(env);\n"+tv1+"="+tv1+"+"+strs[$3]+";\nIloExpr "+tv2+"(env);\n"+tv2+"="+tv2+"+"+strs[$6]+";\nIloExpr "+tv3+"(env);\n"+tv3+"="+tv3+"+"+tv1+"/"+tv2+";\n";
+    strs[n]=tv3;
     $$=n;
 }|
 LP number_expression RP {
     int n=strs.size();
+    string tv="t"+convert(tempVar++);
     scopeStuff[n]=scopeStuff[$2];
-    strs[n]="("+strs[$2]+")";
+    scopeStuff[n]+="IloExpr "+tv+"(env);\n"+tv+"="+tv+"+"+strs[$2]+";\n";
+    strs[n]=tv;
     $$=n;
 }|
 NU {
@@ -651,7 +677,7 @@ VA US element_expression {
     scopeStuff[n]=scopeStuff[$3];
     int i=0;
     list<string> vars;
-vars.push_back(strs[$3]);
+    vars.push_back(strs[$3]);
     mapTypes[strs[n]].push_back(vars);
     mapTypeReasons[strs[n]].push_back(yylineno);
     strs[n]+="["+strs[$3]+"]";

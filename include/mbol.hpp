@@ -31,6 +31,24 @@ struct set1comp {
         return 0;
     }
 };
+struct set2comp {
+    bool operator() (const set<set<int>,set1comp>& lhs,const set<set<int>,set1comp>& rhs) const {
+        if(lhs.size()!=rhs.size()) {
+            return lhs.size()<rhs.size();
+        }
+        set<set<int>,set1comp>::iterator i,j;
+        i=lhs.begin();
+        j=rhs.begin();
+        while(i!=lhs.end()) {
+            if(set1comp()(*i,*j)==true||set1comp()(*j,*i)==true) {
+                return set1comp()(*i,*j);
+            }
+            i++;
+            j++;
+        }
+        return 0;
+    }
+};
 set<set<int>,set1comp> powerset(set<int> x) {
     set<set<int>,set1comp> pset;
     for(int i=0; i<pow(2,x.size()); i++) {
