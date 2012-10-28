@@ -1,6 +1,5 @@
 all: bin
 	cd src;	make
-	cd samples; make
 bin:
 	mkdir bin
 clean:

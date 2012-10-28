@@ -2,6 +2,8 @@
 #include<HelloWorld.hpp>
 #include<MaxFlow.hpp>
 #include<NodeDisjointPaths.hpp>
+#include<SVMSoftMargin.hpp>
+#include<SVMHardMargin.hpp>
 #include<map>
 #include<set>
 using namespace std;
@@ -42,7 +44,7 @@ void makeGraph() {
     addEdge(14,5);
 }
 void writeGraph() {
-    ofstream out("graph.dot");
+    ofstream out("misc-files/graph.dot");
     out << "graph test {\n";
     for(set<int>::iterator i=V.begin();i!=V.end();i++) {
         out << (*i) << " [label=\"" << (*i) << "\",width=.5,height=.5,shape=circle];\n";
@@ -63,7 +65,7 @@ int main(int argc,char* argv[]) {
         writeGraph();
         exit(0);
     }
-    cout << "HelloWorld:" << endl;;
+    cout << "HelloWorld:" << endl;
     {
         HelloWorld hw;
         hw.e=5.8;
@@ -77,8 +79,8 @@ int main(int argc,char* argv[]) {
         cout << "  W: " << hw.W << endl;
         cout << "  l: " << hw.l << endl;
         cout << "  o: " << hw.o << endl;
-hw.init();
-bool ret=hw.solve();
+        hw.init();
+        bool ret=hw.solve();
         if(ret) {
             cout << "Optimal objective value: " << hw.objValue << endl;
             cout << "Optimal solution:" << endl;
@@ -105,7 +107,7 @@ bool ret=hw.solve();
             }
         }
     }
-    cout << "\nMaxFlow:" << endl;;
+    cout << "\nMaxFlow:" << endl;
     {
         MaxFlow mf;
         mf.s=1;
@@ -126,7 +128,7 @@ bool ret=hw.solve();
         mf.solve();
         cout << "Maxflow from " << setw(2) << mf.s << " to " << setw(2) << mf.t << " is " << mf.objValue << endl;
     }
-    cout << "\nNodeDisjointPaths:" << endl;;
+    cout << "\nNodeDisjointPaths:" << endl;
     {
         NodeDisjointPaths ndp;
         ndp.s=1;
@@ -146,5 +148,75 @@ bool ret=hw.solve();
         ndp.init();
         ndp.solve();
         cout << "Node disjoint Paths from " << setw(2) << ndp.s << " to " << setw(2) << ndp.t << " is " << ndp.objValue << endl;
+    }
+    cout << "\nSVMHardMargin:" << endl;
+    {
+        SVMHardMargin svm;
+        ofstream out1("misc-files/svm-hardmargin.plot");
+        ofstream out2("misc-files/svm-hardmargin.data");
+        svm.n=20;
+        svm.d=2;
+        for(int i=1;i<=svm.n;i++) {
+            svm.P[i][1]=1.*rand()/RAND_MAX;
+            svm.P[i][2]=1.*rand()/RAND_MAX;
+            svm.N[i][1]=-1.*rand()/RAND_MAX;
+            svm.N[i][2]=-1.*rand()/RAND_MAX;
+            out2 << svm.P[i][1] << " " << svm.P[i][2] << " " << svm.N[i][1] << " " << svm.N[i][2] << endl;
+        }
+        if(svm.solve()) {
+            cout << "successful SVM solve" << endl;
+        }
+        cout << "SVM soln: " << svm.objValue << endl;
+        cout << svm.w[1] << " " << svm.w[2] << " " << svm.b << endl;
+        out1 << "set terminal postscript eps enhanced color\n";
+        out1 << "f(x)=(" << svm.w[1] << "*x+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
+        out1 << "set output 'svm-hardmargin.eps'\n";
+        out1 << "plot 'misc-files/svm-hardmargin.data' u 1:2,'misc-files/svm-hardmargin.data' u 3:4,f(x)\n";
+    }
+    cout << "\nSVMSoftMargin:" << endl;
+    {
+        SVMSoftMargin svm;
+        ofstream out1("misc-files/svm-softmargin.plot");
+        svm.n=50;
+        svm.d=2;
+        svm.beta=50;
+        svm.alpha=1;
+        for(int i=1;i<=10;i++) {
+            svm.P[i][1]=10.*rand()/RAND_MAX-5;
+            svm.P[i][2]=2.*rand()/RAND_MAX-1;
+            svm.N[i][1]=10.*rand()/RAND_MAX-5;
+            svm.N[i][2]=2.*rand()/RAND_MAX-1;
+        }
+        for(int i=11;i<=svm.n;i++) {
+            svm.P[i][1]=10.*rand()/RAND_MAX-5;
+            svm.P[i][2]=7.*rand()/RAND_MAX+3;
+            svm.N[i][1]=10.*rand()/RAND_MAX-5;
+            svm.N[i][2]=-7.*rand()/RAND_MAX-3;
+        }
+        if(svm.solve()) {
+            cout << "successful SVM solve" << endl;
+        }
+        cout << "SVM soln: " << svm.objValue << endl;
+        cout << svm.w[1] << " " << svm.w[2] << " " << svm.b << endl;
+        ofstream out2("misc-files/svm-softmargin.pos");
+        ofstream out3("misc-files/svm-softmargin.neg");
+        ofstream out4("misc-files/svm-softmargin.igpos");
+        ofstream out5("misc-files/svm-softmargin.igneg");
+        for(int i=1;i<=svm.n;i++) {
+            if(!svm.Y[i]) {
+                out3 << svm.N[i][1] << " " << svm.N[i][2] << endl;
+            } else {
+                out5 << svm.N[i][1] << " " << svm.N[i][2] << endl;
+            }
+            if(!svm.X[i]) {
+                out2 << svm.P[i][1] << " " << svm.P[i][2] << endl;
+            } else {
+                out4 << svm.P[i][1] << " " << svm.P[i][2] << endl;
+            }
+        }
+        out1 << "set terminal postscript eps enhanced color\n";
+        out1 << "f(x)=(" << svm.w[1] << "*x+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
+        out1 << "set output 'svm-softmargin.eps'\n";
+        out1 << "plot 'misc-files/svm-softmargin.pos' u 1:2:(.1) linecolor rgb 'red' w circles fill solid,'misc-files/svm-softmargin.neg' u 1:2:(.1) linecolor rgb 'blue' w circles fill solid,'misc-files/svm-softmargin.igpos' u 1:2:(.1) linecolor rgb 'red' w circles,'misc-files/svm-softmargin.igneg' u 1:2:(.1) linecolor rgb 'blue' w circles,f(x)\n";
     }
 }

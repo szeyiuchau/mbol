@@ -41,3 +41,8 @@ COMING SOON:
 Full documentation has not been created yet.
 
 Type checking is lacking. Typically, if you use a variable as two different types, something bad will happen either in the mbolc execution or when the resulting c++ code is attempted to be compiled.
+
+
+ADVANCED:
+
+To enable proper equation highlighting with the mbol environment for the source .tex files, I was able to edit /usr/share/vim/vim73/syntax/tex.vim and add to the end of "Standard Math Zones" an entry for "mbol" that is similar to the one for "equation". The location of this file may be slightly different on other systems. This method does require root.

@@ -2,7 +2,7 @@
 
    1  program : '\begin{mbol}' objective constraints '\end{mbol}'
 
-   2  objective : objective_type '{' program_variables '}' '{' primary_expression '}'
+   2  objective : objective_type '{' program_variables '}' '{' number_expression '}'
 
    3  program_variables : VARIABLE
    4                    | program_variables ',' VARIABLE
@@ -17,8 +17,8 @@
   10             | VARIABLE '\in' '\mathbb{Z}'
   11             | equation ',' qualifiers
 
-  12  equation : primary_expression inequality primary_expression
-  13           | primary_expression '=' primary_expression
+  12  equation : number_expression inequality number_expression
+  13           | number_expression '=' number_expression
 
   14  inequality : '>'
   15             | '<'
@@ -30,42 +30,45 @@
   20             | qualifiers ',' qualifier
 
   21  qualifier : VARIABLE inequality VARIABLE
-  22            | VARIABLE '\subset' primary_expression
-  23            | VARIABLE '\subseteq' primary_expression
-  24            | NUMBER '\le' VARIABLE '\le' number_variable
-  25            | VARIABLE '\in' primary_expression
+  22            | VARIABLE '\subset' element_expression
+  23            | VARIABLE '\subseteq' element_expression
+  24            | NUMBER '\le' VARIABLE '\le' number_expression
+  25            | VARIABLE '\in' element_expression
 
-  26  number_variable : VARIABLE
-  27                  | NUMBER
+  26  element_expression : element_subexpression
+  27                     | element_expression '\setminus' element_subexpression
+  28                     | element_expression '\cup' element_subexpression
+  29                     | element_expression '\cap' element_subexpression
 
-  28  primary_expression : expression
-  29                     | primary_expression '\setminus' expression
-  30                     | primary_expression '\cup' expression
-  31                     | primary_expression '\cap' expression
-  32                     | primary_expression expression
-  33                     | primary_expression operator expression
+  30  number_expression : number_subexpression
+  31                    | number_expression number_subexpression
+  32                    | number_expression operator number_subexpression
 
-  34  expression : sum
-  35             | '|' primary_expression '|'
-  36             | '\frac' '{' primary_expression '}' '{' primary_expression '}'
-  37             | '(' primary_expression ')'
-  38             | NUMBER
-  39             | VARIABLE
-  40             | '\{' primary_expression '\}'
-  41             | VARIABLE '_' '{' indices '}'
+  33  element_subexpression : '\{' number_expression '\}'
+  34                        | '(' element_expression ')'
+  35                        | VARIABLE
 
-  42  operator : '+'
-  43           | '-'
-  44           | '/'
-  45           | '*'
+  36  number_subexpression : sum
+  37                       | '|' element_expression '|'
+  38                       | '\frac' '{' number_expression '}' '{' number_expression '}'
+  39                       | '(' number_expression ')'
+  40                       | NUMBER
+  41                       | VARIABLE
+  42                       | VARIABLE '_' '{' indices '}'
+  43                       | VARIABLE '_' element_expression
 
-  46  indices : expression
-  47          | indices ',' expression
+  44  operator : '+'
+  45           | '-'
+  46           | '/'
+  47           | '*'
 
-  48  sum : sum_product sum_product_qualifiers '(' primary_expression ')'
+  48  indices : element_expression
+  49          | indices ',' element_expression
 
-  49  sum_product : '\sum'
-  50              | '\prod'
+  50  sum : sum_product sum_product_qualifiers '(' number_expression ')'
 
-  51  sum_product_qualifiers : '_' '{' expression '=' expression '}' '^' '{' expression '}'
-  52                         | '_' '{' qualifiers '}'
+  51  sum_product : '\sum'
+  52              | '\prod'
+
+  53  sum_product_qualifiers : '_' '{' VARIABLE '=' number_subexpression '}' '^' '{' number_subexpression '}'
+  54                         | '_' '{' qualifiers '}'
