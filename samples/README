@@ -1,0 +1,14 @@
+This directory contains a variety of samples to help you understand MBOL syntax along with how to setup input, run, and obtain output from the optimization program. Use these examples to understand out how to include and compile files for latex, c++ code, and the MBOL language itself. When you write your own programs in MBOL you will need to use the mbol.tex and mbol.hpp that are included in the latex and c++.
+
+With CPLEX and mbolc made, you can run the optimization programs:
+make
+./main
+
+With pdflatex you can compile the files containing the MBOL language (.tex files) into latex:
+make main.pdf
+
+With graphviz you can see the graph which the graph-based optimization were computed on:
+make graph
+
+With gnuplot you can see the data which the SVM optimization program was applied to along with the resulting hypeplane:
+make svm
