@@ -21,12 +21,20 @@
 %%
 program:
 AA objective constraints BB {
-    // going to figure out the types of element variables and store them here
     
-    // start with basic elements which will be integers
+    // if a variable has no declare type, then it is a constant that must be provided by the user
+    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
+        if(declType[i->first]=="") {
+            setDeclType(i->first,"constant");
+        }
+    }
+    
+    // find basic elements which will be integers
     set<string> startNodes;
-    for(map<string,map<string,int> >::iterator i=setGraph.begin();i!=setGraph.end();i++) {
-        startNodes.insert(i->first);
+    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
+        if(i->second=="an element") {
+            startNodes.insert(i->first);
+        }
     }
     for(map<string,map<string,int> >::iterator i=setGraph.begin();i!=setGraph.end();i++) {
         for(map<string,int>::iterator j=i->second.begin();j!=i->second.end();j++) {
@@ -80,7 +88,7 @@ AA objective constraints BB {
                     }
                     prev=*i;
                 }
-                cout << "ERROR: inconsistent types for element "+x.back()+" on line";
+                cout << "ERROR: inconsistent types for element "+stripVar(x.back())+" on line";
                 if(lines.size()>1) {
                     cout << "s";
                 }
@@ -105,15 +113,13 @@ AA objective constraints BB {
     
     // take care of simple variables
     for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(typeMap.count(i->first)) {
-            continue;
-        }
-        if(i->second=="number") {
+        if(i->second=="a number"&&!typeMap.count(i->first)) {
             if(declType[i->first]=="variable") {
                 if(intConstraints.count(i->first)) {
                     typeMap[i->first]="MyIloIntVar";
                     typeMap["RET_"+i->first.substr(0,i->first.size()-4)]="int";
                 } else {
+                    //cout << i->first << endl;
                     typeMap[i->first]="MyIloNumVar";
                     typeMap["RET_"+i->first.substr(0,i->first.size()-4)]="double";
                 }
@@ -124,11 +130,11 @@ AA objective constraints BB {
     }
     
     // setup constant ints with types
-    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
+    /*for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
         if(i->second=="constant") {
             typeMap[i->first]="int";
         }
-    }
+    }*/
     
     // get types of the map objects (real/integer variables in mathematical program)
     for(map<string,list<list<string> > >::iterator i=mapTypes.begin();i!=mapTypes.end();i++) {
@@ -150,7 +156,7 @@ AA objective constraints BB {
             if(different) {
                 set<int> lines;
                 lines.insert(mapTypeReasons[i->first].front());
-                cout << "ERROR: inconsistent use of indices for "+i->first+" on line";
+                cout << "ERROR: inconsistent use of indices for "+stripVar(i->first)+" on line";
                 int first=mapTypeReasons[i->first].front();
                 if(*rs!=first) {
                     cout << "s " << first;
@@ -208,12 +214,12 @@ AA objective constraints BB {
     }
     
     // start making all the cppCode
-    hppCode="#include<set>\n#include<map>\n#include<ilcplex/ilocplex.h>\n#include<mbol.hpp>\nusing namespace std;\n#ifndef MBOL_"+functionName+"\n#define MBOL_"+functionName+"\nclass "+functionName+" {\npublic:\nbool init();\nbool solve();\n"+functionName+"();\n~"+functionName+"();\nbool hasInitialized;\nIloCplex cplex;\nIloEnv env;\ndouble objValue;\nIloExpr objExp;\n";
+    hppCode="#include<set>\n#include<map>\n#include<ilcplex/ilocplex.h>\n#include<mbol.hpp>\nusing namespace std;\n#ifndef MBOL_"+className+"\n#define MBOL_"+className+"\nclass "+className+" {\npublic:\nbool init();\nbool solve();\n"+className+"();\n~"+className+"();\nbool hasInitialized;\nIloCplex cplex;\nIloEnv env;\ndouble objValue;\nIloExpr objExp;\n";
     
     // create struct for returning variables 
     hppCode+="// Variable results\n";
-    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(declType[i->first]=="variable") {
+    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
+        if(i->second=="variable") {
             string retName=i->first.substr(0,i->first.size()-4);
             hppCode+="TYPE_RET_"+retName+"_ "+retName+";\n";
         }
@@ -222,27 +228,27 @@ AA objective constraints BB {
     
     // making arguments which are constants in the program
     hppCode+="// Constants in the program that you must initialize\n";
-    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(i->second!="constant"&&declType[i->first]=="") {
+    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
+        if(i->second=="constant") {
             hppCode+="TYPE_"+i->first+"_ "+i->first+";\n";
         }
     }
     
     // declare CPLEX variables (actual variables in program)
     hppCode+="// Variables used by the CPLEX program\n";
-    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(declType[i->first]=="variable") {
+    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
+        if(i->second=="variable") {
             hppCode+="TYPE_"+i->first+"_ "+i->first+";\n";
         }
     }
     hppCode+="};\n#endif\n";
-    cppCode=functionName+"::"+functionName+"() {\nhasInitialized=false;\n}\nbool "+functionName+"::init() {\n";
+    cppCode=className+"::"+className+"() {\nhasInitialized=false;\n}\nbool "+className+"::init() {\n";
     cppCode+="IloModel model(env);\ng_env=env;\ntry {\n";
     
     
     // take care of simple variables
-    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(i->second=="number"&&declType[i->first]=="variable"&&mapTypes.count(i->first)==0) {
+    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
+        if(varType[i->first]=="a number"&&i->second=="variable"&&mapTypes.count(i->first)==0) {
             if(intConstraints.count(i->first)) {
                 cppCode+="MyIloIntVar";
             } else {
@@ -258,27 +264,14 @@ AA objective constraints BB {
     if(quiet) {
         cppCode+="cplex.setOut(env.getNullStream());\n";
     }
-    if(paramFile!="") {
-        FILE* f=fopen(paramFile.c_str(),"r");
-        int num;
-        char buf[1024];
-        do {
-            bzero(buf,1024);
-            num=fread(buf,1000,1,f);
-            cppCode+=string(buf);
-        } while(num==1000);
-        fclose(f);
-    }
-    cppCode+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nhasInitialized=true;\nreturn true;\n}\nbool "+functionName+"::solve() {\nif(!hasInitialized) {\ninit();\n}\nif(!hasInitialized) {\nreturn false;\n}\ntry{\ncplex.solve();\nobjValue=cplex.getValue(objExp);\n";
+    cppCode+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nhasInitialized=true;\nreturn true;\n}\nbool "+className+"::solve() {\nif(!hasInitialized) {\ninit();\n}\nif(!hasInitialized) {\nreturn false;\n}\ntry{\ncplex.solve();\nobjValue=cplex.getValue(objExp);\n";
     
     
     
     // fill in simple variable values
-    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(i->second=="number") {
-            if(declType.count(i->first)&&declType[i->first]=="variable") {
-                cppCode+=i->first.substr(0,i->first.size()-4)+"=cplex.getValue("+i->first+");\n";
-            }
+    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
+        if(i->second=="variable"&&varType[i->first]=="a number"&&mapTypes.count(i->first)==0) {
+            cppCode+=i->first.substr(0,i->first.size()-4)+"=cplex.getValue("+i->first+");\n";
         }
     }
     
@@ -337,7 +330,7 @@ AA objective constraints BB {
             cppCode+="}\n";
         }
     }
-    cppCode+="\n} catch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nreturn true;\n}\n"+functionName+"::~"+functionName+"() {\nenv.end();\n}\n";
+    cppCode+="\n} catch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nreturn true;\n}\n"+className+"::~"+className+"() {\nenv.end();\n}\n";
     
     // real types put in the cppCode
     for(map<string,string>::iterator i=typeMap.begin();i!=typeMap.end();i++) {
@@ -353,12 +346,12 @@ objective_type LC program_variables RC LC number_expression RC {
 };
 program_variables:
 VA {
-    declType[string($1)]="variable";
-    declType[string($1)+"_var"]="variable";
+    setDeclType(string($1),"variable (return)");
+    setDeclType(string($1)+"_var","variable");
 }|
 program_variables CO VA {
-    declType[string($3)]="variable";
-    declType[string($3)+"_var"]="variable";
+    setDeclType(string($3),"variable (return)");
+    setDeclType(string($3)+"_var","variable");
 };
 objective_type:
 MA {
@@ -464,10 +457,11 @@ VA inequality VA {
     $$=n;
 }|
 VA SS element_expression {
-    string tv1="t"+convert(tempVar++);
-    string tv2="t"+convert(tempVar++);
+    string tv1=tempElement();
+    string tv2=tempElement();
     int n=strs.size();
-    declType[string($1)]="temporary";
+    setVarType(string($1),"an element");
+    setDeclType(string($1),"temporary");
     scopeStuff[n]=scopeStuff[$3]+"TYPE_"+tv1+"_ "+tv1+"=powerset("+strs[$3]+");\n"+tv1+".erase("+strs[$3]+");\n";
     setGraphTriple(strs[$3],tv2,string($1));
     setGraphEdge(string($1),tv1,1);
@@ -477,10 +471,11 @@ VA SS element_expression {
     $$=n;
 }|
 VA SE element_expression {
-    string tv1="t"+convert(tempVar++);
-    string tv2="t"+convert(tempVar++);
+    string tv1=tempElement();
+    string tv2=tempElement();
     int n=strs.size();
-    declType[string($1)]="temporary";
+    setVarType(string($1),"an element");
+    setDeclType(string($1),"temporary");
     scopeStuff[n]=scopeStuff[$3]+"TYPE_"+tv1+"_ "+tv1+"=powerset("+strs[$3]+");\n";
     setGraphTriple(strs[$3],tv2,string($1));
     setGraphEdge(string($1),tv1,1);
@@ -490,16 +485,17 @@ VA SE element_expression {
     $$=n;
 }|
 NU LE VA LE number_expression {
-    declType[string($3)]="temporary";
-    string tv="t"+convert(tempVar++);
-    typeMap[string($3)]="int";
+    //    setDeclType(string($3),"temporary");
+    //    setVarType(string($3),"an element");
+    setGraph[string($3)];
     int n=strs.size();
     strs[n]="for(int "+string($3)+"="+string($1)+";"+string($3)+"<="+strs[$5]+";"+string($3)+"++) {";
     $$=n;
 }|
 VA IN element_expression {
-    declType[string($1)]="temporary";
-    string tv="t"+convert(tempVar++);
+    setDeclType(string($1),"temporary");
+    setVarType(string($1),"an element");
+    string tv=tempExp();
     int n=strs.size();
     scopeStuff[n]=scopeStuff[$3];
     setGraphEdge(string($1),strs[$3],1);
@@ -515,7 +511,7 @@ element_subexpression {
 }|
 element_expression SR element_subexpression {
     int n=strs.size();
-    string tv="t"+convert(tempVar++);
+    string tv=tempElement();
     setGraphTriple(tv,strs[$1],strs[$3]);
     scopeStuff[n]=scopeStuff[$1]+scopeStuff[$3]+"TYPE_"+tv+"_ "+tv+"="+strs[$1]+";\nfor(TYPE_"+strs[$3]+"_::iterator iter="+strs[$3]+".begin();iter!="+strs[$3]+".end();iter++) {\n"+tv+".erase(*iter);\n}\n";
     strs[n]=tv;
@@ -523,7 +519,7 @@ element_expression SR element_subexpression {
 }|
 element_expression SU element_subexpression {
     int n=strs.size();
-    string tv="t"+convert(tempVar++);
+    string tv=tempElement();;
     setGraphTriple(tv,strs[$1],strs[$3]);
     scopeStuff[n]=scopeStuff[$1]+scopeStuff[$3]+"TYPE_"+tv+"_ "+tv+"="+strs[$1]+";\n"+tv+".insert("+strs[$3]+".begin(),"+strs[$3]+".end());\n";
     strs[n]=tv;
@@ -531,7 +527,7 @@ element_expression SU element_subexpression {
 }|
 element_expression SI element_subexpression {
     int n=strs.size();
-    string tv="t"+convert(tempVar++);
+    string tv=tempElement();
     setGraphTriple(tv,strs[$1],strs[$3]);
     scopeStuff[n]=scopeStuff[$1]+scopeStuff[$3]+"TYPE_"+tv+"_ "+tv+";\nfor(TYPE_"+strs[$3]+"_::iterator iter="+strs[$3]+".begin();iter!="+strs[$3]+".end();iter++) {\nif("+strs[$1]+".count(*iter)) {\n"+tv+".insert(*iter);\n}\n}\n";
     strs[n]=tv;
@@ -560,8 +556,10 @@ number_expression operator number_subexpression {
 element_subexpression:
 LR VA CL qualifiers RR {
     int n=strs.size();
-    string tv="t"+convert(tempVar++);
+    string tv=tempElement();
     scopeStuff[n]="TYPE_"+tv+"_ "+tv+";\n"+strs[$4]+"\n"+tv+".insert("+string($2)+");";
+    setDeclType(string($2),"temporary");
+    setVarType(string($2),"an element");
     setGraphEdge(string($2),tv,1);
     int numbrackets=0;
     for(int i=0;i<scopeStuff[n].size();i++) {
@@ -579,9 +577,9 @@ LR VA CL qualifiers RR {
     strs[n]=tv;
     $$=n;
 }|
-LR number_expression RR {
+LR element_expression RR {
     int n=strs.size();
-    string tv="t"+convert(tempVar++);
+    string tv=tempElement();
     scopeStuff[n]=scopeStuff[$2];
     setGraphEdge(strs[$2],tv,1);
     scopeStuff[n]+="TYPE_"+tv+"_ "+tv+";\n"+tv+".insert("+strs[$2]+");\n";
@@ -597,7 +595,7 @@ LP element_expression RP {
 VA {
     int n=strs.size();
     strs[n]=string($1);
-    varType[strs[n]]="element";
+    setVarType(strs[n],"an element");
     setGraph[string($1)]; 
     $$=n;
 };
@@ -618,16 +616,16 @@ LI element_expression LJ {
 }|
 FR LC number_expression RC LC number_expression RC {
     int n=strs.size();
-    string tv1="t"+convert(tempVar++);
-    string tv2="t"+convert(tempVar++);
-    string tv3="t"+convert(tempVar++);
+    string tv1=tempExp();
+    string tv2=tempExp();
+    string tv3=tempExp();
     scopeStuff[n]=scopeStuff[$3]+scopeStuff[$6]+"IloExpr "+tv1+"(env);\n"+tv1+"="+tv1+"+"+strs[$3]+";\nIloExpr "+tv2+"(env);\n"+tv2+"="+tv2+"+"+strs[$6]+";\nIloExpr "+tv3+"(env);\n"+tv3+"="+tv3+"+"+tv1+"/"+tv2+";\n";
     strs[n]=tv3;
     $$=n;
 }|
 LP number_expression RP {
     int n=strs.size();
-    string tv="t"+convert(tempVar++);
+    string tv=tempExp();
     scopeStuff[n]=scopeStuff[$2];
     scopeStuff[n]+="IloExpr "+tv+"(env);\n"+tv+"="+tv+"+"+strs[$2]+";\n";
     strs[n]=tv;
@@ -636,25 +634,25 @@ LP number_expression RP {
 NU {
     int n=strs.size();
     strs[n]=string($1);
-    varType[strs[n]]="constant";
+    //    setVarType(strs[n],"a number");
     $$=n;
 }|
 VA {
     int n=strs.size();
     strs[n]=string($1);
-    if(declType[strs[n]]=="variable") {
+    if(declType[strs[n]]=="variable (return)") {
         strs[n]+="_var";
     }
-    varType[strs[n]]="number";
+    setVarType(strs[n],"a number");
     $$=n;
 }|
 VA US LC indices RC {
     int n=strs.size();
     strs[n]=string($1);
-    if(declType[strs[n]]=="variable") {
+    if(declType[strs[n]]=="variable (return)") {
         strs[n]+="_var";
     }
-    varType[strs[n]]="map";
+    setVarType(strs[n],"a number");
     scopeStuff[n]=scopeStuff[$4];
     int i=0;
     list<string> vars;
@@ -670,10 +668,10 @@ VA US LC indices RC {
 VA US element_expression {
     int n=strs.size();
     strs[n]=string($1);
-    if(declType[strs[n]]=="variable") {
+    if(declType[strs[n]]=="variable (return)") {
         strs[n]+="_var";
     }
-    varType[strs[n]]="map";
+    setVarType(strs[n],"a number");
     scopeStuff[n]=scopeStuff[$3];
     int i=0;
     list<string> vars;
@@ -720,8 +718,8 @@ indices CO element_expression {
 sum:
 sum_product sum_product_qualifiers LP number_expression RP {
     int n=strs.size();
-    string tv1="t"+convert(tempVar++);
-    string tv2="t"+convert(tempVar++);
+    string tv1=tempExp();
+    string tv2=tempExp();
     scopeStuff[n]=scopeStuff[$2]+"IloExpr "+tv1+"(env);\n";
     if(strs[$1]=="*") {
         scopeStuff[n]+=tv1+"="+tv1+"+1;\n";
@@ -758,7 +756,7 @@ US LC VA EQ number_subexpression RC CT LC number_subexpression RC {
     int n=strs.size();
     typeMap[string($3)]="int";
     strs[n]="for(int "+string($3)+"="+strs[$5]+";"+string($3)+"<="+strs[$9]+";"+string($3)+"++) {";
-    declType[string($3)]="temporary";
+    setDeclType(string($3),"temporary");
     $$=n;
 }|
 US LC qualifiers RC {
@@ -786,7 +784,7 @@ extern int yylex();
 extern int yyparse();
 extern "C" int yywrap();
 map<int,string> strs;
-string functionName;
+string className;
 map<string,int> declareMap;
 void yyerror(const char *str) {
     cout << "ERROR: " << str << " for token " << string(yytext) << " on line " << yylineno << endl;
@@ -798,8 +796,14 @@ int yywrap() {
 map<string,list<int> > mapTypeReasons;
 map<string,list<list<string> > > mapTypes;
 map<int,string> scopeStuff;
+map<string,int> varReason;
+map<string,int> declReason;
 map<string,string> declType;
 map<string,string> varType;
+string tempExp() {
+    string tv="t"+convert(tempVar++);
+    return tv;
+}
 map<string,map<string,int> > setGraphReasoning;
 map<string,map<string,int> > setGraph;
 set<string> weakSet;
@@ -814,13 +818,36 @@ string replaceAll(string a,string b,string c) {
 }
 map<string,string> typeMap;
 bool quiet;
+map<string,string> options;
+void usage() {
+    cout << "Usage: mbolc [options] input_file" << endl;
+    cout << "Options:" << endl;
+    int msize=0;
+    for(map<string,string>::iterator i=options.begin();i!=options.end();i++) {
+        if(i->first.size()>msize) {
+            msize=i->first.size();
+        }
+    }
+    for(map<string,string>::iterator i=options.begin();i!=options.end();i++) {
+        cout << "  " << i->first;
+        for(int j=0;j<msize+2-i->first.size();j++) {
+            cout << " ";
+        }
+        cout << i->second << endl;
+    }
+}
+void version() {
+    cout << "MBOLC Version 0.2.0" << endl;
+    exit(0);
+}
+void help() {
+    usage();
+    exit(0);
+}
 void badArgs() {
     cout << "Invalid arguments, correct usage:" << endl;
-    cout << "mbolc [-v] [-p PARAM_FILE] INPUT_FILE OUTPUT_FILE" << endl;
+    usage();
     exit(1);
-}
-string paramFile;
-void typeCheck(string var,string type,string decl) {
 }
 string indentCode(string code) {
     string indentedCode="";
@@ -842,10 +869,31 @@ string indentCode(string code) {
     }
     return indentedCode;
 }
+string stripVar(string a) {
+    replaceAll(a,"_var","");
+}
+void setVarType(string name,string type) {
+    if(varType[name]=="") {
+        varType[name]=type;
+        varReason[name]=yylineno;
+    } else if(varType[name]!=type) {
+        cout << "ERROR: inconsistent type for " << stripVar(name) << " as it is " << varType[name] << " on line " << varReason[name] << " and " << type << " on line " << yylineno << endl;
+        exit(1);
+    }
+}
+void setDeclType(string name,string type) {
+    if(declType[name]=="") {
+        declType[name]=type;
+        declReason[name]=yylineno;
+    } else if(declType[name]!=type) {
+        cout << "ERROR: inconsistent usage for " << stripVar(name) << " as it is " << declType[name] << " on line " << declReason[name] << " and " << type << " on line " << yylineno << endl;
+        exit(1);
+    }
+}
 void setGraphEdge(string a,string b,int c) {
     if(setGraph[a].count(b)) {
         if(setGraph[a][b]!=c) {
-            cout << "ERROR: contradicting relationships between elements "+a+" and "+b+" on line";
+            cout << "ERROR: contradicting relationships between elements "+stripVar(a)+" and "+stripVar(b)+" on line";
             if(setGraphReasoning[a][b]!=yylineno) {
                 cout << "s " << setGraphReasoning[a][b];
             }
@@ -865,31 +913,46 @@ void setGraphTriple(string a,string b,string c) {
     setGraphEdge(a,c,0);
     setGraphEdge(c,a,0);
 }
+string tempElement() {
+    string tv="t"+convert(tempVar++);
+    setDeclType(tv,"temporary");
+    setVarType(tv,"an element");
+    return tv;
+}
 int main(int argc,char* argv[]) {
     bool inputRead=false;
-    bool compile=false;
     quiet=false;
     string outputName;
-    paramFile="";
+    bool customClassName=false;
+    options["-v"]="Print version information and exit";
+    options["-h"]="Print help information and exit";
+    options["-q"]="Put CPLEX in quiet mode";
+    options["-o <arg>"]="Use <arg> as output class which makes output file <arg>.hpp";
     for(int i=1;i<argc;i++) {
         if(string(argv[i])=="-q") {
             quiet=true;
-        } else if(string(argv[i])=="-c") {
-            compile=true;
-        } else if(string(argv[i])=="-p") {
+        } else if(string(argv[i])=="-v") {
+            version();
+        } else if(string(argv[i])=="-h") {
+            help();
+        } else if(string(argv[i])=="-o") {
             i++;
-            if(i>=argc) {
+            if(i<argc) {
+                customClassName=true;
+                className=string(argv[i]);
+            } else {
                 badArgs();
             }
-            paramFile=string(argv[i]);
         } else if(!inputRead) {
             yyin=fopen(argv[i],"r");
             inputRead=true;
             string inputName=string(argv[i]);
-            if(inputName.find(".")!=string::npos) {
-                functionName=inputName.substr(0,inputName.find("."));
-            } else {
-                functionName=inputName;
+            if(!customClassName) {
+                if(inputName.find(".")!=string::npos) {
+                    className=inputName.substr(0,inputName.find("."));
+                } else {
+                    className=inputName;
+                }
             }
         } else {
             badArgs();
@@ -903,11 +966,8 @@ int main(int argc,char* argv[]) {
     yyparse();
     fclose(yyin);
     
-    out.open((functionName+".hpp").c_str());
+    out.open((className+".hpp").c_str());
     out << indentCode(hppCode);
     out << indentCode(cppCode);
     out.close();
-    
-    if(compile) {
-    }    
 }
