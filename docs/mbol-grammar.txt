@@ -45,7 +45,7 @@
   32                    | number_expression operator number_subexpression
 
   33  element_subexpression : '\{' VARIABLE ':' qualifiers '\}'
-  34                        | '\{' number_expression '\}'
+  34                        | '\{' element_expression '\}'
   35                        | '(' element_expression ')'
   36                        | VARIABLE
 
