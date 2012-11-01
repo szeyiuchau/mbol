@@ -5,6 +5,11 @@ Math-Based Optimization Language (MBOL) is a programming language for optimizati
 This tool was initially created by me (Andrew Newell) to more efficiently create mathematical programs to run on CPLEX. This tool has been exteremely useful in my research at Purdue University, and I wanted to share the tool with others.
 
 
+AUTHOR:
+
+Andrew Newell is currently the only author. You can send me comments or suggestions at andyjnewell@gmail.com. Also, if you are interesting in also becoming an author of this project let me know.
+
+
 DEPENDENCIES:
 
 The tools lex, yacc, and g++ are used to compile mbolc (the MBOL compiler).
