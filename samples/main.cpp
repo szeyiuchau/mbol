@@ -170,8 +170,11 @@ int main(int argc,char* argv[]) {
         cout << svm.w[1] << " " << svm.w[2] << " " << svm.b << endl;
         out1 << "set terminal postscript eps enhanced color\n";
         out1 << "f(x)=(" << svm.w[1] << "*x+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
+        out1 << "g(x)=(" << svm.w[1] << "*x+1+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
+        out1 << "h(x)=(" << svm.w[1] << "*x-1+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
         out1 << "set output 'svm-hardmargin.eps'\n";
-        out1 << "plot 'misc-files/svm-hardmargin.data' u 1:2,'misc-files/svm-hardmargin.data' u 3:4,f(x)\n";
+        out1 << "unset key\n";
+        out1 << "plot 'misc-files/svm-hardmargin.data' u 1:2,'misc-files/svm-hardmargin.data' u 3:4,f(x) lt 1 linecolor rgb 'black',g(x) lt 2 linecolor rgb 'black',h(x) lt 2 linecolor rgb 'black'\n";
     }
     cout << "\nSVMSoftMargin:" << endl;
     {
@@ -179,8 +182,7 @@ int main(int argc,char* argv[]) {
         ofstream out1("misc-files/svm-softmargin.plot");
         svm.n=50;
         svm.d=2;
-        svm.beta=50;
-        svm.alpha=1;
+        svm.alpha=1./50;
         for(int i=1;i<=10;i++) {
             svm.P[i][1]=10.*rand()/RAND_MAX-5;
             svm.P[i][2]=2.*rand()/RAND_MAX-1;
@@ -198,6 +200,10 @@ int main(int argc,char* argv[]) {
         }
         cout << "SVM soln: " << svm.objValue << endl;
         cout << svm.w[1] << " " << svm.w[2] << " " << svm.b << endl;
+        /*for(int i=1;i<=50;i++) {
+            cout << svm.X[i] << " " << svm.x[i] << endl;
+            cout << svm.Y[i] << " " << svm.y[i] << endl;
+        }*/
         ofstream out2("misc-files/svm-softmargin.pos");
         ofstream out3("misc-files/svm-softmargin.neg");
         ofstream out4("misc-files/svm-softmargin.igpos");
@@ -216,7 +222,10 @@ int main(int argc,char* argv[]) {
         }
         out1 << "set terminal postscript eps enhanced color\n";
         out1 << "f(x)=(" << svm.w[1] << "*x+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
+        out1 << "g(x)=(" << svm.w[1] << "*x+1+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
+        out1 << "h(x)=(" << svm.w[1] << "*x-1+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
         out1 << "set output 'svm-softmargin.eps'\n";
-        out1 << "plot 'misc-files/svm-softmargin.pos' u 1:2:(.1) linecolor rgb 'red' w circles fill solid,'misc-files/svm-softmargin.neg' u 1:2:(.1) linecolor rgb 'blue' w circles fill solid,'misc-files/svm-softmargin.igpos' u 1:2:(.1) linecolor rgb 'red' w circles,'misc-files/svm-softmargin.igneg' u 1:2:(.1) linecolor rgb 'blue' w circles,f(x)\n";
+        out1 << "unset key\n";
+        out1 << "plot 'misc-files/svm-softmargin.pos' u 1:2:(.1) linecolor rgb 'red' w circles fill solid,'misc-files/svm-softmargin.neg' u 1:2:(.1) linecolor rgb 'blue' w circles fill solid,'misc-files/svm-softmargin.igpos' u 1:2:(.1) linecolor rgb 'red' w circles,'misc-files/svm-softmargin.igneg' u 1:2:(.1) linecolor rgb 'blue' w circles,f(x) lt 1 linecolor rgb 'black',g(x) lt 2 linecolor rgb 'black',h(x) lt 2 linecolor rgb 'black'\n";
     }
 }
