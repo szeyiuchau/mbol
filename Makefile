@@ -5,5 +5,6 @@ bin:
 clean:
 	cd src; make clean
 	cd samples; make clean
+	cd docs; make clean
 install:
 	cd src; make install
