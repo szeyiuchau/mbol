@@ -12,7 +12,7 @@ misc-files/svm-hardmargin.plot: main misc-files
 svm: misc-files/svm-hardmargin.plot misc-files/svm-softmargin.plot
 	gnuplot misc-files/svm-hardmargin.plot
 	gnuplot misc-files/svm-softmargin.plot
-main.pdf: main.tex NodeDisjointPaths.tex ChromaticNumber.tex MaxFlow.tex HelloWorld.tex
+main.pdf: main.tex mbol-source/*.tex
 	pdflatex main.tex
 	rm main.aux main.log
 %.hpp: mbol-source/%.tex ../bin/mbolc
