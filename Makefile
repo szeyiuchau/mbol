@@ -8,3 +8,6 @@ clean:
 	cd docs; make clean
 install:
 	cd src; make install
+commit:
+	git commit -a
+	git push origin master
