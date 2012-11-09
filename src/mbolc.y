@@ -82,7 +82,7 @@ AA objective constraints BB {
             }
         }
         if(visited.count(x.back())) {
-            if(type!=typeMap[x.back()]) {
+            if(tupleType.count(x.front())==0&&type!=typeMap[x.back()]) {
                 set<int> lines;
                 string prev;
                 prev="";
@@ -99,7 +99,7 @@ AA objective constraints BB {
                     }
                     prev=*i;
                 }
-                cout << "ERROR: inconsistent types for element "+stripVar(x.back())+" on line";
+                cout << "ERROR: inconsistent types for element " << stripVar(x.back()) << " on line";
                 if(lines.size()>1) {
                     cout << "s";
                 }
@@ -127,10 +127,10 @@ AA objective constraints BB {
             if(typeMap[*j]=="int") {
                 type+="_int";
             } else {
-                type+="_set"+countStr(typeMap[*j],"set<");
+                type+="_set"+convert(countStr(typeMap[*j],"set<"));
             }
         }
-typeMap[i->first]=type;
+        typeMap[i->first]=type;
     }
     
     // take care of simple variables
@@ -352,7 +352,7 @@ typeMap[i->first]=type;
             cppCode+="}\n";
         }
     }
-    cppCode+="\n} catch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nreturn true;\n}\n"+className+"::~"+className+"() {\nenv.end();\n}\n";
+    cppCode+="} catch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nreturn true;\n}\n"+className+"::~"+className+"() {\nenv.end();\n}\n";
     
     // real types put in the cppCode
     for(map<string,string>::iterator i=typeMap.begin();i!=typeMap.end();i++) {
@@ -493,6 +493,7 @@ LP tuple_indices RP IN element_expression {
     strs[n]="for(TYPE_"+strs[$5]+"_::iterator "+tv+"="+strs[$5]+".begin();"+tv+"!="+strs[$5]+".end();"+tv+"++) {";
     for(int i=0;i<tupleHolder[$2].size();i++) {
         strs[n]+="\nTYPE_"+tupleHolder[$2][i]+"_ "+tupleHolder[$2][i]+"="+tv+"->e"+convert(i)+";";
+        setDeclType(tupleHolder[$2][i],"temporary");
     }
     tupleType[tv]=tupleHolder[$2];
     $$=n;
@@ -505,6 +506,11 @@ ES EQ element_expression {
 ES NE element_expression {
     int n=strs.size();
     strs[n]="if(!"+strs[$3]+".empty()) {";
+    $$=n;
+}|
+VA EQ VA {
+    int n=strs.size();
+    strs[n]="if("+string($1)+"=="+string($3)+") {";
     $$=n;
 }|
 VA inequality VA {
@@ -603,15 +609,6 @@ number_expression number_subexpression {
     //type(strs[$2],"number");
     $$=n;
 }|
-LP number_expression RP CT LC number_expression RC {
-    int n=strs.size();
-    string tv1=tempExp();
-    string tv2=tempExp();
-    string tv3=tempExp();
-    scopeStuff[n]=scopeStuff[$2]+scopeStuff[$6]+"double "+tv1+"="+strs[$2]+";\ndouble "+tv2+"="+strs[$6]+";\ndouble "+tv3+"=pow("+tv1+","+tv2+");\n";
-    strs[n]=tv3;
-    $$=n;
-}|
 number_expression operator number_subexpression {
     int n=strs.size();
     scopeStuff[n]=scopeStuff[$1]+scopeStuff[$3];
@@ -677,6 +674,15 @@ LI element_expression LJ {
     scopeStuff[n]=scopeStuff[$2];
     strs[n]=strs[$2]+".size()";
     setGraphEdge(strs[$2],strs[n],1);
+    $$=n;
+}|
+LP number_expression RP CT LC number_expression RC {
+    int n=strs.size();
+    string tv1=tempExp();
+    string tv2=tempExp();
+    string tv3=tempExp();
+    scopeStuff[n]=scopeStuff[$2]+scopeStuff[$6]+"double "+tv1+"="+strs[$2]+";\ndouble "+tv2+"="+strs[$6]+";\ndouble "+tv3+"=pow("+tv1+","+tv2+");\n";
+    strs[n]=tv3;
     $$=n;
 }|
 FR LC number_expression RC LC number_expression RC {
@@ -817,10 +823,10 @@ PR {
     $$=n;
 };
 sum_product_qualifiers:
-US LC VA EQ number_subexpression RC CT LC number_subexpression RC {
+US LC VA EQ NU RC CT LC number_subexpression RC {
     int n=strs.size();
     typeMap[string($3)]="int";
-    strs[n]="for(int "+string($3)+"="+strs[$5]+";"+string($3)+"<="+strs[$9]+";"+string($3)+"++) {";
+    strs[n]="for(int "+string($3)+"="+string($5)+";"+string($3)+"<="+strs[$9]+";"+string($3)+"++) {";
     setDeclType(string($3),"temporary");
     $$=n;
 }|
@@ -945,7 +951,7 @@ string indentCode(string code) {
     return indentedCode;
 }
 string stripVar(string a) {
-    replaceAll(a,"_var","");
+    return replaceAll(a,"_var","");
 }
 void setVarType(string name,string type) {
     if(varType[name]=="") {

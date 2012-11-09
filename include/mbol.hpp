@@ -64,6 +64,21 @@ struct tupleinstintcomp {
         return 0;
     }
 };
+struct tuple_int_set1 {
+    int e0;
+    set<int> e1;
+};
+struct set0comp_tuple_int_set1 {
+    bool operator() (const tuple_int_set1& lhs,const tuple_int_set1& rhs) const {
+        if(lhs.e0!=rhs.e0) {
+            return lhs.e0<rhs.e0;
+        }
+        if(set1comp()(lhs.e1,rhs.e1)==true||set1comp()(lhs.e1,rhs.e1)==true) {
+            return set1comp()(lhs.e1,rhs.e1);
+        }
+        return 0;
+    }
+};
 struct tuple_int_int {
     int e0;
     int e1;
