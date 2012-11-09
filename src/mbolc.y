@@ -2,6 +2,7 @@
     #include<sstream>
     #include<iostream>
     #include<fstream>
+    #include<vector>
     #include<stdio.h>
     #include<stdlib.h>
     #include<string.h>
@@ -10,14 +11,14 @@
     #include<list>
     using namespace std;
 %}
-%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR PR GT LT NE LJ CN CL
+%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR PR GT LT NE LJ CN CL ES
 %union {
     int ival;
     char* sval;
 }
 %token <sval> NU
 %token <sval> VA
-%type <ival> objective objective_type constraints constraint equation inequality qualifiers qualifier operator indices sum sum_product_qualifiers sum_product number_expression element_expression number_subexpression element_subexpression
+%type <ival> objective objective_type constraints constraint equation inequality qualifiers qualifier operator indices sum sum_product_qualifiers sum_product number_expression element_expression number_subexpression element_subexpression tuple_indices
 %%
 program:
 AA objective constraints BB {
@@ -59,15 +60,25 @@ AA objective constraints BB {
             toVisit.erase(toVisit.begin());
         }
         string type="";
-        for(int i=0;i<length;i++) {
-            type+="set<";
-        }
-        type+="int";
-        for(int i=0;i<length;i++) {
-            if(i==0) {
-                type+=">";
-            } else {
-                type+=",set"+convert(i)+"comp>";
+        if(tupleType.count(x.front())) {
+            for(int i=0;i<length;i++) {
+                type+="set<";
+            }
+            type+="TYPE_"+x.front()+"_";
+            for(int i=0;i<length;i++) {
+                type+=",set"+convert(i)+"comp_TYPE_"+x.front()+"_>";
+            }
+        } else {
+            for(int i=0;i<length;i++) {
+                type+="set<";
+            }
+            type+="int";
+            for(int i=0;i<length;i++) {
+                if(i==0) {
+                    type+=">";
+                } else {
+                    type+=",set"+convert(i)+"comp>";
+                }
             }
         }
         if(visited.count(x.back())) {
@@ -110,6 +121,17 @@ AA objective constraints BB {
         }
     }
     
+    for(map<string,vector<string> >::iterator i=tupleType.begin();i!=tupleType.end();i++) {
+        string type="tuple";
+        for(vector<string>::iterator j=i->second.begin();j!=i->second.end();j++) {
+            if(typeMap[*j]=="int") {
+                type+="_int";
+            } else {
+                type+="_set"+countStr(typeMap[*j],"set<");
+            }
+        }
+typeMap[i->first]=type;
+    }
     
     // take care of simple variables
     for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
@@ -450,7 +472,41 @@ qualifiers CO qualifier {
     strs[n]=strs[$1]+"\n"+scopeStuff[$3]+strs[$3];
     $$=n;
 };
+tuple_indices:
+VA {
+    int n=strs.size();
+    tupleHolder[n].push_back(string($1));
+    $$=n;
+}|
+tuple_indices CO VA {
+    int n=strs.size();
+    tupleHolder[n]=tupleHolder[$1];
+    tupleHolder[n].push_back(string($3));
+    $$=n;
+};
 qualifier:
+LP tuple_indices RP IN element_expression {
+    int n=strs.size();
+    string tv=tempElement();
+    scopeStuff[n]=scopeStuff[$5];
+    setGraphEdge(tv,strs[$5],1);
+    strs[n]="for(TYPE_"+strs[$5]+"_::iterator "+tv+"="+strs[$5]+".begin();"+tv+"!="+strs[$5]+".end();"+tv+"++) {";
+    for(int i=0;i<tupleHolder[$2].size();i++) {
+        strs[n]+="\nTYPE_"+tupleHolder[$2][i]+"_ "+tupleHolder[$2][i]+"="+tv+"->e"+convert(i)+";";
+    }
+    tupleType[tv]=tupleHolder[$2];
+    $$=n;
+}|
+ES EQ element_expression {
+    int n=strs.size();
+    strs[n]="if("+strs[$3]+".empty()) {";
+    $$=n;
+}|
+ES NE element_expression {
+    int n=strs.size();
+    strs[n]="if(!"+strs[$3]+".empty()) {";
+    $$=n;
+}|
 VA inequality VA {
     int n=strs.size();
     strs[n]="if("+string($1)+strs[$2]+string($3)+") {";
@@ -545,6 +601,15 @@ number_expression number_subexpression {
     scopeStuff[n]=scopeStuff[$1]+scopeStuff[$2];
     strs[n]=strs[$1]+"*"+strs[$2];
     //type(strs[$2],"number");
+    $$=n;
+}|
+LP number_expression RP CT LC number_expression RC {
+    int n=strs.size();
+    string tv1=tempExp();
+    string tv2=tempExp();
+    string tv3=tempExp();
+    scopeStuff[n]=scopeStuff[$2]+scopeStuff[$6]+"double "+tv1+"="+strs[$2]+";\ndouble "+tv2+"="+strs[$6]+";\ndouble "+tv3+"=pow("+tv1+","+tv2+");\n";
+    strs[n]=tv3;
     $$=n;
 }|
 number_expression operator number_subexpression {
@@ -800,10 +865,12 @@ map<string,int> varReason;
 map<string,int> declReason;
 map<string,string> declType;
 map<string,string> varType;
+map<int,vector<string> > tupleHolder;
 string tempExp() {
     string tv="t"+convert(tempVar++);
     return tv;
 }
+map<string,vector<string> > tupleType;
 map<string,map<string,int> > setGraphReasoning;
 map<string,map<string,int> > setGraph;
 set<string> weakSet;
@@ -815,6 +882,14 @@ string replaceAll(string a,string b,string c) {
         a=a.substr(0,a.find(b))+c+a.substr(a.find(b)+b.size());
     }
     return a;
+}
+int countStr(string a,string b) {
+    int x=0;
+    while(a.find(b)!=string::npos) {
+        x++;
+        a=a.substr(0,a.find(b))+a.substr(a.find(b)+b.size());
+    }
+    return x;
 }
 map<string,string> typeMap;
 bool quiet;

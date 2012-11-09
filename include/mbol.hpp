@@ -49,6 +49,36 @@ struct set2comp {
         return 0;
     }
 };
+struct tupleintint {
+    int x1;
+    set<int> x2;
+};
+struct tupleinstintcomp {
+    bool operator() (const tupleintint& lhs,const tupleintint& rhs) const {
+        if(lhs.x1!=rhs.x1) {
+            return lhs.x1<rhs.x1;
+        }
+        if(lhs.x2!=rhs.x2) {
+            return lhs.x2<rhs.x2;
+        }
+        return 0;
+    }
+};
+struct tuple_int_int {
+    int e0;
+    int e1;
+};
+struct set0comp_tuple_int_int {
+    bool operator() (const tuple_int_int& lhs,const tuple_int_int& rhs) const {
+        if(lhs.e0!=rhs.e0) {
+            return lhs.e0<rhs.e0;
+        }
+        if(lhs.e1!=rhs.e1) {
+            return lhs.e1<rhs.e1;
+        }
+        return 0;
+    }
+};
 set<set<int>,set1comp> powerset(set<int> x) {
     set<set<int>,set1comp> pset;
     for(int i=0; i<pow(2,x.size()); i++) {

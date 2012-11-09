@@ -6,6 +6,7 @@ int li=0;
 %}
 %%
 \\ne return NE;
+\\emptyset return ES;
 ":" return CL;
 "<" return LT;
 ">" return GT;
