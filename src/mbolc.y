@@ -500,11 +500,13 @@ LP tuple_indices RP IN element_expression {
 }|
 ES EQ element_expression {
     int n=strs.size();
+scopeStuff[n]=scopeStuff[$3];
     strs[n]="if("+strs[$3]+".empty()) {";
     $$=n;
 }|
 ES NE element_expression {
     int n=strs.size();
+scopeStuff[n]=scopeStuff[$3];
     strs[n]="if(!"+strs[$3]+".empty()) {";
     $$=n;
 }|

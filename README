@@ -12,7 +12,7 @@ Andrew Newell is currently the only author. You can send me comments or suggesti
 
 DEPENDENCIES:
 
-The tools lex, yacc, and g++ are used to compile mbolc (the MBOL compiler).
+Only g++ is necessary to compile mbolc (MBOL compiler). The compiler uses lex and yacc, so if you want to modify the compiler you will need lex and yacc.
 
 The tool pdflatex is highly recommended as the most important advantage of using MBOL is that the MBOL source is compilable by pdflatex into publishable typesetted mathematics.
 

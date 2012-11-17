@@ -6,6 +6,6 @@ y.tab.c: mbolc.y
 ../bin/mbolc: y.tab.c lex.yy.c
 	g++ -g lex.yy.c y.tab.c -lfl -o ../bin/mbolc
 clean:
-	rm -rf lex.yy.c y.tab.c y.tab.h ../bin/mbolc
+	rm -rf ../bin/mbolc
 install:
 	cp ../bin/mbolc /usr/bin
