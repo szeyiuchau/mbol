@@ -500,13 +500,13 @@ LP tuple_indices RP IN element_expression {
 }|
 ES EQ element_expression {
     int n=strs.size();
-scopeStuff[n]=scopeStuff[$3];
+    scopeStuff[n]=scopeStuff[$3];
     strs[n]="if("+strs[$3]+".empty()) {";
     $$=n;
 }|
 ES NE element_expression {
     int n=strs.size();
-scopeStuff[n]=scopeStuff[$3];
+    scopeStuff[n]=scopeStuff[$3];
     strs[n]="if(!"+strs[$3]+".empty()) {";
     $$=n;
 }|
@@ -1022,7 +1022,7 @@ int main(int argc,char* argv[]) {
             i++;
             if(i<argc) {
                 customClassName=true;
-                className=string(argv[i]);
+                outputName=string(argv[i]);
             } else {
                 badArgs();
             }
@@ -1032,14 +1032,19 @@ int main(int argc,char* argv[]) {
             string inputName=string(argv[i]);
             if(!customClassName) {
                 if(inputName.find(".")!=string::npos) {
-                    className=inputName.substr(0,inputName.find("."));
+                    outputName=inputName.substr(0,inputName.find("."))+".hpp";
                 } else {
-                    className=inputName;
+                    outputName=inputName+".hpp";
                 }
             }
         } else {
             badArgs();
         }
+    }
+    
+    className=outputName.substr(0,outputName.find("."));
+    if(className.find("/")!=string::npos) {
+        className=className.substr(className.rfind("/")+1);
     }
     
     if(!inputRead) {
@@ -1049,7 +1054,7 @@ int main(int argc,char* argv[]) {
     yyparse();
     fclose(yyin);
     
-    out.open((className+".hpp").c_str());
+    out.open((outputName).c_str());
     out << indentCode(hppCode);
     out << indentCode(cppCode);
     out.close();

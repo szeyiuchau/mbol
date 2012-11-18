@@ -609,7 +609,7 @@ int main(int argc,char* argv[]) {
             i++;
             if(i<argc) {
                 customClassName=true;
-                className=string(argv[i]);
+                outputName=string(argv[i]);
             } else {
                 badArgs();
             }
@@ -619,14 +619,19 @@ int main(int argc,char* argv[]) {
             string inputName=string(argv[i]);
             if(!customClassName) {
                 if(inputName.find(".")!=string::npos) {
-                    className=inputName.substr(0,inputName.find("."));
+                    outputName=inputName.substr(0,inputName.find("."))+".hpp";
                 } else {
-                    className=inputName;
+                    outputName=inputName+".hpp";
                 }
             }
         } else {
             badArgs();
         }
+    }
+    
+    className=outputName.substr(0,outputName.find("."));
+    if(className.find("/")!=string::npos) {
+        className=className.substr(className.rfind("/")+1);
     }
     
     if(!inputRead) {
@@ -636,12 +641,12 @@ int main(int argc,char* argv[]) {
     yyparse();
     fclose(yyin);
     
-    out.open((className+".hpp").c_str());
+    out.open((outputName).c_str());
     out << indentCode(hppCode);
     out << indentCode(cppCode);
     out.close();
 }
-#line 644 "y.tab.c"
+#line 649 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1387,7 +1392,7 @@ case 24:
 #line 501 "mbolc.y"
 	{
     int n=strs.size();
-scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
+    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
     strs[n]="if("+strs[yystack.l_mark[0].ival]+".empty()) {";
     yyval.ival=n;
 }
@@ -1396,7 +1401,7 @@ case 25:
 #line 507 "mbolc.y"
 	{
     int n=strs.size();
-scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
+    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
     strs[n]="if(!"+strs[yystack.l_mark[0].ival]+".empty()) {";
     yyval.ival=n;
 }
@@ -1831,7 +1836,7 @@ case 62:
     yyval.ival=n;
 }
 break;
-#line 1834 "y.tab.c"
+#line 1839 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
