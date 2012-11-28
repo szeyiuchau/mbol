@@ -1,8 +1,9 @@
 %{
+#include<classes.hpp>
     #include "y.tab.h"
     #define YY_SKIP_YYWRAP
     extern "C" int yywrap();
-int li=0;
+    int li=0;
 %}
 %%
 \\ne return NE;
@@ -10,7 +11,6 @@ int li=0;
 ":" return CL;
 "<" return LT;
 ">" return GT;
-\\prod return PR;
 \\frac return FR;
 \\subseteq return SE;
 \\subset return SS;
@@ -41,7 +41,15 @@ int li=0;
 \\maxf return MA;
 \\minf return MI;
 \\con return CN;
-"\sum" return SM;
+(\\sum|\\prod) {
+    if(strcmp(yytext,"\\sum")==0) {
+        strcpy(yylval.sval,"+");
+    }
+    if(strcmp(yytext,"\\prod")==0) {
+        strcpy(yylval.sval,"*");
+    }
+    return SM;
+};
 "\in" return IN;
 "\ge" return GE;
 "=" return EQ;

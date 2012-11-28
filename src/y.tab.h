@@ -35,15 +35,14 @@
 #define CT 291
 #define SS 292
 #define FR 293
-#define PR 294
-#define GT 295
-#define LT 296
-#define NE 297
-#define LJ 298
-#define CN 299
-#define CL 300
-#define ES 301
-#define NU 302
+#define GT 294
+#define LT 295
+#define NE 296
+#define LJ 297
+#define CN 298
+#define CL 299
+#define ES 300
+#define NU 301
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
@@ -53,6 +52,25 @@
 typedef union {
     int ival;
     char* sval;
+    Objective* objectiveVal;
+    ObjectiveType* objectiveTypeVal;
+    Constraints* constraintsVal;
+    Constraint* constraintVal;
+    Equation* equationVal;
+    Inequality* inequalityVal;
+    Qualifiers* qualifiersVal;
+    Qualifier* qualifierVal;
+    NumberOperator* numberOperatorVal;
+    Indices* indicesVal;
+    Sum* sumVal;
+    SumQualifiers* sumQualifiersVal;
+    NumberExpression* numberExpressionVal;
+    ElementExpression* elementExpressionVal;
+    NumberSubexpression* numberSubexpressionVal;
+    ProgramVariables* programVariablesVal;
+    ElementSubexpression* elementSubexpressionVal;
+    TupleIndices* tupleIndicesVal;
+    Program* programVal;
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
 extern YYSTYPE yylval;

@@ -84,8 +84,8 @@ int main(int argc,char* argv[]) {
         if(ret) {
             cout << "Optimal objective value: " << hw.objValue << endl;
             cout << "Optimal solution:" << endl;
-            cout << "  H: " << hw.H << endl;
-            cout << "  d: " << hw.d << endl;
+            cout << "  H: " << hw.H_ret << endl;
+            cout << "  d: " << hw.d_ret << endl;
         } else {
             cout << "CPLEX ERROR OCCURRED\n";
         }
@@ -99,7 +99,7 @@ int main(int argc,char* argv[]) {
         cn.solve();
         cout << "Chromatic number is " << cn.objValue << endl;
         cout << "Color map is " << endl;
-        for(map<int,map<int,int> >::iterator i=cn.c.begin();i!=cn.c.end();i++) {
+        for(map<int,map<int,int> >::iterator i=cn.c_ret.begin();i!=cn.c_ret.end();i++) {
             for(map<int,int>::iterator j=i->second.begin();j!=i->second.end();j++) {
                 if(j->second>0.5) {
                     cout << "  color " << setw(2) << i->first << " assigned to node " << setw(2) << j->first << endl;
@@ -167,11 +167,11 @@ int main(int argc,char* argv[]) {
             cout << "successful SVM solve" << endl;
         }
         cout << "SVM soln: " << svm.objValue << endl;
-        cout << svm.w[1] << " " << svm.w[2] << " " << svm.b << endl;
+        cout << svm.w_ret[1] << " " << svm.w_ret[2] << " " << svm.b_ret << endl;
         out1 << "set terminal postscript eps enhanced color\n";
-        out1 << "f(x)=(" << svm.w[1] << "*x+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
-        out1 << "g(x)=(" << svm.w[1] << "*x+1+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
-        out1 << "h(x)=(" << svm.w[1] << "*x-1+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
+        out1 << "f(x)=(" << svm.w_ret[1] << "*x+" << svm.b_ret << ")/(-1*" << svm.w_ret[2] << ")\n";
+        out1 << "g(x)=(" << svm.w_ret[1] << "*x+1+" << svm.b_ret << ")/(-1*" << svm.w_ret[2] << ")\n";
+        out1 << "h(x)=(" << svm.w_ret[1] << "*x-1+" << svm.b_ret << ")/(-1*" << svm.w_ret[2] << ")\n";
         out1 << "set output 'svm-hardmargin.eps'\n";
         out1 << "unset key\n";
         out1 << "plot 'misc-files/svm-hardmargin.data' u 1:2,'misc-files/svm-hardmargin.data' u 3:4,f(x) lt 1 linecolor rgb 'black',g(x) lt 2 linecolor rgb 'black',h(x) lt 2 linecolor rgb 'black'\n";
@@ -199,7 +199,7 @@ int main(int argc,char* argv[]) {
             cout << "successful SVM solve" << endl;
         }
         cout << "SVM soln: " << svm.objValue << endl;
-        cout << svm.w[1] << " " << svm.w[2] << " " << svm.b << endl;
+        cout << svm.w_ret[1] << " " << svm.w_ret[2] << " " << svm.b_ret << endl;
         /*for(int i=1;i<=50;i++) {
             cout << svm.X[i] << " " << svm.x[i] << endl;
             cout << svm.Y[i] << " " << svm.y[i] << endl;
@@ -209,21 +209,21 @@ int main(int argc,char* argv[]) {
         ofstream out4("misc-files/svm-softmargin.igpos");
         ofstream out5("misc-files/svm-softmargin.igneg");
         for(int i=1;i<=svm.n;i++) {
-            if(!svm.Y[i]) {
+            if(!svm.Y_ret[i]) {
                 out3 << svm.N[i][1] << " " << svm.N[i][2] << endl;
             } else {
                 out5 << svm.N[i][1] << " " << svm.N[i][2] << endl;
             }
-            if(!svm.X[i]) {
+            if(!svm.X_ret[i]) {
                 out2 << svm.P[i][1] << " " << svm.P[i][2] << endl;
             } else {
                 out4 << svm.P[i][1] << " " << svm.P[i][2] << endl;
             }
         }
         out1 << "set terminal postscript eps enhanced color\n";
-        out1 << "f(x)=(" << svm.w[1] << "*x+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
-        out1 << "g(x)=(" << svm.w[1] << "*x+1+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
-        out1 << "h(x)=(" << svm.w[1] << "*x-1+" << svm.b << ")/(-1*" << svm.w[2] << ")\n";
+        out1 << "f(x)=(" << svm.w_ret[1] << "*x+" << svm.b_ret << ")/(-1*" << svm.w_ret[2] << ")\n";
+        out1 << "g(x)=(" << svm.w_ret[1] << "*x+1+" << svm.b_ret << ")/(-1*" << svm.w_ret[2] << ")\n";
+        out1 << "h(x)=(" << svm.w_ret[1] << "*x-1+" << svm.b_ret << ")/(-1*" << svm.w_ret[2] << ")\n";
         out1 << "set output 'svm-softmargin.eps'\n";
         out1 << "unset key\n";
         out1 << "plot 'misc-files/svm-softmargin.pos' u 1:2:(.1) linecolor rgb 'red' w circles fill solid,'misc-files/svm-softmargin.neg' u 1:2:(.1) linecolor rgb 'blue' w circles fill solid,'misc-files/svm-softmargin.igpos' u 1:2:(.1) linecolor rgb 'red' w circles,'misc-files/svm-softmargin.igneg' u 1:2:(.1) linecolor rgb 'blue' w circles,f(x) lt 1 linecolor rgb 'black',g(x) lt 2 linecolor rgb 'black',h(x) lt 2 linecolor rgb 'black'\n";

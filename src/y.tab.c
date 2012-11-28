@@ -17,6 +17,8 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #define YYPURE 0
 
 #line 2 "mbolc.y"
+    #include<visitors.hpp>
+    #include<utilities.hpp>
     #include<sstream>
     #include<iostream>
     #include<fstream>
@@ -27,8 +29,9 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
     #include<map>
     #include<set>
     #include<list>
+    #include<classes.hpp>
     using namespace std;
-#line 15 "mbolc.y"
+#line 18 "mbolc.y"
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
@@ -38,9 +41,28 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 typedef union {
     int ival;
     char* sval;
+    Objective* objectiveVal;
+    ObjectiveType* objectiveTypeVal;
+    Constraints* constraintsVal;
+    Constraint* constraintVal;
+    Equation* equationVal;
+    Inequality* inequalityVal;
+    Qualifiers* qualifiersVal;
+    Qualifier* qualifierVal;
+    NumberOperator* numberOperatorVal;
+    Indices* indicesVal;
+    Sum* sumVal;
+    SumQualifiers* sumQualifiersVal;
+    NumberExpression* numberExpressionVal;
+    ElementExpression* elementExpressionVal;
+    NumberSubexpression* numberSubexpressionVal;
+    ProgramVariables* programVariablesVal;
+    ElementSubexpression* elementSubexpressionVal;
+    TupleIndices* tupleIndicesVal;
+    Program* programVal;
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 43 "y.tab.c"
+#line 65 "y.tab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -106,211 +128,184 @@ extern int YYPARSE_DECL();
 #define CT 291
 #define SS 292
 #define FR 293
-#define PR 294
-#define GT 295
-#define LT 296
-#define NE 297
-#define LJ 298
-#define CN 299
-#define CL 300
-#define ES 301
-#define NU 302
+#define GT 294
+#define LT 295
+#define NE 296
+#define LJ 297
+#define CN 298
+#define CL 299
+#define ES 300
+#define NU 301
 #define YYERRCODE 256
 static const short yylhs[] = {                           -1,
-    0,    1,   19,   19,    2,    2,    3,    3,    4,    4,
-    4,    5,    5,    6,    6,    6,    6,    6,    7,    7,
-   18,   18,    8,    8,    8,    8,    8,    8,    8,    8,
-    8,   15,   15,   15,   15,   14,   14,   14,   17,   17,
-   17,   17,   16,   16,   16,   16,   16,   16,   16,   16,
-   16,    9,    9,    9,    9,   10,   10,   11,   13,   13,
+    0,    1,    4,    4,   18,   18,    2,    2,    3,    3,
+    3,    5,    5,    6,    6,    6,    6,    6,    7,    7,
+   17,   17,    8,    8,    8,    8,    8,    8,    8,    8,
+    8,    8,   14,   14,   14,   14,   13,   13,   13,   16,
+   16,   16,   16,   15,   15,   15,   15,   15,   15,   15,
+   15,   15,    9,    9,    9,    9,   10,   10,   11,   12,
    12,   12,
 };
 static const short yylen[] = {                            2,
     4,    7,    1,    3,    1,    1,    4,    5,    1,    3,
     3,    3,    3,    1,    1,    1,    1,    1,    1,    3,
     1,    3,    5,    3,    3,    3,    3,    3,    3,    5,
-    3,    1,    3,    3,    3,    1,    2,    3,    5,    3,
-    3,    1,    1,    3,    7,    7,    3,    1,    1,    5,
-    3,    1,    1,    1,    1,    1,    3,    5,    1,    1,
+    5,    3,    1,    3,    3,    3,    1,    2,    3,    5,
+    3,    3,    1,    1,    3,    7,    7,    3,    1,    1,
+    5,    3,    1,    1,    1,    1,    1,    3,    5,   10,
    10,    4,
 };
 static const short yydefred[] = {                         0,
     0,    0,    5,    6,    0,    0,    0,    0,    0,    0,
-    1,    0,    3,    0,   59,    0,    0,    0,    0,   60,
-   48,    0,    0,   43,    0,    0,   36,    0,    0,    0,
-    0,    0,    0,    0,   42,    0,    0,    0,   32,    0,
-    7,    0,    0,    0,   18,   17,    0,   52,   53,   54,
-   55,   14,   15,   16,    0,    0,   37,    0,    4,    0,
-   10,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-   44,    0,    0,    0,    0,    0,    0,   19,    0,    0,
-    0,    0,   38,    8,    0,    0,    0,    0,   41,    0,
-   40,   35,   34,   33,    0,    0,    0,    0,    0,    0,
-   21,    0,    0,    0,    0,    0,    0,    0,    0,    2,
-    0,   50,    0,    0,    0,    0,   26,    0,    0,   27,
-    0,    0,    0,    0,    0,   20,    0,   62,   58,    0,
-    0,   39,    0,   22,    0,    0,    0,   45,   46,    0,
-    0,    0,    0,    0,    0,   61,
+    1,    0,    3,    0,    0,    0,    0,    0,    0,   49,
+    0,    0,   44,    0,   37,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,   43,    0,    0,    0,   33,    0,
+    7,    0,   18,   17,    0,   53,   54,   55,   56,   14,
+   15,   16,    0,    0,   38,    0,    4,    0,    0,    0,
+   10,   52,    0,    0,    0,    0,    0,    0,    0,    0,
+   45,    0,    0,    0,    0,    0,    0,   19,    0,    0,
+   39,    8,    0,    0,    0,    0,    0,    0,    0,   42,
+    0,   41,   36,   35,   34,    0,    0,    0,    0,    0,
+    0,   21,    0,    0,    0,    0,    0,    2,    0,   62,
+   59,    0,   51,    0,    0,    0,    0,   26,    0,    0,
+   27,    0,    0,    0,    0,    0,   20,    0,    0,    0,
+   40,    0,   22,    0,    0,    0,   46,   47,    0,   31,
+    0,    0,    0,    0,    0,   61,   60,
 };
 static const short yydgoto[] = {                          2,
-    5,    6,    8,   22,   23,  100,   77,   78,   56,   86,
-   24,   44,   25,   26,   38,   27,   39,  102,   14,
+    5,    8,   21,   14,   22,  101,   77,   78,   54,   87,
+   23,   30,   24,   38,   25,   39,  103,    6,
 };
-static const short yysindex[] = {                      -267,
- -140,    0,    0,    0, -286, -258, -246, -217, -248, -249,
-    0, -239,    0, -178,    0,  -68, -242, -197, -227,    0,
-    0, -211, -188,    0, -168,   -5,    0, -249, -173, -186,
- -190, -254, -162,   71,    0, -197,  -94, -215,    0, -242,
-    0, -247, -129, -128,    0,    0, -242,    0,    0,    0,
-    0,    0,    0,    0, -242, -242,    0, -124,    0, -242,
-    0, -197, -121, -120,  -78, -108, -132, -197, -197, -197,
-    0,   96, -184,  -69, -255,  -73,  -61,    0, -210, -242,
-  229,  229,    0,    0,  121, -175, -121,  -74,    0, -247,
-    0,    0,    0,    0,  -66, -197,  -60, -197, -197,  -47,
-    0, -256, -197, -197,  -46, -247,   59, -165,  154,    0,
- -197,    0, -242, -245, -242, -121,    0, -121, -121,    0,
-  -45,  -32, -121, -121,  -30,    0, -262,    0,    0, -121,
-  179,    0,  204,    0, -197, -242,  -43,    0,    0, -121,
-  229,  -58,  -44, -242,  -41,    0,
+static const short yysindex[] = {                      -271,
+ -200,    0,    0,    0, -285, -227, -202, -218, -189, -248,
+    0, -183,    0, -232, -159, -246,  -94, -137, -160,    0,
+ -141, -139,    0,  -93,    0, -248, -123, -127, -126, -125,
+ -132, -250, -101, -251,    0, -137,    5, -152,    0,  -94,
+    0, -262,    0,    0,  -94,    0,    0,    0,    0,    0,
+    0,    0,  -94,  -94,    0, -105,    0,  -94, -243,  -94,
+    0,    0, -137, -117,   39, -118,  -26, -137, -137, -137,
+    0,  -40, -106,  -81, -261,  -69,  -66,    0,   90,   90,
+    0,    0,   -8,  110, -185,   18, -173,   36,  -70,    0,
+ -262,    0,    0,    0,    0,  -60, -137,  -61, -137, -137,
+  -50,    0, -225, -137, -137,  -25, -262,    0, -255,    0,
+    0, -137,    0,  -94, -254,  -94,   36,    0,   36,   36,
+    0,  -20,  -11,   36,   36,   -7,    0,   -6,   36,   42,
+    0,   66,    0, -137, -212,  -36,    0,    0,   36,    0,
+   36,  -17, -155,   -5,   12,    0,    0,
 };
 static const short yyrindex[] = {                         0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,   38,    0,    0,    0,    0,
-    0,    0,  -40,    0,    0,    0,    0,    0,    0,    0,
-    0,    0, -136,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,  -51,    0,    0,    0,    0,
+    0,   -1,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0, -178,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,  -92,  -48,    0, -109,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,  -39,    0,    0,    0,
- -113, -112,    0,    0,    0,    0,  -86,    0,    0,    0,
+    0,    0,    0, -135,    0,  -13,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    3,    0, -131,  -84,
+    0,    0,    0,    0,    0,    0,    0,  -41,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0, -250,    0, -200, -172,    0,
-    0,    0, -170, -157,    0,    0,    0,    0,    0,  -84,
-    0,    0,    0,    0,    0,    0,    0,    0,    0, -144,
- -137,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0, -199,    0, -190, -156,
+    0,    0,    0, -110,  -88,    0,    0,    0,  -19,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,  -63,    0,
+  -62,    0,    0,    0,    0,    0,    0,
 };
 static const short yygindex[] = {                         0,
-    0,    0,    0,  209,    0,  213,  -53,  135,    0,    0,
-    0,    0,    0,  -17,  -31,  -24,  147,    0,    0,
+    0,    0,  240,    0,    0,  255,  -18,  175,    0,    0,
+    0,    0,   -9,  -34,  -24,  159,    0,    0,
 };
-#define YYTABLESIZE 531
-static const short yytable[] = {                         34,
-   63,   57,  121,  117,   65,   67,  103,   15,   31,   57,
-    1,   35,    7,  106,   15,    9,   16,   13,   73,   62,
-  122,   36,   72,   33,   31,  108,   17,   10,   74,   81,
-   87,   83,   37,   17,   28,   31,  114,   82,   18,  137,
-  132,  104,   85,   19,   20,   18,   40,   57,   68,   69,
-   19,   20,   21,   75,   76,  107,   57,   57,   29,   21,
-   57,   11,  109,   41,  116,   74,  118,  119,   35,   70,
-   42,  123,  124,   96,   29,   45,   46,   97,   36,  130,
-   29,   12,   71,  111,   57,   29,   28,   60,   24,   37,
-   75,   76,   59,  106,   43,  131,   30,  133,   61,  112,
-   32,   25,   28,  140,   24,   98,   57,   99,   57,  128,
-   52,   53,   54,   28,   23,   24,   57,   25,  141,  145,
-   49,   30,   49,   49,   49,   49,    3,    4,   25,   49,
-   23,   68,   69,   49,   49,   49,   49,   30,   49,   49,
-   49,   23,   68,   69,   79,   13,   12,   80,   30,   49,
-   84,   49,   70,   91,   42,   42,   49,   49,   49,   49,
-   49,   13,   12,   70,   51,   49,   51,   51,   51,   51,
-   88,   66,   56,   51,   57,   42,   42,   51,   51,   51,
-   51,   36,   51,   51,   51,   68,   69,  105,   56,   31,
-   57,   90,   37,   51,   32,   51,  101,  106,   89,  113,
-   51,   51,   51,   51,   51,  117,   70,  115,   47,   51,
-   47,   47,   47,   47,   92,   93,   94,   47,  120,  125,
-  134,   47,   47,   47,   47,  135,   47,   47,   47,  144,
-  136,  142,  143,  146,    9,   11,   58,   47,   55,   47,
-  126,    0,    0,    0,   47,   47,   47,   47,   47,    0,
-    0,   15,    0,   47,   45,   46,   47,    0,    0,    0,
-   33,    0,    0,    0,   48,   49,   50,   51,    0,    0,
-   17,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,   18,    0,    0,    0,    0,   19,   20,   52,
-   53,   54,    0,    0,   49,    0,   21,   49,   49,   49,
-    0,    0,    0,   49,    0,    0,    0,   49,   49,   49,
-   49,    0,    0,   49,    0,    0,   96,    0,   45,   46,
-  127,    0,    0,    0,    0,   49,    0,   15,    0,    0,
-   49,   49,   49,   49,   49,    0,   33,    0,    0,   49,
-   48,   49,   50,   51,    0,    0,   17,   64,   98,    0,
-   99,    0,   15,   52,   53,   54,    0,    0,   18,    0,
-    0,   33,    0,   19,   20,   48,   49,   50,   51,    0,
-   95,   17,   21,    0,    0,    0,    0,   15,    0,    0,
-    0,    0,    0,   18,    0,    0,   33,    0,   19,   20,
-   48,   49,   50,   51,    0,  110,   17,   21,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,   18,    0,
-   15,    0,    0,   19,   20,    0,    0,    0,    0,   33,
-    0,    0,   21,   48,   49,   50,   51,    0,    0,   17,
-  129,    0,    0,    0,    0,   15,    0,    0,    0,    0,
-    0,   18,    0,    0,   33,    0,   19,   20,   48,   49,
-   50,   51,    0,  138,   17,   21,    0,    0,    0,    0,
-   15,    0,    0,    0,    0,    0,   18,    0,    0,   33,
-    0,   19,   20,   48,   49,   50,   51,    0,  139,   17,
-   21,    0,    0,    0,    0,   15,    0,    0,    0,    0,
-    0,   18,    0,    0,   33,    0,   19,   20,   48,   49,
-   50,   51,    0,    0,   17,   21,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,   18,    0,    0,    0,
-    0,   19,   20,    0,    0,    0,    0,    0,    0,    0,
-   21,
+#define YYTABLESIZE 406
+static const short yytable[] = {                         55,
+  104,   65,   67,   73,  107,   15,    1,   34,   15,   55,
+  118,   31,    7,   74,   33,   62,   32,   16,   46,   47,
+   48,   49,   84,   63,   17,   64,   27,   17,   88,   81,
+   72,  131,   74,  122,  105,   79,   18,   75,   76,   18,
+   85,   19,   28,   80,   19,  128,    9,   55,   83,   20,
+   86,  123,   20,   35,   55,   55,   75,   76,   55,   32,
+   11,   55,  117,   36,  119,  120,    3,    4,   29,  124,
+  125,   10,  115,  107,   37,   32,   13,  129,   50,   12,
+   50,   50,   50,   50,   29,  112,   32,   50,  140,  110,
+   26,   50,   50,   50,   50,   29,   50,   50,   50,  139,
+  141,  113,   28,   29,  130,   55,  132,   55,  145,   50,
+   35,   68,   69,   40,   50,   50,   50,   50,   28,   42,
+   36,   48,   50,   48,   48,   48,   48,   13,   35,   28,
+   48,   37,   70,   41,   48,   48,   48,   48,   36,   48,
+   48,   48,   57,   13,   71,  144,   58,   59,   24,   37,
+   60,   97,   48,   43,   44,   98,   61,   48,   48,   48,
+   48,   32,   15,   15,   24,   48,   43,   44,   45,   82,
+   25,   33,   33,   89,   12,   24,   46,   47,   48,   49,
+   91,   17,   17,   99,  102,  100,   25,   50,   51,   52,
+   12,  106,  107,   18,   18,   23,   30,   25,   19,   19,
+   50,   51,   52,  114,  118,   50,   20,   20,   50,   50,
+   50,   23,   30,  116,   50,  121,   15,   57,   50,   50,
+   50,   50,   23,   30,   50,   33,   93,   94,   95,   46,
+   47,   48,   49,   57,   96,   17,   50,   68,   69,   58,
+  126,   50,   50,   50,   50,  133,  134,   18,   15,   50,
+   43,   43,   19,  135,  142,   58,  143,   33,   70,   92,
+   20,   46,   47,   48,   49,   56,  108,   17,  136,  146,
+   66,   43,   43,    9,   15,   68,   69,   11,   53,   18,
+   36,  127,    0,   33,   19,    0,  147,   46,   47,   48,
+   49,   37,   20,   17,  111,    0,   70,    0,   15,   68,
+   69,    0,   68,   69,    0,   18,    0,   33,    0,    0,
+   19,   46,   47,   48,   49,   90,  137,   17,   20,    0,
+   70,    0,   15,   70,    0,    0,    0,    0,    0,   18,
+    0,   33,    0,    0,   19,   46,   47,   48,   49,    0,
+  138,   17,   20,    0,    0,    0,   15,    0,    0,    0,
+    0,    0,    0,   18,    0,   33,    0,    0,   19,   46,
+   47,   48,   49,    0,    0,   17,   20,   97,    0,   43,
+   44,  109,    0,    0,    0,    0,    0,   18,    0,    0,
+    0,    0,   19,    0,    0,    0,    0,    0,    0,    0,
+   20,    0,    0,    0,    0,    0,    0,    0,    0,   99,
+    0,  100,    0,   50,   51,   52,
 };
-static const short yycheck[] = {                         17,
-   32,   26,  259,  266,   36,   37,  262,  257,  259,   34,
-  278,  266,  299,  259,  257,  274,  266,  266,  266,  274,
-  277,  276,   40,  266,  275,   79,  276,  274,  276,   47,
-   62,   56,  287,  276,  274,  286,   90,   55,  288,  302,
-  286,  297,   60,  293,  294,  288,  274,   72,  264,  265,
-  293,  294,  302,  301,  302,  266,   81,   82,  259,  302,
-   85,  279,   80,  275,   96,  276,   98,   99,  266,  285,
-  259,  103,  104,  258,  275,  260,  261,  262,  276,  111,
-  259,  299,  298,  259,  109,  286,  259,  274,  259,  287,
-  301,  302,  266,  259,  263,  113,  275,  115,  289,  275,
-  263,  259,  275,  135,  275,  290,  131,  292,  133,  275,
-  295,  296,  297,  286,  259,  286,  141,  275,  136,  144,
-  257,  259,  259,  260,  261,  262,  267,  268,  286,  266,
-  275,  264,  265,  270,  271,  272,  273,  275,  275,  276,
-  277,  286,  264,  265,  274,  259,  259,  276,  286,  286,
-  275,  288,  285,  286,  264,  265,  293,  294,  295,  296,
-  297,  275,  275,  285,  257,  302,  259,  260,  261,  262,
-  291,  266,  259,  266,  259,  285,  286,  270,  271,  272,
-  273,  276,  275,  276,  277,  264,  265,  261,  275,  258,
-  275,  300,  287,  286,  263,  288,  266,  259,  277,  274,
-  293,  294,  295,  296,  297,  266,  285,  274,  257,  302,
-  259,  260,  261,  262,   68,   69,   70,  266,  266,  266,
-  266,  270,  271,  272,  273,  258,  275,  276,  277,  274,
-  261,  275,  291,  275,  275,  275,   28,  286,   26,  288,
-  106,   -1,   -1,   -1,  293,  294,  295,  296,  297,   -1,
-   -1,  257,   -1,  302,  260,  261,  262,   -1,   -1,   -1,
-  266,   -1,   -1,   -1,  270,  271,  272,  273,   -1,   -1,
-  276,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,  288,   -1,   -1,   -1,   -1,  293,  294,  295,
-  296,  297,   -1,   -1,  257,   -1,  302,  260,  261,  262,
-   -1,   -1,   -1,  266,   -1,   -1,   -1,  270,  271,  272,
-  273,   -1,   -1,  276,   -1,   -1,  258,   -1,  260,  261,
-  262,   -1,   -1,   -1,   -1,  288,   -1,  257,   -1,   -1,
-  293,  294,  295,  296,  297,   -1,  266,   -1,   -1,  302,
-  270,  271,  272,  273,   -1,   -1,  276,  277,  290,   -1,
-  292,   -1,  257,  295,  296,  297,   -1,   -1,  288,   -1,
-   -1,  266,   -1,  293,  294,  270,  271,  272,  273,   -1,
-  275,  276,  302,   -1,   -1,   -1,   -1,  257,   -1,   -1,
-   -1,   -1,   -1,  288,   -1,   -1,  266,   -1,  293,  294,
-  270,  271,  272,  273,   -1,  275,  276,  302,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,  288,   -1,
-  257,   -1,   -1,  293,  294,   -1,   -1,   -1,   -1,  266,
-   -1,   -1,  302,  270,  271,  272,  273,   -1,   -1,  276,
-  277,   -1,   -1,   -1,   -1,  257,   -1,   -1,   -1,   -1,
-   -1,  288,   -1,   -1,  266,   -1,  293,  294,  270,  271,
-  272,  273,   -1,  275,  276,  302,   -1,   -1,   -1,   -1,
-  257,   -1,   -1,   -1,   -1,   -1,  288,   -1,   -1,  266,
-   -1,  293,  294,  270,  271,  272,  273,   -1,  275,  276,
-  302,   -1,   -1,   -1,   -1,  257,   -1,   -1,   -1,   -1,
-   -1,  288,   -1,   -1,  266,   -1,  293,  294,  270,  271,
-  272,  273,   -1,   -1,  276,  302,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,  288,   -1,   -1,   -1,
-   -1,  293,  294,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-  302,
+static const short yycheck[] = {                         24,
+  262,   36,   37,  266,  259,  257,  278,   17,  257,   34,
+  266,  258,  298,  276,  266,  266,  263,  266,  270,  271,
+  272,  273,  266,  274,  276,  277,  259,  276,   63,   54,
+   40,  286,  276,  259,  296,   45,  288,  300,  301,  288,
+   59,  293,  275,   53,  293,  301,  274,   72,   58,  301,
+   60,  277,  301,  266,   79,   80,  300,  301,   83,  259,
+  279,   86,   97,  276,   99,  100,  267,  268,  259,  104,
+  105,  274,   91,  259,  287,  275,  266,  112,  257,  298,
+  259,  260,  261,  262,  275,  259,  286,  266,  301,  275,
+  274,  270,  271,  272,  273,  286,  275,  276,  277,  134,
+  135,  275,  259,  263,  114,  130,  116,  132,  143,  288,
+  266,  264,  265,  274,  293,  294,  295,  296,  275,  259,
+  276,  257,  301,  259,  260,  261,  262,  259,  266,  286,
+  266,  287,  285,  275,  270,  271,  272,  273,  276,  275,
+  276,  277,  266,  275,  297,  301,  274,  274,  259,  287,
+  276,  258,  288,  260,  261,  262,  289,  293,  294,  295,
+  296,  263,  257,  257,  275,  301,  260,  261,  262,  275,
+  259,  266,  266,  291,  259,  286,  270,  271,  272,  273,
+  299,  276,  276,  290,  266,  292,  275,  294,  295,  296,
+  275,  261,  259,  288,  288,  259,  259,  286,  293,  293,
+  294,  295,  296,  274,  266,  257,  301,  301,  260,  261,
+  262,  275,  275,  274,  266,  266,  257,  259,  270,  271,
+  272,  273,  286,  286,  276,  266,   68,   69,   70,  270,
+  271,  272,  273,  275,  275,  276,  288,  264,  265,  259,
+  266,  293,  294,  295,  296,  266,  258,  288,  257,  301,
+  264,  265,  293,  261,  291,  275,  274,  266,  285,  286,
+  301,  270,  271,  272,  273,   26,  275,  276,  275,  275,
+  266,  285,  286,  275,  257,  264,  265,  275,   24,  288,
+  276,  107,   -1,  266,  293,   -1,  275,  270,  271,  272,
+  273,  287,  301,  276,  277,   -1,  285,   -1,  257,  264,
+  265,   -1,  264,  265,   -1,  288,   -1,  266,   -1,   -1,
+  293,  270,  271,  272,  273,  277,  275,  276,  301,   -1,
+  285,   -1,  257,  285,   -1,   -1,   -1,   -1,   -1,  288,
+   -1,  266,   -1,   -1,  293,  270,  271,  272,  273,   -1,
+  275,  276,  301,   -1,   -1,   -1,  257,   -1,   -1,   -1,
+   -1,   -1,   -1,  288,   -1,  266,   -1,   -1,  293,  270,
+  271,  272,  273,   -1,   -1,  276,  301,  258,   -1,  260,
+  261,  262,   -1,   -1,   -1,   -1,   -1,  288,   -1,   -1,
+   -1,   -1,  293,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+  301,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,  290,
+   -1,  292,   -1,  294,  295,  296,
 };
 #define YYFINAL 2
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 302
+#define YYMAXTOKEN 301
 #if YYDEBUG
 static const char *yyname[] = {
 
@@ -322,8 +317,8 @@ static const char *yyname[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"SM","IN","CO","GE","LE","EQ",
 "US","SI","SU","VA","MA","MI","ST","PL","SB","DI","MU","LC","RC","LP","RP","AA",
-"BB","CC","DD","EL","AN","UN","SR","RR","LR","LI","ZC","SE","CT","SS","FR","PR",
-"GT","LT","NE","LJ","CN","CL","ES","NU",
+"BB","CC","DD","EL","AN","UN","SR","RR","LR","LI","ZC","SE","CT","SS","FR","GT",
+"LT","NE","LJ","CN","CL","ES","NU",
 };
 static const char *yyrule[] = {
 "$accept : program",
@@ -356,7 +351,8 @@ static const char *yyrule[] = {
 "qualifier : VA inequality VA",
 "qualifier : VA SS element_expression",
 "qualifier : VA SE element_expression",
-"qualifier : NU LE VA LE number_expression",
+"qualifier : NU LE VA LE element_expression",
+"qualifier : NU LE VA LE NU",
 "qualifier : VA IN element_expression",
 "element_expression : element_subexpression",
 "element_expression : element_expression SR element_subexpression",
@@ -364,7 +360,7 @@ static const char *yyrule[] = {
 "element_expression : element_expression SI element_subexpression",
 "number_expression : number_subexpression",
 "number_expression : number_expression number_subexpression",
-"number_expression : number_expression operator number_subexpression",
+"number_expression : number_expression number_operator number_subexpression",
 "element_subexpression : LR VA CL qualifiers RR",
 "element_subexpression : LR element_expression RR",
 "element_subexpression : LP element_expression RP",
@@ -377,18 +373,17 @@ static const char *yyrule[] = {
 "number_subexpression : NU",
 "number_subexpression : VA",
 "number_subexpression : VA US LC indices RC",
-"number_subexpression : VA US element_expression",
-"operator : PL",
-"operator : SB",
-"operator : DI",
-"operator : MU",
+"number_subexpression : VA US VA",
+"number_operator : PL",
+"number_operator : SB",
+"number_operator : DI",
+"number_operator : MU",
 "indices : element_expression",
 "indices : indices CO element_expression",
-"sum : sum_product sum_product_qualifiers LP number_expression RP",
-"sum_product : SM",
-"sum_product : PR",
-"sum_product_qualifiers : US LC VA EQ NU RC CT LC number_subexpression RC",
-"sum_product_qualifiers : US LC qualifiers RC",
+"sum : SM sum_qualifiers LP number_expression RP",
+"sum_qualifiers : US LC VA EQ NU RC CT LC element_expression RC",
+"sum_qualifiers : US LC VA EQ NU RC CT LC NU RC",
+"sum_qualifiers : US LC qualifiers RC",
 
 };
 #endif
@@ -426,26 +421,14 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 843 "mbolc.y"
-string convert(int x) {
-    stringstream ss;
-    ss << x;
-    return ss.str();
-}
-int tempVar=0;
-string arguments="";
-string declarations="";
-set<string> intConstraints;
-string expressionVar;
+#line 291 "mbolc.y"
+Program* program;
 extern FILE* yyin;
 extern char* yytext;
 extern int yylineno;
 extern int yylex();
 extern int yyparse();
 extern "C" int yywrap();
-map<int,string> strs;
-string className;
-map<string,int> declareMap;
 void yyerror(const char *str) {
     cout << "ERROR: " << str << " for token " << string(yytext) << " on line " << yylineno << endl;
     exit(1);
@@ -453,25 +436,6 @@ void yyerror(const char *str) {
 int yywrap() {
     return 1;
 }
-map<string,list<int> > mapTypeReasons;
-map<string,list<list<string> > > mapTypes;
-map<int,string> scopeStuff;
-map<string,int> varReason;
-map<string,int> declReason;
-map<string,string> declType;
-map<string,string> varType;
-map<int,vector<string> > tupleHolder;
-string tempExp() {
-    string tv="t"+convert(tempVar++);
-    return tv;
-}
-map<string,vector<string> > tupleType;
-map<string,map<string,int> > setGraphReasoning;
-map<string,map<string,int> > setGraph;
-set<string> weakSet;
-ofstream out;
-string cppCode;
-string hppCode;
 string replaceAll(string a,string b,string c) {
     while(a.find(b)!=string::npos) {
         a=a.substr(0,a.find(b))+c+a.substr(a.find(b)+b.size());
@@ -486,7 +450,6 @@ int countStr(string a,string b) {
     }
     return x;
 }
-map<string,string> typeMap;
 bool quiet;
 map<string,string> options;
 void usage() {
@@ -539,60 +502,10 @@ string indentCode(string code) {
     }
     return indentedCode;
 }
-string stripVar(string a) {
-    return replaceAll(a,"_var","");
-}
-void setVarType(string name,string type) {
-    if(varType[name]=="") {
-        varType[name]=type;
-        varReason[name]=yylineno;
-    } else if(varType[name]!=type) {
-        cout << "ERROR: inconsistent type for " << stripVar(name) << " as it is " << varType[name] << " on line " << varReason[name] << " and " << type << " on line " << yylineno << endl;
-        exit(1);
-    }
-}
-void setDeclType(string name,string type) {
-    if(declType[name]=="") {
-        declType[name]=type;
-        declReason[name]=yylineno;
-    } else if(declType[name]!=type) {
-        cout << "ERROR: inconsistent usage for " << stripVar(name) << " as it is " << declType[name] << " on line " << declReason[name] << " and " << type << " on line " << yylineno << endl;
-        exit(1);
-    }
-}
-void setGraphEdge(string a,string b,int c) {
-    if(setGraph[a].count(b)) {
-        if(setGraph[a][b]!=c) {
-            cout << "ERROR: contradicting relationships between elements "+stripVar(a)+" and "+stripVar(b)+" on line";
-            if(setGraphReasoning[a][b]!=yylineno) {
-                cout << "s " << setGraphReasoning[a][b];
-            }
-            cout << " " << yylineno << endl;
-            exit(1);
-        }
-    } else {
-        setGraph[a][b]=c;
-        setGraphReasoning[a][b]=yylineno;
-    }
-}
-void setGraphTriple(string a,string b,string c) {
-    setGraphEdge(a,b,0);
-    setGraphEdge(b,a,0);
-    setGraphEdge(b,c,0);
-    setGraphEdge(c,b,0);
-    setGraphEdge(a,c,0);
-    setGraphEdge(c,a,0);
-}
-string tempElement() {
-    string tv="t"+convert(tempVar++);
-    setDeclType(tv,"temporary");
-    setVarType(tv,"an element");
-    return tv;
-}
 int main(int argc,char* argv[]) {
     bool inputRead=false;
     quiet=false;
-    string outputName;
+    string outputName,inputName;
     bool customClassName=false;
     options["-v"]="Print version information and exit";
     options["-h"]="Print help information and exit";
@@ -614,9 +527,8 @@ int main(int argc,char* argv[]) {
                 badArgs();
             }
         } else if(!inputRead) {
-            yyin=fopen(argv[i],"r");
             inputRead=true;
-            string inputName=string(argv[i]);
+            inputName=string(argv[i]);
             if(!customClassName) {
                 if(inputName.find(".")!=string::npos) {
                     outputName=inputName.substr(0,inputName.find("."))+".hpp";
@@ -629,24 +541,36 @@ int main(int argc,char* argv[]) {
         }
     }
     
-    className=outputName.substr(0,outputName.find("."));
+    string className=outputName.substr(0,outputName.find("."));
     if(className.find("/")!=string::npos) {
         className=className.substr(className.rfind("/")+1);
+    }
+    yyin=fopen(inputName.c_str(),"r");
+    string code;    
+    yyparse();
+    map<string,Type*> types;
+    {
+        MbolElementVisitor* v=new MbolElementVisitorTypeHelper();
+        program->accept(*v);
+        types=((MbolElementVisitorTypeHelper*)v)->types;
+    }
+    {
+        MbolElementVisitor* v=new MbolElementVisitorCPLEX(types,quiet,className);
+        program->accept(*v);
+        code=indentCode(((MbolElementVisitorCPLEX*)v)->code);
     }
     
     if(!inputRead) {
         badArgs();
     }
     
-    yyparse();
     fclose(yyin);
     
-    out.open((outputName).c_str());
-    out << indentCode(hppCode);
-    out << indentCode(cppCode);
+    ofstream out((outputName).c_str());
+    out << code;
     out.close();
 }
-#line 649 "y.tab.c"
+#line 573 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -853,990 +777,399 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 24 "mbolc.y"
+#line 64 "mbolc.y"
 	{
-    
-    /* if a variable has no declare type, then it is a constant that must be provided by the user*/
-    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(declType[i->first]=="") {
-            setDeclType(i->first,"constant");
-        }
-    }
-    
-    /* find basic elements which will be integers*/
-    set<string> startNodes;
-    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(i->second=="an element") {
-            startNodes.insert(i->first);
-        }
-    }
-    for(map<string,map<string,int> >::iterator i=setGraph.begin();i!=setGraph.end();i++) {
-        for(map<string,int>::iterator j=i->second.begin();j!=i->second.end();j++) {
-            startNodes.erase(j->first);
-        }
-    }
-    
-    /* BFS search to figure out distance to each node which reveals its element type*/
-    map<int,list<list<string> > > toVisit;
-    set<string> visited;
-    map<string,list<string> > foundPaths;
-    for(set<string>::iterator i=startNodes.begin();i!=startNodes.end();i++) {
-        list<string> temp;
-        temp.push_back(*i);
-        toVisit[0].push_back(temp);
-    }
-    while(!toVisit.empty()) {
-        list<string> x=toVisit.begin()->second.front();
-        int length=toVisit.begin()->first;
-        toVisit.begin()->second.pop_front();
-        while(!toVisit.empty()&&toVisit.begin()->second.empty()) {
-            toVisit.erase(toVisit.begin());
-        }
-        string type="";
-        if(tupleType.count(x.front())) {
-            for(int i=0;i<length;i++) {
-                type+="set<";
-            }
-            type+="TYPE_"+x.front()+"_";
-            for(int i=0;i<length;i++) {
-                type+=",set"+convert(i)+"comp_TYPE_"+x.front()+"_>";
-            }
-        } else {
-            for(int i=0;i<length;i++) {
-                type+="set<";
-            }
-            type+="int";
-            for(int i=0;i<length;i++) {
-                if(i==0) {
-                    type+=">";
-                } else {
-                    type+=",set"+convert(i)+"comp>";
-                }
-            }
-        }
-        if(visited.count(x.back())) {
-            if(tupleType.count(x.front())==0&&type!=typeMap[x.back()]) {
-                set<int> lines;
-                string prev;
-                prev="";
-                for(list<string>::iterator i=x.begin();i!=x.end();i++) {
-                    if(prev!="") {
-                        lines.insert(setGraphReasoning[prev][*i]);
-                    }
-                    prev=*i;
-                }
-                prev="";
-                for(list<string>::iterator i=foundPaths[x.back()].begin();i!=foundPaths[x.back()].end();i++) {
-                    if(prev!="") {
-                        lines.insert(setGraphReasoning[prev][*i]);
-                    }
-                    prev=*i;
-                }
-                cout << "ERROR: inconsistent types for element " << stripVar(x.back()) << " on line";
-                if(lines.size()>1) {
-                    cout << "s";
-                }
-                for(set<int>::iterator i=lines.begin();i!=lines.end();i++) {
-                    cout << " " << *i;
-                }
-                cout << endl;
-                exit(1);
-            }
-            continue;
-        }
-        foundPaths[x.back()]=x;
-        typeMap[x.back()]=type;
-        visited.insert(x.back());
-        for(map<string,int>::iterator i=setGraph[x.back()].begin(); i!=setGraph[x.back()].end(); i++) {
-            list<string> y=x;
-            y.push_back(i->first);
-            toVisit[length+i->second].push_back(y);
-        }
-    }
-    
-    for(map<string,vector<string> >::iterator i=tupleType.begin();i!=tupleType.end();i++) {
-        string type="tuple";
-        for(vector<string>::iterator j=i->second.begin();j!=i->second.end();j++) {
-            if(typeMap[*j]=="int") {
-                type+="_int";
-            } else {
-                type+="_set"+convert(countStr(typeMap[*j],"set<"));
-            }
-        }
-        typeMap[i->first]=type;
-    }
-    
-    /* take care of simple variables*/
-    for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(i->second=="a number"&&!typeMap.count(i->first)) {
-            if(declType[i->first]=="variable") {
-                if(intConstraints.count(i->first)) {
-                    typeMap[i->first]="MyIloIntVar";
-                    typeMap["RET_"+i->first.substr(0,i->first.size()-4)]="int";
-                } else {
-                    /*cout << i->first << endl;*/
-                    typeMap[i->first]="MyIloNumVar";
-                    typeMap["RET_"+i->first.substr(0,i->first.size()-4)]="double";
-                }
-            } else {
-                typeMap[i->first]="double";
-            }
-        }
-    }
-    
-    /* setup constant ints with types*/
-    /*for(map<string,string>::iterator i=varType.begin();i!=varType.end();i++) {
-        if(i->second=="constant") {
-            typeMap[i->first]="int";
-        }
-    }*/
-    
-    /* get types of the map objects (real/integer variables in mathematical program)*/
-    for(map<string,list<list<string> > >::iterator i=mapTypes.begin();i!=mapTypes.end();i++) {
-        list<string> example=i->second.front();
-        list<int>::iterator rs=mapTypeReasons[i->first].begin();
-        for(list<list<string> >::iterator j=i->second.begin();j!=i->second.end();j++) {
-            bool different=false;
-            if(j->size()!=example.size()) {
-                different=true;
-            } else {
-                list<string>::iterator kk=example.begin(); 
-                for(list<string>::iterator k=j->begin();k!=j->end();k++) {
-                    if(typeMap[*kk]!=typeMap[*k]) {
-                        different=true;
-                    }
-                    kk++;
-                }
-            }
-            if(different) {
-                set<int> lines;
-                lines.insert(mapTypeReasons[i->first].front());
-                cout << "ERROR: inconsistent use of indices for "+stripVar(i->first)+" on line";
-                int first=mapTypeReasons[i->first].front();
-                if(*rs!=first) {
-                    cout << "s " << first;
-                }
-                cout << " " << *rs << endl;
-                exit(1);
-            }
-            rs++;
-        }
-        string type="";
-        for(list<string>::iterator j=example.begin();j!=example.end();j++) {
-            if(typeMap[*j]=="int") {
-                type+="map<int,";
-            }
-            if(typeMap[*j]=="set<int>") {
-                type+="map<set<int>,";
-            }
-        }
-        if(declType[i->first]=="variable") {
-            if(intConstraints.count(i->first)) {
-                type+="MyIloIntVar";
-            } else {
-                type+="MyIloNumVar";
-            }
-        } else {
-            type+="double";
-        }
-        for(list<string>::reverse_iterator j=example.rbegin();j!=example.rend();j++) {
-            if(typeMap[*j]=="int") {
-                if(type[type.size()-1]=='>') {
-                    type+=" ";
-                }
-                type+=">";
-            }
-            if(typeMap[*j]=="set<int>") {
-                type+=",set1comp>";
-            }
-        }
-        typeMap[i->first]=type;
-        if(declType[i->first]=="variable") {
-            if(intConstraints.count(i->first)) {
-                type=replaceAll(type,"MyIloIntVar","int");
-            } else {
-                type=replaceAll(type,"MyIloNumVar","double");
-            }
-            typeMap["RET_"+i->first.substr(0,i->first.size()-4)]=type;
-        }
-    }
-    
-    /* if a variable had the cardinality operator applied to it, then it is a set even if labeled an int*/
-    for(set<string>::iterator i=weakSet.begin();i!=weakSet.end();i++) {
-        if(typeMap[*i]=="int") {
-            typeMap[*i]="set<int>";
-        }
-    }
-    
-    /* start making all the cppCode*/
-    hppCode="#include<set>\n#include<map>\n#include<ilcplex/ilocplex.h>\n#include<mbol.hpp>\nusing namespace std;\n#ifndef MBOL_"+className+"\n#define MBOL_"+className+"\nclass "+className+" {\npublic:\nbool init();\nbool solve();\n"+className+"();\n~"+className+"();\nbool hasInitialized;\nIloCplex cplex;\nIloEnv env;\ndouble objValue;\nIloExpr objExp;\n";
-    
-    /* create struct for returning variables */
-    hppCode+="// Variable results\n";
-    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
-        if(i->second=="variable") {
-            string retName=i->first.substr(0,i->first.size()-4);
-            hppCode+="TYPE_RET_"+retName+"_ "+retName+";\n";
-        }
-    }
-    
-    
-    /* making arguments which are constants in the program*/
-    hppCode+="// Constants in the program that you must initialize\n";
-    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
-        if(i->second=="constant") {
-            hppCode+="TYPE_"+i->first+"_ "+i->first+";\n";
-        }
-    }
-    
-    /* declare CPLEX variables (actual variables in program)*/
-    hppCode+="// Variables used by the CPLEX program\n";
-    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
-        if(i->second=="variable") {
-            hppCode+="TYPE_"+i->first+"_ "+i->first+";\n";
-        }
-    }
-    hppCode+="};\n#endif\n";
-    cppCode=className+"::"+className+"() {\nhasInitialized=false;\n}\nbool "+className+"::init() {\n";
-    cppCode+="IloModel model(env);\ng_env=env;\ntry {\n";
-    
-    
-    /* take care of simple variables*/
-    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
-        if(varType[i->first]=="a number"&&i->second=="variable"&&mapTypes.count(i->first)==0) {
-            if(intConstraints.count(i->first)) {
-                cppCode+="MyIloIntVar";
-            } else {
-                cppCode+="MyIloNumVar";
-            }
-            cppCode+=" temp"+i->first+";\n"+i->first+"=temp"+i->first+";\n";
-        }
-    }
-    
-    /* this contains most of the logic of the program*/
-    cppCode+=declarations+strs[yystack.l_mark[-2].ival]+strs[yystack.l_mark[-1].ival];
-    cppCode+="IloCplex tempCplex(model);\ncplex=tempCplex;\n";
-    if(quiet) {
-        cppCode+="cplex.setOut(env.getNullStream());\n";
-    }
-    cppCode+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nhasInitialized=true;\nreturn true;\n}\nbool "+className+"::solve() {\nif(!hasInitialized) {\ninit();\n}\nif(!hasInitialized) {\nreturn false;\n}\ntry{\ncplex.solve();\nobjValue=cplex.getValue(objExp);\n";
-    
-    
-    
-    /* fill in simple variable values*/
-    for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
-        if(i->second=="variable"&&varType[i->first]=="a number"&&mapTypes.count(i->first)==0) {
-            cppCode+=i->first.substr(0,i->first.size()-4)+"=cplex.getValue("+i->first+");\n";
-        }
-    }
-    
-    /* fill in map variable values*/
-    for(map<string,list<list<string> > >::iterator i=mapTypes.begin();i!=mapTypes.end();i++) {
-        if(declType[i->first]!="variable") {
-            continue;
-        }
-        string retName=i->first.substr(0,i->first.size()-4);
-        list<string> example=i->second.front();
-        int tVal=0;
-        string prev=i->first;
-        string indices="";
-        for(int j=0;j<example.size();j++) {
-            cppCode+="for(";
-            int temp;
-            temp=0;
-            for(list<string>::iterator k=example.begin();k!=example.end();k++) {
-                temp++;
-                if(temp>j) {
-                    if(typeMap[*k]=="int") {
-                        cppCode+="map<int,";
-                    }
-                    if(typeMap[*k]=="set<int>") {
-                        cppCode+="map<set<int>,";
-                    }
-                }
-            }
-            if(intConstraints.count(i->first)) {
-                cppCode+="MyIloIntVar";
-            } else {
-                cppCode+="MyIloNumVar";
-            }
-            temp=example.size()-j;
-            for(list<string>::reverse_iterator j=example.rbegin();j!=example.rend();j++) {
-                temp--;
-                if(temp>=0) {
-                    if(typeMap[*j]=="int") {
-                        if(cppCode[cppCode.size()-1]=='>') {
-                            cppCode+=" ";
-                        }
-                        cppCode+=">";
-                    }
-                    if(typeMap[*j]=="set<int>") {
-                        cppCode+=",set1comp>";
-                    }
-                }
-            }
-            cppCode+="::iterator iter"+convert(tVal)+"="+prev+".begin();iter"+convert(tVal)+"!="+prev+".end();iter"+convert(tVal)+"++) {\n";
-            indices+="[iter"+convert(tVal)+"->first]";
-            prev="iter"+convert(tVal)+"->second";
-            tVal++;
-        }
-        cppCode+=retName+indices+"=cplex.getValue("+prev+");\n";
-        for(list<string>::iterator j=example.begin();j!=example.end();j++) {
-            cppCode+="}\n";
-        }
-    }
-    cppCode+="} catch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nreturn true;\n}\n"+className+"::~"+className+"() {\nenv.end();\n}\n";
-    
-    /* real types put in the cppCode*/
-    for(map<string,string>::iterator i=typeMap.begin();i!=typeMap.end();i++) {
-        hppCode=replaceAll(hppCode,"TYPE_"+i->first+"_",i->second);
-        cppCode=replaceAll(cppCode,"TYPE_"+i->first+"_",i->second);
-    }
+    program=new Program(yystack.l_mark[-2].objectiveVal,yystack.l_mark[-1].constraintsVal);
+    yyval.programVal=program;
 }
 break;
 case 2:
-#line 364 "mbolc.y"
+#line 69 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="{\n"+scopeStuff[yystack.l_mark[-1].ival]+"IloExpr tempObjExp(env);\nobjExp=tempObjExp;\nobjExp=objExp+"+strs[yystack.l_mark[-1].ival]+";\n"+strs[yystack.l_mark[-6].ival]+"\n}\n";
-    yyval.ival=n;
+    yyval.objectiveVal=new Objective(yystack.l_mark[-6].objectiveTypeVal,yystack.l_mark[-4].programVariablesVal,yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 3:
-#line 370 "mbolc.y"
+#line 73 "mbolc.y"
 	{
-    setDeclType(string(yystack.l_mark[0].sval),"variable (return)");
-    setDeclType(string(yystack.l_mark[0].sval)+"_var","variable");
+    yyval.programVariablesVal=new ProgramVariables(string(yystack.l_mark[0].sval));
 }
 break;
 case 4:
-#line 374 "mbolc.y"
+#line 76 "mbolc.y"
 	{
-    setDeclType(string(yystack.l_mark[0].sval),"variable (return)");
-    setDeclType(string(yystack.l_mark[0].sval)+"_var","variable");
+    yystack.l_mark[-2].programVariablesVal->variables.push_back(string(yystack.l_mark[0].sval));
 }
 break;
 case 5:
-#line 379 "mbolc.y"
+#line 80 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="IloObjective obj=IloMaximize(env,objExp);\nmodel.add(obj);";
-    yyval.ival=n;
+    yyval.objectiveTypeVal=new ObjectiveType("max");
 }
 break;
 case 6:
-#line 384 "mbolc.y"
+#line 83 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="IloObjective obj=IloMinimize(env,objExp);\nmodel.add(obj);";
-    yyval.ival=n;
+    yyval.objectiveTypeVal=new ObjectiveType("min");
 }
 break;
 case 7:
-#line 390 "mbolc.y"
+#line 87 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=strs[yystack.l_mark[-1].ival];
-    yyval.ival=n;
+    yyval.constraintsVal=new Constraints(yystack.l_mark[-1].constraintVal);
 }
 break;
 case 8:
-#line 395 "mbolc.y"
+#line 90 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=strs[yystack.l_mark[-4].ival]+strs[yystack.l_mark[-1].ival];
-    yyval.ival=n;
+    yystack.l_mark[-4].constraintsVal->constraints.push_back(yystack.l_mark[-1].constraintVal);
 }
 break;
 case 9:
-#line 401 "mbolc.y"
+#line 94 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="// Line "+convert(yylineno)+" of optimization program\n{\n"+strs[yystack.l_mark[0].ival]+"\n}\n";
-    yyval.ival=n;
+    yyval.constraintVal=new Constraint(yystack.l_mark[0].equationVal);
 }
 break;
 case 10:
-#line 406 "mbolc.y"
+#line 97 "mbolc.y"
 	{
-    intConstraints.insert(string(yystack.l_mark[-2].sval)+"_var");
+    yyval.constraintVal=new Constraint(string(yystack.l_mark[-2].sval));
 }
 break;
 case 11:
-#line 409 "mbolc.y"
+#line 100 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="// Line "+convert(yylineno)+" of optimization program\n"+scopeStuff[yystack.l_mark[0].ival]+strs[yystack.l_mark[0].ival]+"\n"+strs[yystack.l_mark[-2].ival];
-    int numbrackets=0;
-    for(int i=0;i<strs[yystack.l_mark[0].ival].size();i++) {
-        if(strs[yystack.l_mark[0].ival][i]=='}') {
-            numbrackets--;
-        }
-        if(strs[yystack.l_mark[0].ival][i]=='{') { 
-            numbrackets++;
-        }
-    }
-    for(int i=0;i<numbrackets;i++) {
-        strs[n]=strs[n]+"\n}";
-    }
-    strs[n]+="\n";
-    yyval.ival=n;
+    yyval.constraintVal=new Constraint(yystack.l_mark[-2].equationVal,yystack.l_mark[0].qualifiersVal);
 }
 break;
 case 12:
-#line 428 "mbolc.y"
+#line 104 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=scopeStuff[yystack.l_mark[-2].ival]+"IloExpr expLHS(env);\nexpLHS=expLHS+"+strs[yystack.l_mark[-2].ival]+";\n"+scopeStuff[yystack.l_mark[0].ival]+"IloExpr expRHS(env);\nexpRHS=expRHS+"+strs[yystack.l_mark[0].ival]+";\nmodel.add(expLHS"+strs[yystack.l_mark[-1].ival]+"expRHS);";
-    yyval.ival=n; 
+    yyval.equationVal=new Equation(yystack.l_mark[-2].numberExpressionVal,yystack.l_mark[-1].inequalityVal,yystack.l_mark[0].numberExpressionVal);
 }
 break;
 case 13:
-#line 433 "mbolc.y"
+#line 107 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=scopeStuff[yystack.l_mark[-2].ival]+"IloExpr expLHS(env);\nexpLHS=expLHS+"+strs[yystack.l_mark[-2].ival]+";\n"+scopeStuff[yystack.l_mark[0].ival]+"IloExpr expRHS(env);\nexpRHS=expRHS+"+strs[yystack.l_mark[0].ival]+";\nmodel.add(expLHS == expRHS);";
-    yyval.ival=n; 
+    yyval.equationVal=new Equation(yystack.l_mark[-2].numberExpressionVal,new Inequality("=="),yystack.l_mark[0].numberExpressionVal);
 }
 break;
 case 14:
-#line 439 "mbolc.y"
+#line 111 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=">";
-    yyval.ival=n;
+    yyval.inequalityVal=new Inequality(">");
 }
 break;
 case 15:
-#line 444 "mbolc.y"
+#line 114 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="<";
-    yyval.ival=n;
+    yyval.inequalityVal=new Inequality("<");
 }
 break;
 case 16:
-#line 449 "mbolc.y"
+#line 117 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="!=";
-    yyval.ival=n;
+    yyval.inequalityVal=new Inequality("!=");
 }
 break;
 case 17:
-#line 454 "mbolc.y"
+#line 120 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="<=";
-    yyval.ival=n;
+    yyval.inequalityVal=new Inequality("<=");
 }
 break;
 case 18:
-#line 459 "mbolc.y"
+#line 123 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=">=";
-    yyval.ival=n;
+    yyval.inequalityVal=new Inequality(">=");
 }
 break;
 case 19:
-#line 465 "mbolc.y"
+#line 127 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=scopeStuff[yystack.l_mark[0].ival]+strs[yystack.l_mark[0].ival];
-    yyval.ival=n;
+    yyval.qualifiersVal=new Qualifiers(yystack.l_mark[0].qualifierVal);
 }
 break;
 case 20:
-#line 470 "mbolc.y"
+#line 130 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=strs[yystack.l_mark[-2].ival]+"\n"+scopeStuff[yystack.l_mark[0].ival]+strs[yystack.l_mark[0].ival];
-    yyval.ival=n;
+    yystack.l_mark[-2].qualifiersVal->qualifiers.push_back(yystack.l_mark[0].qualifierVal);
 }
 break;
 case 21:
-#line 476 "mbolc.y"
+#line 134 "mbolc.y"
 	{
-    int n=strs.size();
-    tupleHolder[n].push_back(string(yystack.l_mark[0].sval));
-    yyval.ival=n;
+    /*    int n=strs.size();
+    tupleHolder[n].push_back(string($1));
+    $$=n;*/
 }
 break;
 case 22:
-#line 481 "mbolc.y"
+#line 139 "mbolc.y"
 	{
-    int n=strs.size();
-    tupleHolder[n]=tupleHolder[yystack.l_mark[-2].ival];
-    tupleHolder[n].push_back(string(yystack.l_mark[0].sval));
-    yyval.ival=n;
+    /*    int n=strs.size();
+    tupleHolder[n]=tupleHolder[$1];
+    tupleHolder[n].push_back(string($3));
+    $$=n;*/
 }
 break;
 case 23:
-#line 488 "mbolc.y"
+#line 146 "mbolc.y"
 	{
-    int n=strs.size();
+    /*    int n=strs.size();
     string tv=tempElement();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
-    setGraphEdge(tv,strs[yystack.l_mark[0].ival],1);
-    strs[n]="for(TYPE_"+strs[yystack.l_mark[0].ival]+"_::iterator "+tv+"="+strs[yystack.l_mark[0].ival]+".begin();"+tv+"!="+strs[yystack.l_mark[0].ival]+".end();"+tv+"++) {";
-    for(int i=0;i<tupleHolder[yystack.l_mark[-3].ival].size();i++) {
-        strs[n]+="\nTYPE_"+tupleHolder[yystack.l_mark[-3].ival][i]+"_ "+tupleHolder[yystack.l_mark[-3].ival][i]+"="+tv+"->e"+convert(i)+";";
-        setDeclType(tupleHolder[yystack.l_mark[-3].ival][i],"temporary");
+    scopeStuff[n]=scopeStuff[$5];
+    setGraphEdge(tv,strs[$5],1);
+    strs[n]="for(TYPE_"+strs[$5]+"_::iterator "+tv+"="+strs[$5]+".begin();"+tv+"!="+strs[$5]+".end();"+tv+"++) {";
+    for(int i=0;i<tupleHolder[$2].size();i++) {
+        strs[n]+="\nTYPE_"+tupleHolder[$2][i]+"_ "+tupleHolder[$2][i]+"="+tv+"->e"+convert(i)+";";
+        setDeclType(tupleHolder[$2][i],"temporary");
     }
-    tupleType[tv]=tupleHolder[yystack.l_mark[-3].ival];
-    yyval.ival=n;
+    tupleType[tv]=tupleHolder[$2];
+    $$=n;*/
 }
 break;
 case 24:
-#line 501 "mbolc.y"
+#line 159 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
-    strs[n]="if("+strs[yystack.l_mark[0].ival]+".empty()) {";
-    yyval.ival=n;
 }
 break;
 case 25:
-#line 507 "mbolc.y"
+#line 161 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
-    strs[n]="if(!"+strs[yystack.l_mark[0].ival]+".empty()) {";
-    yyval.ival=n;
 }
 break;
 case 26:
-#line 513 "mbolc.y"
+#line 163 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="if("+string(yystack.l_mark[-2].sval)+"=="+string(yystack.l_mark[0].sval)+") {";
-    yyval.ival=n;
 }
 break;
 case 27:
-#line 518 "mbolc.y"
+#line 165 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="if("+string(yystack.l_mark[-2].sval)+strs[yystack.l_mark[-1].ival]+string(yystack.l_mark[0].sval)+") {";
-    yyval.ival=n;
 }
 break;
 case 28:
-#line 523 "mbolc.y"
+#line 167 "mbolc.y"
 	{
-    string tv1=tempElement();
-    string tv2=tempElement();
-    int n=strs.size();
-    setVarType(string(yystack.l_mark[-2].sval),"an element");
-    setDeclType(string(yystack.l_mark[-2].sval),"temporary");
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival]+"TYPE_"+tv1+"_ "+tv1+"=powerset("+strs[yystack.l_mark[0].ival]+");\n"+tv1+".erase("+strs[yystack.l_mark[0].ival]+");\n";
-    setGraphTriple(strs[yystack.l_mark[0].ival],tv2,string(yystack.l_mark[-2].sval));
-    setGraphEdge(string(yystack.l_mark[-2].sval),tv1,1);
-    setGraphEdge(strs[yystack.l_mark[0].ival],tv1,1);
-    setGraphEdge(tv2,tv1,1);
-    strs[n]="for(TYPE_"+tv1+"_::iterator "+tv2+"="+tv1+".begin();"+tv2+"!="+tv1+".end();"+tv2+"++) {\nTYPE_"+string(yystack.l_mark[-2].sval)+"_ "+string(yystack.l_mark[-2].sval)+"=*"+tv2+";";
-    yyval.ival=n;
+    yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),"subset",yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 29:
-#line 537 "mbolc.y"
+#line 170 "mbolc.y"
 	{
-    string tv1=tempElement();
-    string tv2=tempElement();
-    int n=strs.size();
-    setVarType(string(yystack.l_mark[-2].sval),"an element");
-    setDeclType(string(yystack.l_mark[-2].sval),"temporary");
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival]+"TYPE_"+tv1+"_ "+tv1+"=powerset("+strs[yystack.l_mark[0].ival]+");\n";
-    setGraphTriple(strs[yystack.l_mark[0].ival],tv2,string(yystack.l_mark[-2].sval));
-    setGraphEdge(string(yystack.l_mark[-2].sval),tv1,1);
-    setGraphEdge(strs[yystack.l_mark[0].ival],tv1,1);
-    setGraphEdge(tv2,tv1,1);
-    strs[n]="for(TYPE_"+tv1+"_::iterator "+tv2+"="+tv1+".begin();"+tv2+"!="+tv1+".end();"+tv2+"++) {\nTYPE_"+string(yystack.l_mark[-2].sval)+"_ "+string(yystack.l_mark[-2].sval)+"=*"+tv2+";";
-    yyval.ival=n;
+    yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),"subsetequal",yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 30:
-#line 551 "mbolc.y"
+#line 173 "mbolc.y"
 	{
-    /*    setDeclType(string($3),"temporary");*/
-    /*    setVarType(string($3),"an element");*/
-    setGraph[string(yystack.l_mark[-2].sval)];
-    int n=strs.size();
-    strs[n]="for(int "+string(yystack.l_mark[-2].sval)+"="+string(yystack.l_mark[-4].sval)+";"+string(yystack.l_mark[-2].sval)+"<="+strs[yystack.l_mark[0].ival]+";"+string(yystack.l_mark[-2].sval)+"++) {";
-    yyval.ival=n;
+    yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string(yystack.l_mark[-4].sval),yystack.l_mark[0].elementExpressionVal))));
 }
 break;
 case 31:
-#line 559 "mbolc.y"
+#line 176 "mbolc.y"
 	{
-    setDeclType(string(yystack.l_mark[-2].sval),"temporary");
-    setVarType(string(yystack.l_mark[-2].sval),"an element");
-    string tv=tempExp();
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
-    setGraphEdge(string(yystack.l_mark[-2].sval),strs[yystack.l_mark[0].ival],1);
-    strs[n]="for(TYPE_"+strs[yystack.l_mark[0].ival]+"_::iterator "+tv+"="+strs[yystack.l_mark[0].ival]+".begin();"+tv+"!="+strs[yystack.l_mark[0].ival]+".end();"+tv+"++) {\nTYPE_"+string(yystack.l_mark[-2].sval)+"_ "+string(yystack.l_mark[-2].sval)+"=*"+tv+";";
-    yyval.ival=n; 
+    yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string(yystack.l_mark[-4].sval),string(yystack.l_mark[0].sval)))));
 }
 break;
 case 32:
-#line 570 "mbolc.y"
+#line 179 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
-    strs[n]=strs[yystack.l_mark[0].ival];
-    yyval.ival=n;
+    yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),"in",yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 33:
-#line 576 "mbolc.y"
+#line 183 "mbolc.y"
 	{
-    int n=strs.size();
-    string tv=tempElement();
-    setGraphTriple(tv,strs[yystack.l_mark[-2].ival],strs[yystack.l_mark[0].ival]);
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-2].ival]+scopeStuff[yystack.l_mark[0].ival]+"TYPE_"+tv+"_ "+tv+"="+strs[yystack.l_mark[-2].ival]+";\nfor(TYPE_"+strs[yystack.l_mark[0].ival]+"_::iterator iter="+strs[yystack.l_mark[0].ival]+".begin();iter!="+strs[yystack.l_mark[0].ival]+".end();iter++) {\n"+tv+".erase(*iter);\n}\n";
-    strs[n]=tv;
-    yyval.ival=n;
+    yyval.elementExpressionVal=new ElementExpression(yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 34:
-#line 584 "mbolc.y"
+#line 186 "mbolc.y"
 	{
-    int n=strs.size();
-    string tv=tempElement();;
-    setGraphTriple(tv,strs[yystack.l_mark[-2].ival],strs[yystack.l_mark[0].ival]);
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-2].ival]+scopeStuff[yystack.l_mark[0].ival]+"TYPE_"+tv+"_ "+tv+"="+strs[yystack.l_mark[-2].ival]+";\n"+tv+".insert("+strs[yystack.l_mark[0].ival]+".begin(),"+strs[yystack.l_mark[0].ival]+".end());\n";
-    strs[n]=tv;
-    yyval.ival=n;
+    yyval.elementExpressionVal=new ElementExpression(yystack.l_mark[-2].elementExpressionVal,new ElementOperator("reduce"),yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 35:
-#line 592 "mbolc.y"
+#line 189 "mbolc.y"
 	{
-    int n=strs.size();
-    string tv=tempElement();
-    setGraphTriple(tv,strs[yystack.l_mark[-2].ival],strs[yystack.l_mark[0].ival]);
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-2].ival]+scopeStuff[yystack.l_mark[0].ival]+"TYPE_"+tv+"_ "+tv+";\nfor(TYPE_"+strs[yystack.l_mark[0].ival]+"_::iterator iter="+strs[yystack.l_mark[0].ival]+".begin();iter!="+strs[yystack.l_mark[0].ival]+".end();iter++) {\nif("+strs[yystack.l_mark[-2].ival]+".count(*iter)) {\n"+tv+".insert(*iter);\n}\n}\n";
-    strs[n]=tv;
-    yyval.ival=n;
+    yyval.elementExpressionVal=new ElementExpression(yystack.l_mark[-2].elementExpressionVal,new ElementOperator("union"),yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 36:
-#line 601 "mbolc.y"
+#line 192 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
-    strs[n]=strs[yystack.l_mark[0].ival];
-    yyval.ival=n;
+    yyval.elementExpressionVal=new ElementExpression(yystack.l_mark[-2].elementExpressionVal,new ElementOperator("intersect"),yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 37:
-#line 607 "mbolc.y"
+#line 196 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-1].ival]+scopeStuff[yystack.l_mark[0].ival];
-    strs[n]=strs[yystack.l_mark[-1].ival]+"*"+strs[yystack.l_mark[0].ival];
-    /*type(strs[$2],"number");*/
-    yyval.ival=n;
+    yyval.numberExpressionVal=new NumberExpression(yystack.l_mark[0].numberSubexpressionVal);
 }
 break;
 case 38:
-#line 614 "mbolc.y"
+#line 199 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-2].ival]+scopeStuff[yystack.l_mark[0].ival];
-    strs[n]=strs[yystack.l_mark[-2].ival]+strs[yystack.l_mark[-1].ival]+strs[yystack.l_mark[0].ival];
-    yyval.ival=n;
+    yystack.l_mark[-1].numberExpressionVal->numberSubexpressions.push_back(yystack.l_mark[0].numberSubexpressionVal);
+    yystack.l_mark[-1].numberExpressionVal->numberOperators.push_back(new NumberOperator("*"));
 }
 break;
 case 39:
-#line 621 "mbolc.y"
+#line 203 "mbolc.y"
 	{
-    int n=strs.size();
-    string tv=tempElement();
-    scopeStuff[n]="TYPE_"+tv+"_ "+tv+";\n"+strs[yystack.l_mark[-1].ival]+"\n"+tv+".insert("+string(yystack.l_mark[-3].sval)+");";
-    setDeclType(string(yystack.l_mark[-3].sval),"temporary");
-    setVarType(string(yystack.l_mark[-3].sval),"an element");
-    setGraphEdge(string(yystack.l_mark[-3].sval),tv,1);
-    int numbrackets=0;
-    for(int i=0;i<scopeStuff[n].size();i++) {
-        if(scopeStuff[n][i]=='}') {
-            numbrackets--;
-        }
-        if(scopeStuff[n][i]=='{') { 
-            numbrackets++;
-        }
-    }
-    for(int i=0;i<numbrackets;i++) {
-        scopeStuff[n]=scopeStuff[n]+"\n}";
-    }
-    scopeStuff[n]+="\n";
-    strs[n]=tv;
-    yyval.ival=n;
+    yystack.l_mark[-2].numberExpressionVal->numberSubexpressions.push_back(yystack.l_mark[0].numberSubexpressionVal);
+    yystack.l_mark[-2].numberExpressionVal->numberOperators.push_back(yystack.l_mark[-1].numberOperatorVal);
 }
 break;
 case 40:
-#line 644 "mbolc.y"
+#line 208 "mbolc.y"
 	{
-    int n=strs.size();
-    string tv=tempElement();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-1].ival];
-    setGraphEdge(strs[yystack.l_mark[-1].ival],tv,1);
-    scopeStuff[n]+="TYPE_"+tv+"_ "+tv+";\n"+tv+".insert("+strs[yystack.l_mark[-1].ival]+");\n";
-    strs[n]=tv;
-    yyval.ival=n;
+    yyval.elementSubexpressionVal=new ElementSubexpression(new SetCreator(string(yystack.l_mark[-3].sval),yystack.l_mark[-1].qualifiersVal));
 }
 break;
 case 41:
-#line 653 "mbolc.y"
+#line 211 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-1].ival];
-    strs[n]="("+strs[yystack.l_mark[-1].ival]+")";
-    yyval.ival=n;
+    yyval.elementSubexpressionVal=new ElementSubexpression(new ElementSet(yystack.l_mark[-1].elementExpressionVal));
 }
 break;
 case 42:
-#line 659 "mbolc.y"
+#line 214 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=string(yystack.l_mark[0].sval);
-    setVarType(strs[n],"an element");
-    setGraph[string(yystack.l_mark[0].sval)]; 
-    yyval.ival=n;
+    yyval.elementSubexpressionVal=new ElementSubexpression(new ElementParantheses(yystack.l_mark[-1].elementExpressionVal));
 }
 break;
 case 43:
-#line 667 "mbolc.y"
+#line 217 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
-    strs[n]=strs[yystack.l_mark[0].ival];
-    yyval.ival=n;
+    yyval.elementSubexpressionVal=new ElementSubexpression(new ElementVariable(string(yystack.l_mark[0].sval)));
 }
 break;
 case 44:
-#line 673 "mbolc.y"
+#line 221 "mbolc.y"
 	{
-    int n=strs.size();
-    weakSet.insert(strs[yystack.l_mark[-1].ival]);
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-1].ival];
-    strs[n]=strs[yystack.l_mark[-1].ival]+".size()";
-    setGraphEdge(strs[yystack.l_mark[-1].ival],strs[n],1);
-    yyval.ival=n;
+    yyval.numberSubexpressionVal=new NumberSubexpression(yystack.l_mark[0].sumVal);
 }
 break;
 case 45:
-#line 681 "mbolc.y"
+#line 224 "mbolc.y"
 	{
-    int n=strs.size();
-    string tv1=tempExp();
-    string tv2=tempExp();
-    string tv3=tempExp();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-5].ival]+scopeStuff[yystack.l_mark[-1].ival]+"double "+tv1+"="+strs[yystack.l_mark[-5].ival]+";\ndouble "+tv2+"="+strs[yystack.l_mark[-1].ival]+";\ndouble "+tv3+"=pow("+tv1+","+tv2+");\n";
-    strs[n]=tv3;
-    yyval.ival=n;
+    yyval.numberSubexpressionVal=new NumberSubexpression(new SetSize(yystack.l_mark[-1].elementExpressionVal));
 }
 break;
 case 46:
-#line 690 "mbolc.y"
+#line 227 "mbolc.y"
 	{
+    /*    
     int n=strs.size();
     string tv1=tempExp();
     string tv2=tempExp();
     string tv3=tempExp();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-4].ival]+scopeStuff[yystack.l_mark[-1].ival]+"IloExpr "+tv1+"(env);\n"+tv1+"="+tv1+"+"+strs[yystack.l_mark[-4].ival]+";\nIloExpr "+tv2+"(env);\n"+tv2+"="+tv2+"+"+strs[yystack.l_mark[-1].ival]+";\nIloExpr "+tv3+"(env);\n"+tv3+"="+tv3+"+"+tv1+"/"+tv2+";\n";
+    scopeStuff[n]=scopeStuff[$2]+scopeStuff[$6]+"double "+tv1+"="+strs[$2]+";\ndouble "+tv2+"="+strs[$6]+";\ndouble "+tv3+"=pow("+tv1+","+tv2+");\n";
     strs[n]=tv3;
-    yyval.ival=n;
+    $$=n;*/
 }
 break;
 case 47:
-#line 699 "mbolc.y"
+#line 237 "mbolc.y"
 	{
-    int n=strs.size();
-    string tv=tempExp();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-1].ival];
-    scopeStuff[n]+="IloExpr "+tv+"(env);\n"+tv+"="+tv+"+"+strs[yystack.l_mark[-1].ival]+";\n";
-    strs[n]=tv;
-    yyval.ival=n;
+    yyval.numberSubexpressionVal=new NumberSubexpression(new Fraction(yystack.l_mark[-4].numberExpressionVal,yystack.l_mark[-1].numberExpressionVal));
 }
 break;
 case 48:
-#line 707 "mbolc.y"
+#line 240 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=string(yystack.l_mark[0].sval);
-    /*    setVarType(strs[n],"a number");*/
-    yyval.ival=n;
+    yyval.numberSubexpressionVal=new NumberSubexpression(new NumberParantheses(yystack.l_mark[-1].numberExpressionVal));
 }
 break;
 case 49:
-#line 713 "mbolc.y"
+#line 243 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=string(yystack.l_mark[0].sval);
-    if(declType[strs[n]]=="variable (return)") {
-        strs[n]+="_var";
-    }
-    setVarType(strs[n],"a number");
-    yyval.ival=n;
+    yyval.numberSubexpressionVal=new NumberSubexpression(new NumberLiteral(string(yystack.l_mark[0].sval)));
 }
 break;
 case 50:
-#line 722 "mbolc.y"
+#line 246 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=string(yystack.l_mark[-4].sval);
-    if(declType[strs[n]]=="variable (return)") {
-        strs[n]+="_var";
-    }
-    setVarType(strs[n],"a number");
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-1].ival];
-    int i=0;
-    list<string> vars;
-    while(strs[yystack.l_mark[-1].ival].find("[",i)!=string::npos) {
-        vars.push_back(strs[yystack.l_mark[-1].ival].substr(strs[yystack.l_mark[-1].ival].find("[",i)+1,strs[yystack.l_mark[-1].ival].find("]",i)-strs[yystack.l_mark[-1].ival].find("[",i)-1));
-        i=strs[yystack.l_mark[-1].ival].find("[",i+1);
-    }
-    mapTypes[strs[n]].push_back(vars);
-    mapTypeReasons[strs[n]].push_back(yylineno);
-    strs[n]+=strs[yystack.l_mark[-1].ival];
-    yyval.ival=n;
+    yyval.numberSubexpressionVal=new NumberSubexpression(new NumberVariable(string(yystack.l_mark[0].sval)));
 }
 break;
 case 51:
-#line 741 "mbolc.y"
+#line 249 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]=string(yystack.l_mark[-2].sval);
-    if(declType[strs[n]]=="variable (return)") {
-        strs[n]+="_var";
-    }
-    setVarType(strs[n],"a number");
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
-    int i=0;
-    list<string> vars;
-    vars.push_back(strs[yystack.l_mark[0].ival]);
-    mapTypes[strs[n]].push_back(vars);
-    mapTypeReasons[strs[n]].push_back(yylineno);
-    strs[n]+="["+strs[yystack.l_mark[0].ival]+"]";
-    yyval.ival=n;
+    yyval.numberSubexpressionVal=new NumberSubexpression(new VariableMap(string(yystack.l_mark[-4].sval),yystack.l_mark[-1].indicesVal));
 }
 break;
 case 52:
-#line 758 "mbolc.y"
+#line 252 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="+";
-    yyval.ival=n;
+    yyval.numberSubexpressionVal=new NumberSubexpression(new VariableMap(string(yystack.l_mark[-2].sval),string(yystack.l_mark[0].sval)));
 }
 break;
 case 53:
-#line 763 "mbolc.y"
+#line 256 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="-";
-    yyval.ival=n;
+    yyval.numberOperatorVal=new NumberOperator("+");
 }
 break;
 case 54:
-#line 768 "mbolc.y"
+#line 259 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="/";
-    yyval.ival=n;
+    yyval.numberOperatorVal=new NumberOperator("-");
 }
 break;
 case 55:
-#line 773 "mbolc.y"
+#line 262 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="*";
-    yyval.ival=n;
+    yyval.numberOperatorVal=new NumberOperator("/");
 }
 break;
 case 56:
-#line 779 "mbolc.y"
+#line 265 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[0].ival];
-    strs[n]="["+strs[yystack.l_mark[0].ival]+"]";
-    yyval.ival=n;
+    yyval.numberOperatorVal=new NumberOperator("*");
 }
 break;
 case 57:
-#line 785 "mbolc.y"
+#line 269 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-2].ival]+scopeStuff[yystack.l_mark[0].ival];
-    strs[n]=strs[yystack.l_mark[-2].ival]+"["+strs[yystack.l_mark[0].ival]+"]";
-    yyval.ival=n;
+    yyval.indicesVal=new Indices(yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 58:
-#line 792 "mbolc.y"
+#line 272 "mbolc.y"
 	{
-    int n=strs.size();
-    string tv1=tempExp();
-    string tv2=tempExp();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-3].ival]+"IloExpr "+tv1+"(env);\n";
-    if(strs[yystack.l_mark[-4].ival]=="*") {
-        scopeStuff[n]+=tv1+"="+tv1+"+1;\n";
-    }
-    scopeStuff[n]+=strs[yystack.l_mark[-3].ival]+"\n"+scopeStuff[yystack.l_mark[-1].ival]+"IloExpr "+tv2+"(env);\n"+tv2+"="+tv2+"+"+strs[yystack.l_mark[-1].ival]+";\n"+tv1+"="+tv1+strs[yystack.l_mark[-4].ival]+tv2+";\n";
-    int numbrackets=0;
-    for(int i=0;i<strs[yystack.l_mark[-3].ival].size();i++) {
-        if(strs[yystack.l_mark[-3].ival][i]=='}') {
-            numbrackets--;
-        }
-        if(strs[yystack.l_mark[-3].ival][i]=='{') { 
-            numbrackets++;
-        }
-    }
-    for(int i=0;i<numbrackets;i++) {
-        scopeStuff[n]=scopeStuff[n]+"}\n";
-    }
-    strs[n]=tv1;
-    yyval.ival=n;
+    yystack.l_mark[-2].indicesVal->elementExpressions.push_back(yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 59:
-#line 817 "mbolc.y"
+#line 276 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="+";
-    yyval.ival=n;
+    yyval.sumVal=new Sum(string(yystack.l_mark[-4].sval),yystack.l_mark[-3].sumQualifiersVal,yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 60:
-#line 822 "mbolc.y"
+#line 280 "mbolc.y"
 	{
-    int n=strs.size();
-    strs[n]="*";
-    yyval.ival=n;
+    yyval.sumQualifiersVal=new SumQualifiers(string(yystack.l_mark[-7].sval),string(yystack.l_mark[-5].sval),yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 61:
-#line 828 "mbolc.y"
+#line 283 "mbolc.y"
 	{
-    int n=strs.size();
-    typeMap[string(yystack.l_mark[-7].sval)]="int";
-    strs[n]="for(int "+string(yystack.l_mark[-7].sval)+"="+string(yystack.l_mark[-5].sval)+";"+string(yystack.l_mark[-7].sval)+"<="+strs[yystack.l_mark[-1].ival]+";"+string(yystack.l_mark[-7].sval)+"++) {";
-    setDeclType(string(yystack.l_mark[-7].sval),"temporary");
-    yyval.ival=n;
+    yyval.sumQualifiersVal=new SumQualifiers(string(yystack.l_mark[-7].sval),string(yystack.l_mark[-5].sval),string(yystack.l_mark[-1].sval));
 }
 break;
 case 62:
-#line 835 "mbolc.y"
+#line 286 "mbolc.y"
 	{
-    int n=strs.size();
-    scopeStuff[n]=scopeStuff[yystack.l_mark[-1].ival];
-    strs[n]=strs[yystack.l_mark[-1].ival];
-    yyval.ival=n;
+    yyval.sumQualifiersVal=new SumQualifiers(yystack.l_mark[-1].qualifiersVal);
 }
 break;
-#line 1839 "y.tab.c"
+#line 1172 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
