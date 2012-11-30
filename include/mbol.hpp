@@ -96,7 +96,7 @@ struct set0comp_tuple_int_int {
         return 0;
     }
 };
-set<set<int>,set1comp> powerset(set<int> x) {
+/*set<set<int>,set1comp> powerset(set<int> x) {
     set<set<int>,set1comp> pset;
     for(int i=0; i<pow(2,x.size()); i++) {
         set<int> s;
@@ -110,8 +110,7 @@ set<set<int>,set1comp> powerset(set<int> x) {
         pset.insert(s);
     }
     return pset;
-}
-
+}*/
 class Thing;
 
 struct ThingCompare {
@@ -282,4 +281,20 @@ set<Thing,ThingCompare> thingConversion(set<int> a) {
     }
     return x;
 }
+set<Thing,ThingCompare> powerset(set<Thing,ThingCompare> x) {
+    set<Thing,ThingCompare> pset;
+    for(int i=0; i<pow(2,x.size()); i++) {
+        set<Thing,ThingCompare> s;
+        set<Thing,ThingCompare>::iterator k=x.begin();
+        for(int j=0; j<x.size(); j++) {
+            if(((i >> j)&1)==1) {
+                s.insert(*k);
+            }
+            k++;
+        }
+        pset.insert(s);
+    }
+    return pset;
+}
+
 #endif

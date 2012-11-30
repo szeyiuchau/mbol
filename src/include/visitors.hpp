@@ -12,7 +12,7 @@
 
 using namespace std;
 
-
+class NumberPower;
 class Constraint;
 class NumberOperator;
 class NumberParantheses;
@@ -53,6 +53,10 @@ class MbolElementVisitor {
     virtual void specialVisit(const Sum* sum) {
     }
     virtual void specialVisit(const SetCreator* setCreator) {
+    }
+    virtual void specialVisit(const NumberPower* numberPower) {
+}
+    virtual void visit(const NumberPower* numberPower) {
     }
     virtual void visit(const ElementExpression* elementExpression) {
     }
@@ -140,11 +144,14 @@ class MbolElementVisitorPrinter : public MbolElementVisitor {
 
 class MbolElementVisitorCPLEX : public MbolElementVisitor {
     public:
+bool justDouble;
     string code;
     map<string,Type*> types;
     string className;
     bool quiet;
     MbolElementVisitorCPLEX(map<string,Type*> a,bool d,string e);
+    virtual void specialVisit(const NumberPower* numberPower);
+    virtual void visit(const NumberPower* numberPower);
     virtual void visit(const ElementExpression* elementExpression);
     virtual void visit(const Program* program);
     virtual void specialVisit(const Program* program);

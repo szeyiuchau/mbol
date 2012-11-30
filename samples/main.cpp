@@ -65,7 +65,8 @@ int main(int argc,char* argv[]) {
         writeGraph();
         exit(0);
     }
-    set<Thing,ThingCompare> V=thingConversion(VV);
+    //set<Thing,ThingCompare> V=VV;
+        set<Thing,ThingCompare> V=thingConversion(VV);
     {
         cout << "Thing test:" << endl;
         Thing a=5;

@@ -152,7 +152,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                             code+="map<int,";
                         }
                         if((*k)->setPaths.begin()->first==1) {
-                            code+="map<Thing,";
+                            code+="map<set<Thing,ThingCompare>,";
                             //code+="map<set<int>,";
                         }
                     }
@@ -191,61 +191,6 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
         
     }
     
-    // fill in map variable values
-    /*for(map<string,list<list<string> > >::iterator i=mapTypes.begin();i!=mapTypes.end();i++) {
-        if(declType[i->first]!="variable") {
-            continue;
-        }
-        string retName=i->first.substr(0,i->first.size()-4);
-        list<string> example=i->second.front();
-        int tVal=0;
-        string prev=i->first;
-        string indices="";
-        for(int j=0;j<example.size();j++) {
-            code+="for(";
-            int temp;
-            temp=0;
-            for(list<string>::iterator k=example.begin();k!=example.end();k++) {
-                temp++;
-                if(temp>j) {
-                    if(typeMap[*k]=="int") {
-                        code+="map<int,";
-                    }
-                    if(typeMap[*k]=="set<int>") {
-                        code+="map<set<int>,";
-                    }
-                }
-            }
-            if(intConstraints.count(i->first)) {
-                code+="MyIloIntVar";
-            } else {
-                code+="MyIloNumVar";
-            }
-            temp=example.size()-j;
-            for(list<string>::reverse_iterator j=example.rbegin();j!=example.rend();j++) {
-                temp--;
-                if(temp>=0) {
-                    if(typeMap[*j]=="int") {
-                        if(code[code.size()-1]=='>') {
-                            code+=" ";
-                        }
-                        code+=">";
-                    }
-                    if(typeMap[*j]=="set<int>") {
-                        code+=",set1comp>";
-                    }
-                }
-            }
-            code+="::iterator iter"+convert(tVal)+"="+prev+".begin();iter"+convert(tVal)+"!="+prev+".end();iter"+convert(tVal)+"++) {\n";
-            indices+="[iter"+convert(tVal)+"->first]";
-            prev="iter"+convert(tVal)+"->second";
-            tVal++;
-        }
-        code+=retName+indices+"=cplex.getValue("+prev+");\n";
-        for(list<string>::iterator j=example.begin();j!=example.end();j++) {
-            code+="}\n";
-        }
-    }*/
     code+="} catch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nreturn true;\n}\n"+className+"::~"+className+"() {\nenv.end();\n}\n";
     
 }
@@ -253,6 +198,7 @@ MbolElementVisitorCPLEX::MbolElementVisitorCPLEX(map<string,Type*> a,bool d,stri
     types=a;
     quiet=d;
     className=e;
+    justDouble=false;
     code="";
 }
 void MbolElementVisitorCPLEX::visit(const ElementExpression* elementExpression) {
@@ -276,12 +222,21 @@ void MbolElementVisitorCPLEX::visit(const ElementExpression* elementExpression) 
         code+="}\n";
     }
 }
+void MbolElementVisitorCPLEX::specialVisit(const NumberPower* numberPower) {
+    justDouble=true;
+}
+void MbolElementVisitorCPLEX::visit(const NumberPower* numberPower) {
+    justDouble=false;
+    code+="double "+numberPower->value+";\n";
+    code+=numberPower->value+"=pow("+numberPower->base->value+","+numberPower->power->value+");\n";
+}
 void MbolElementVisitorCPLEX::visit(const NumberLiteral* numberLiteral) {
     code+="IloExpr "+numberLiteral->value+"(env);\n";
     code+=numberLiteral->value+"="+numberLiteral->value+"+"+numberLiteral->number+";\n";
 }
 void MbolElementVisitorCPLEX::visit(const Qualifier* qualifier) {
-    if(qualifier->equation!=NULL) {
+    if(qualifier->inequality!=NULL) {
+        code+="if("+qualifier->lhs+qualifier->inequality->value+qualifier->rhs+") {\n";
     }
     if(qualifier->elementExpression!=NULL) {
         if(qualifier->setCreator=="subset"||qualifier->setCreator=="subsetequal") {
@@ -308,6 +263,11 @@ void MbolElementVisitorCPLEX::specialVisit(const SetCreator* setCreator) {
 }
 void MbolElementVisitorCPLEX::visit(const SetCreator* setCreator) {
     code+=setCreator->value+".insert("+setCreator->variable+");\n";
+    for(list<Qualifier*>::iterator i=setCreator->qualifiers->qualifiers.begin();i!=setCreator->qualifiers->qualifiers.end();i++) {
+        //    if((*i)->equation==NULL) {
+            code+="}\n";
+        //    }
+    }
 }
 void MbolElementVisitorCPLEX::visit(const Equation* equation) {
 }
@@ -327,12 +287,18 @@ void MbolElementVisitorCPLEX::specialVisit(const Sum* sum) {
 }
 void MbolElementVisitorCPLEX::visit(const Sum* sum) {
     code+=sum->value+"="+sum->value+sum->sumType+sum->numberExpression->value+";\n";
-    for(int i=0;i<sum->sumQualifiers->qualifiers->qualifiers.size();i++) {
-        code+="}\n";
+    for(list<Qualifier*>::iterator i=sum->sumQualifiers->qualifiers->qualifiers.begin();i!=sum->sumQualifiers->qualifiers->qualifiers.end();i++) {
+        //   if((*i)->equation==NULL) {
+            code+="}\n";
+        //   }
     }
 }
 void MbolElementVisitorCPLEX::visit(const NumberExpression* numberExpression) {
-    code+="IloExpr "+numberExpression->value+"(env);\n";
+    if(justDouble) {
+        code+="double "+numberExpression->value+";\n";
+    } else {
+        code+="IloExpr "+numberExpression->value+"(env);\n";
+    }
     code+=numberExpression->value+"="+numberExpression->value+"+";
     list<NumberOperator*>::const_iterator j=numberExpression->numberOperators.begin();
     for(list<NumberSubexpression*>::const_iterator i=numberExpression->numberSubexpressions.begin();i!=numberExpression->numberSubexpressions.end();i++) {
@@ -361,7 +327,11 @@ void MbolElementVisitorCPLEX::visit(const ElementSet* elementSet) {
     code+=elementSet->value+".insert("+elementSet->elementExpression->value+");\n";
 }
 void MbolElementVisitorCPLEX::visit(const Fraction* fraction) {
+if(justDouble) {
+    code+="double "+fraction->value+"=0;\n";
+} else {
     code+="IloExpr "+fraction->value+"(env);\n";
+}
     code+=fraction->value+"="+fraction->value+"+"+fraction->numerator->value+"/"+fraction->denominator->value+";\n";
 }
 void MbolElementVisitorCPLEX::visit(const SetSize* setSize) {
@@ -378,8 +348,10 @@ void MbolElementVisitorCPLEX::visit(const Constraint* constraint) {
         code+="model.add("+constraint->equation->lhs->value+constraint->equation->inequality->value+constraint->equation->rhs->value+");\n";
     }
     if(constraint->qualifiers!=NULL) {
-        for(int i=0;i<constraint->qualifiers->qualifiers.size();i++) {
-            code+="}\n";
+        for(list<Qualifier*>::iterator i=constraint->qualifiers->qualifiers.begin();i!=constraint->qualifiers->qualifiers.end();i++) {
+            //    if((*i)->equation==NULL) {
+                code+="}\n";
+            //    }
         }
     }
 }
@@ -395,12 +367,14 @@ void MbolElementVisitorTypeHelper::visit(const Program* program) {
     for(map<string,map<string,edge> >::iterator i=graph.begin();i!=graph.end();i++) {
         types[i->first]=new SetType(i->first);
         if(mapTypes.count(i->first)) {
-            cout << "ERROR: " << i->first << " used as an element and a number" << endl;
-            exit(1);
+            //           cout << "ERROR: " << i->first << " used as an element and a number" << endl;
+            //           exit(1);
         }
     }
     for(map<string,list<list<string> > >::iterator i=mapTypes.begin();i!=mapTypes.end();i++) {
-        types[i->first]=new NumberType(i->first);
+        if(graph.count(i->first)==0) {
+            types[i->first]=new NumberType(i->first);
+        }
     }
     bfs();
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
@@ -462,6 +436,8 @@ void MbolElementVisitorTypeHelper::visit(const Qualifier* qualifier) {
     temporaries.insert(qualifier->variable);
 }
 void MbolElementVisitorTypeHelper::visit(const SetCreator* setCreator) {
+    graph[setCreator->variable][setCreator->value].weight=1;
+    graph[setCreator->value];
     temporaries.insert(setCreator->variable);
 }
 void MbolElementVisitorTypeHelper::visit(const ElementSet* elementSet) {

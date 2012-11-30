@@ -421,7 +421,7 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 280 "mbolc.y"
+#line 273 "mbolc.y"
 Program* program;
 extern FILE* yyin;
 extern char* yytext;
@@ -918,25 +918,25 @@ break;
 case 24:
 #line 144 "mbolc.y"
 	{
-    yyval.qualifierVal=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberLiteral("0"))),new Inequality("=="),new NumberExpression(new NumberSubexpression(new SetSize(yystack.l_mark[0].elementExpressionVal)))));
+    yyval.qualifierVal=new Qualifier("0",new Inequality("=="),new SetSize(yystack.l_mark[0].elementExpressionVal));
 }
 break;
 case 25:
 #line 147 "mbolc.y"
 	{
-    yyval.qualifierVal=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberLiteral("0"))),new Inequality("!="),new NumberExpression(new NumberSubexpression(new SetSize(yystack.l_mark[0].elementExpressionVal)))));
+    yyval.qualifierVal=new Qualifier("0",new Inequality("!="),new SetSize(yystack.l_mark[0].elementExpressionVal));
 }
 break;
 case 26:
 #line 150 "mbolc.y"
 	{
-    yyval.qualifierVal=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberVariable(yystack.l_mark[-2].sval))),new Inequality("=="),new NumberExpression(new NumberSubexpression(new NumberVariable(yystack.l_mark[0].sval)))));
+    yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),new Inequality("=="),string(yystack.l_mark[0].sval));
 }
 break;
 case 27:
 #line 153 "mbolc.y"
 	{
-    yyval.qualifierVal=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberVariable(yystack.l_mark[-2].sval))),yystack.l_mark[-1].inequalityVal,new NumberExpression(new NumberSubexpression(new NumberVariable(yystack.l_mark[0].sval)))));
+    yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),yystack.l_mark[-1].inequalityVal,string(yystack.l_mark[0].sval));
 }
 break;
 case 28:
@@ -1052,113 +1052,106 @@ break;
 case 46:
 #line 216 "mbolc.y"
 	{
-    /*    
-    int n=strs.size();
-    string tv1=tempExp();
-    string tv2=tempExp();
-    string tv3=tempExp();
-    scopeStuff[n]=scopeStuff[$2]+scopeStuff[$6]+"double "+tv1+"="+strs[$2]+";\ndouble "+tv2+"="+strs[$6]+";\ndouble "+tv3+"=pow("+tv1+","+tv2+");\n";
-    strs[n]=tv3;
-    $$=n;*/
+    yyval.numberSubexpressionVal=new NumberSubexpression(new NumberPower(yystack.l_mark[-5].numberExpressionVal,yystack.l_mark[-1].numberExpressionVal));    
 }
 break;
 case 47:
-#line 226 "mbolc.y"
+#line 219 "mbolc.y"
 	{
     yyval.numberSubexpressionVal=new NumberSubexpression(new Fraction(yystack.l_mark[-4].numberExpressionVal,yystack.l_mark[-1].numberExpressionVal));
 }
 break;
 case 48:
-#line 229 "mbolc.y"
+#line 222 "mbolc.y"
 	{
     yyval.numberSubexpressionVal=new NumberSubexpression(new NumberParantheses(yystack.l_mark[-1].numberExpressionVal));
 }
 break;
 case 49:
-#line 232 "mbolc.y"
+#line 225 "mbolc.y"
 	{
     yyval.numberSubexpressionVal=new NumberSubexpression(new NumberLiteral(string(yystack.l_mark[0].sval)));
 }
 break;
 case 50:
-#line 235 "mbolc.y"
+#line 228 "mbolc.y"
 	{
     yyval.numberSubexpressionVal=new NumberSubexpression(new NumberVariable(string(yystack.l_mark[0].sval)));
 }
 break;
 case 51:
-#line 238 "mbolc.y"
+#line 231 "mbolc.y"
 	{
     yyval.numberSubexpressionVal=new NumberSubexpression(new VariableMap(string(yystack.l_mark[-4].sval),yystack.l_mark[-1].indicesVal));
 }
 break;
 case 52:
-#line 241 "mbolc.y"
+#line 234 "mbolc.y"
 	{
     yyval.numberSubexpressionVal=new NumberSubexpression(new VariableMap(string(yystack.l_mark[-2].sval),string(yystack.l_mark[0].sval)));
 }
 break;
 case 53:
-#line 245 "mbolc.y"
+#line 238 "mbolc.y"
 	{
     yyval.numberOperatorVal=new NumberOperator("+");
 }
 break;
 case 54:
-#line 248 "mbolc.y"
+#line 241 "mbolc.y"
 	{
     yyval.numberOperatorVal=new NumberOperator("-");
 }
 break;
 case 55:
-#line 251 "mbolc.y"
+#line 244 "mbolc.y"
 	{
     yyval.numberOperatorVal=new NumberOperator("/");
 }
 break;
 case 56:
-#line 254 "mbolc.y"
+#line 247 "mbolc.y"
 	{
     yyval.numberOperatorVal=new NumberOperator("*");
 }
 break;
 case 57:
-#line 258 "mbolc.y"
+#line 251 "mbolc.y"
 	{
     yyval.indicesVal=new Indices(yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 58:
-#line 261 "mbolc.y"
+#line 254 "mbolc.y"
 	{
     yystack.l_mark[-2].indicesVal->elementExpressions.push_back(yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 59:
-#line 265 "mbolc.y"
+#line 258 "mbolc.y"
 	{
     yyval.sumVal=new Sum(string(yystack.l_mark[-4].sval),yystack.l_mark[-3].sumQualifiersVal,yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 60:
-#line 269 "mbolc.y"
+#line 262 "mbolc.y"
 	{
     yyval.sumQualifiersVal=new SumQualifiers(string(yystack.l_mark[-7].sval),string(yystack.l_mark[-5].sval),yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 61:
-#line 272 "mbolc.y"
+#line 265 "mbolc.y"
 	{
     yyval.sumQualifiersVal=new SumQualifiers(string(yystack.l_mark[-7].sval),string(yystack.l_mark[-5].sval),string(yystack.l_mark[-1].sval));
 }
 break;
 case 62:
-#line 275 "mbolc.y"
+#line 268 "mbolc.y"
 	{
     yyval.sumQualifiersVal=new SumQualifiers(yystack.l_mark[-1].qualifiersVal);
 }
 break;
-#line 1161 "y.tab.c"
+#line 1154 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

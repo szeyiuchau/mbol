@@ -116,6 +116,14 @@ class NumberLiteral : public MbolElement {
     NumberLiteral(string a);
     virtual void accept(MbolElementVisitor& visitor);
 };
+class NumberPower : public MbolElement {
+    public:
+    string value;
+    NumberExpression* power;
+    NumberExpression* base;
+    NumberPower(NumberExpression* a,NumberExpression* b);
+    virtual void accept(MbolElementVisitor& visitor);
+};
 class NumberParantheses : public MbolElement {
     public:
     string value;
@@ -131,6 +139,7 @@ class NumberSubexpression : public MbolElement {
     SetSize* setSize;
     NumberLiteral* numberLiteral;
     NumberVariable* numberVariable;
+NumberPower* numberPower;
     Sum* sum;
     NumberParantheses* numberParantheses;
     NumberSubexpression(Fraction* a);
@@ -140,6 +149,7 @@ class NumberSubexpression : public MbolElement {
     NumberSubexpression(NumberVariable* a);
     NumberSubexpression(Sum* a);
     NumberSubexpression(NumberParantheses* a);
+    NumberSubexpression(NumberPower* a);
     virtual void accept(MbolElementVisitor& visitor);
 };
 class NumberExpression : public MbolElement {
@@ -153,13 +163,17 @@ class NumberExpression : public MbolElement {
 class Qualifier : public MbolElement {
     public:
     ElementExpression* elementExpression;
-TupleIndices* tupleIndices;
-    Equation* equation;
+    TupleIndices* tupleIndices;
+    SetSize* setSize;
+    Inequality* inequality;
+    string lhs,rhs;
     string variable;
     string setCreator;
     string iter;
     string setToIter;
     Qualifier(TupleIndices* a,ElementExpression* b);
+    Qualifier(string a,Inequality* b,SetSize* c);
+    Qualifier(string a,Inequality* b,string c);
     Qualifier(Equation* a);
     Qualifier(string a,string b,ElementExpression* c);
     virtual void accept(MbolElementVisitor& visitor);

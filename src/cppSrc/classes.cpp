@@ -153,6 +153,17 @@ void SetSize::accept(MbolElementVisitor& visitor) {
     elementExpression->accept(visitor);
     visitor.visit(this);
 }
+NumberPower::NumberPower(NumberExpression* a,NumberExpression* b) {
+    base=a;
+    power=b;
+    value=temporary("tPower");
+}
+void NumberPower::accept(MbolElementVisitor& visitor) {
+    visitor.specialVisit(this);
+    base->accept(visitor);
+    power->accept(visitor);
+    visitor.visit(this);
+}
 NumberVariable::NumberVariable(string a) {
     value=a;
 }
@@ -182,6 +193,7 @@ NumberSubexpression::NumberSubexpression(Fraction* a) {
     numberVariable=NULL;
     sum=NULL;
     numberParantheses=NULL;
+    numberPower=NULL;
     value=a->value;
 }
 NumberSubexpression::NumberSubexpression(VariableMap* a) {
@@ -192,6 +204,7 @@ NumberSubexpression::NumberSubexpression(VariableMap* a) {
     numberVariable=NULL;
     sum=NULL;
     numberParantheses=NULL;
+    numberPower=NULL;
     value=a->value;
 }
 NumberSubexpression::NumberSubexpression(SetSize* a) {
@@ -202,6 +215,7 @@ NumberSubexpression::NumberSubexpression(SetSize* a) {
     numberVariable=NULL;
     sum=NULL;
     numberParantheses=NULL;
+    numberPower=NULL;
     value=a->value;
 }
 NumberSubexpression::NumberSubexpression(NumberLiteral* a) {
@@ -212,6 +226,7 @@ NumberSubexpression::NumberSubexpression(NumberLiteral* a) {
     numberVariable=NULL;
     sum=NULL;
     numberParantheses=NULL;
+    numberPower=NULL;
     value=a->value;
 }
 NumberSubexpression::NumberSubexpression(NumberVariable* a) {
@@ -222,6 +237,7 @@ NumberSubexpression::NumberSubexpression(NumberVariable* a) {
     numberVariable=a;
     sum=NULL;
     numberParantheses=NULL;
+    numberPower=NULL;
     value=a->value;
 }
 NumberSubexpression::NumberSubexpression(Sum* a) {
@@ -232,6 +248,7 @@ NumberSubexpression::NumberSubexpression(Sum* a) {
     numberVariable=NULL;
     sum=a;
     numberParantheses=NULL;
+    numberPower=NULL;
     value=a->value;
 }
 NumberSubexpression::NumberSubexpression(NumberParantheses* a) {
@@ -242,6 +259,18 @@ NumberSubexpression::NumberSubexpression(NumberParantheses* a) {
     numberVariable=NULL;
     sum=NULL;
     numberParantheses=a;
+    numberPower=NULL;
+    value=a->value;
+}
+NumberSubexpression::NumberSubexpression(NumberPower* a) {
+    fraction=NULL;
+    variableMap=NULL;
+    setSize=NULL;
+    numberLiteral=NULL;
+    numberVariable=NULL;
+    sum=NULL;
+    numberParantheses=NULL;
+    numberPower=a;
     value=a->value;
 }
 void NumberSubexpression::accept(MbolElementVisitor& visitor) {
@@ -266,6 +295,9 @@ void NumberSubexpression::accept(MbolElementVisitor& visitor) {
     if(numberParantheses!=NULL) {
         numberParantheses->accept(visitor);
     }
+    if(numberPower!=NULL) {
+        numberPower->accept(visitor);
+    }
     visitor.visit(this);
 }
 NumberExpression::NumberExpression(NumberSubexpression* a) {
@@ -281,18 +313,27 @@ void NumberExpression::accept(MbolElementVisitor& visitor) {
     }
     visitor.visit(this);
 }
-Qualifier::Qualifier(Equation* a) {
-    equation=a;
+Qualifier::Qualifier(string a,Inequality* b,string c) {
+    lhs=a;
+    inequality=b;
+    rhs=c;
+    setSize=NULL;
     elementExpression=NULL;
     tupleIndices=NULL;
-    iter=temporary("tIter");
-    setToIter=temporary("tSet");
+}
+Qualifier::Qualifier(string a,Inequality* b,SetSize* c) {
+    lhs=a;
+    inequality=b;
+    rhs=c->value;
+    elementExpression=NULL;
+    tupleIndices=NULL;
 }
 Qualifier::Qualifier(TupleIndices* a,ElementExpression* b) {
     tupleIndices=a;
     setCreator="in";
     elementExpression=b;
-    equation=NULL;
+    inequality=NULL;
+    setSize=NULL;
     iter=temporary("tIter");
     setToIter=temporary("tSet");
 }
@@ -300,8 +341,9 @@ Qualifier::Qualifier(string a,string b,ElementExpression* c) {
     variable=a;
     setCreator=b;
     elementExpression=c;
+    inequality=NULL;
     tupleIndices=NULL;
-    equation=NULL;
+    setSize=NULL;
     iter=temporary("tIter");
     setToIter=temporary("tSet");
 }
@@ -309,8 +351,11 @@ void Qualifier::accept(MbolElementVisitor& visitor) {
     if(tupleIndices!=NULL) {
         tupleIndices->accept(visitor);
     }
-    if(equation!=NULL) {
-        equation->accept(visitor);
+    if(inequality!=NULL) {
+        inequality->accept(visitor);
+    }
+    if(setSize!=NULL) {
+        setSize->accept(visitor);
     }
     if(elementExpression!=NULL) {
         elementExpression->accept(visitor);

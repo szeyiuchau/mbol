@@ -127,7 +127,7 @@ string NumberType::getCPLEXType() {
             pre+="map<int,";
         }
         if((*j)->setPaths.begin()->first==1) {
-            pre+="map<set<Thing>,";
+            pre+="map<set<Thing,ThingCompare>,";
             //pre+="map<set<int>,";
         }
     }
@@ -140,7 +140,7 @@ string NumberType::getCPLEXType() {
             post+=">";
         }
         if((*j)->setPaths.begin()->first==1) {
-            pre+="map<set<ThingCompare>,";
+            post+=",ThingCompare>";
             //post+=",set1comp>";
         }
     }

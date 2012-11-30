@@ -142,16 +142,16 @@ LP tuple_indices RP IN element_expression {
     $$=new Qualifier($2,$5);
 }|
 ES EQ element_expression {
-    $$=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberLiteral("0"))),new Inequality("=="),new NumberExpression(new NumberSubexpression(new SetSize($3)))));
+    $$=new Qualifier("0",new Inequality("=="),new SetSize($3));
 }|
 ES NE element_expression {
-    $$=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberLiteral("0"))),new Inequality("!="),new NumberExpression(new NumberSubexpression(new SetSize($3)))));
+    $$=new Qualifier("0",new Inequality("!="),new SetSize($3));
 }|
 VA EQ VA {
-    $$=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberVariable($1))),new Inequality("=="),new NumberExpression(new NumberSubexpression(new NumberVariable($3)))));
+    $$=new Qualifier(string($1),new Inequality("=="),string($3));
 }|
 VA inequality VA {
-    $$=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberVariable($1))),$2,new NumberExpression(new NumberSubexpression(new NumberVariable($3)))));
+    $$=new Qualifier(string($1),$2,string($3));
 }|
 VA SS element_expression {
     $$=new Qualifier(string($1),"subset",$3);
@@ -214,14 +214,7 @@ LI element_expression LJ {
     $$=new NumberSubexpression(new SetSize($2));
 }|
 LP number_expression RP CT LC number_expression RC {
-    /*    
-    int n=strs.size();
-    string tv1=tempExp();
-    string tv2=tempExp();
-    string tv3=tempExp();
-    scopeStuff[n]=scopeStuff[$2]+scopeStuff[$6]+"double "+tv1+"="+strs[$2]+";\ndouble "+tv2+"="+strs[$6]+";\ndouble "+tv3+"=pow("+tv1+","+tv2+");\n";
-    strs[n]=tv3;
-    $$=n;*/
+    $$=new NumberSubexpression(new NumberPower($2,$6));    
 }|
 FR LC number_expression RC LC number_expression RC {
     $$=new NumberSubexpression(new Fraction($3,$6));
