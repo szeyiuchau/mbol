@@ -152,7 +152,8 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                             code+="map<int,";
                         }
                         if((*k)->setPaths.begin()->first==1) {
-                            code+="map<set<int>,";
+                            code+="map<Thing,";
+                            //code+="map<set<int>,";
                         }
                     }
                 }
@@ -172,7 +173,8 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                             code+=">";
                         }
                         if((*k)->setPaths.begin()->first==1) {
-                            code+=",set1comp>";
+                            code+=",ThingCompare>";
+                            //code+=",set1comp>";
                         }
                     }
                 }
@@ -292,7 +294,13 @@ void MbolElementVisitorCPLEX::visit(const Qualifier* qualifier) {
             code+=types[qualifier->setToIter]->getCPLEXType()+" "+qualifier->setToIter+"="+qualifier->elementExpression->value+";\n";
         }
         code+="for("+types[qualifier->iter]->getCPLEXType()+"::iterator "+qualifier->iter+"="+qualifier->setToIter+".begin();"+qualifier->iter+"!="+qualifier->setToIter+".end();"+qualifier->iter+"++) {\n";
-        code+=types[qualifier->variable]->getCPLEXType()+" "+qualifier->variable+"=*"+qualifier->iter+";\n";
+        if(qualifier->tupleIndices==NULL) {
+            code+=types[qualifier->variable]->getCPLEXType()+" "+qualifier->variable+"=*"+qualifier->iter+";\n";
+        } else {
+            for(int i=0;i<qualifier->tupleIndices->indices.size();i++) {
+                code+=types[qualifier->tupleIndices->indices[i]]->getCPLEXType()+" "+qualifier->tupleIndices->indices[i]+"="+qualifier->iter+"->tupleThing["+convert(i)+"];\n";
+            }
+        }
     }
 }
 void MbolElementVisitorCPLEX::specialVisit(const SetCreator* setCreator) {
@@ -357,7 +365,7 @@ void MbolElementVisitorCPLEX::visit(const Fraction* fraction) {
     code+=fraction->value+"="+fraction->value+"+"+fraction->numerator->value+"/"+fraction->denominator->value+";\n";
 }
 void MbolElementVisitorCPLEX::visit(const SetSize* setSize) {
-    code+="int "+setSize->value+"="+setSize->elementExpression->value+";\n";
+    code+="int "+setSize->value+"="+setSize->elementExpression->value+".size();\n";
 }
 void MbolElementVisitorCPLEX::visit(const ElementNumbers* elementNumbers) {
     code+=types[elementNumbers->value]->getCPLEXType()+" "+elementNumbers->value+";\n";
@@ -436,6 +444,9 @@ void MbolElementVisitorTypeHelper::visit(const Program* program) {
 }
 void MbolElementVisitorTypeHelper::visit(const Qualifier* qualifier) {
     if(qualifier->elementExpression!=NULL) {
+        /*cout << qualifier << endl;
+        cout << qualifier->variable << endl;
+        cout << qualifier->setToIter << endl;*/
         graph[qualifier->variable][qualifier->setToIter].weight=1;
         graph[qualifier->variable][qualifier->iter].weight=1;
         graph[qualifier->iter][qualifier->setToIter].weight=0;

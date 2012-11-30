@@ -32,7 +32,12 @@ string SetType::getCPLEXType() {
     string type="";
     Type* base=setPaths.begin()->second.front().front();
     int length=setPaths.begin()->first;
-    if(base->isTuple) {
+    if(length==0) {
+        type="int";
+    } else {
+        type="set<Thing,ThingCompare>";
+    }
+    /*    if(base->isTuple) {
         for(int i=0;i<length;i++) {
             type+="set<";
         }
@@ -52,7 +57,7 @@ string SetType::getCPLEXType() {
                 type+=",set"+convert(i)+"comp>";
             }
         }
-    }
+    }*/
     return type;
 }
 bool SetType::errorCheck() {
@@ -122,7 +127,8 @@ string NumberType::getCPLEXType() {
             pre+="map<int,";
         }
         if((*j)->setPaths.begin()->first==1) {
-            pre+="map<set<int>,";
+            pre+="map<set<Thing>,";
+            //pre+="map<set<int>,";
         }
     }
     string post="";
@@ -134,7 +140,8 @@ string NumberType::getCPLEXType() {
             post+=">";
         }
         if((*j)->setPaths.begin()->first==1) {
-            post+=",set1comp>";
+            pre+="map<set<ThingCompare>,";
+            //post+=",set1comp>";
         }
     }
     if(isVariable) {

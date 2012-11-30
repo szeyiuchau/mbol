@@ -50,7 +50,9 @@ void ElementNumbers::accept(MbolElementVisitor& visitor) {
     }
     visitor.visit(this);
 }
-TupleIndices::TupleIndices() {
+TupleIndices::TupleIndices(string a,string b) {
+    indices.push_back(a);
+    indices.push_back(b);
 }
 void TupleIndices::accept(MbolElementVisitor& visitor) {
     visitor.visit(this);
@@ -282,6 +284,15 @@ void NumberExpression::accept(MbolElementVisitor& visitor) {
 Qualifier::Qualifier(Equation* a) {
     equation=a;
     elementExpression=NULL;
+    tupleIndices=NULL;
+    iter=temporary("tIter");
+    setToIter=temporary("tSet");
+}
+Qualifier::Qualifier(TupleIndices* a,ElementExpression* b) {
+    tupleIndices=a;
+    setCreator="in";
+    elementExpression=b;
+    equation=NULL;
     iter=temporary("tIter");
     setToIter=temporary("tSet");
 }
@@ -289,11 +300,15 @@ Qualifier::Qualifier(string a,string b,ElementExpression* c) {
     variable=a;
     setCreator=b;
     elementExpression=c;
+    tupleIndices=NULL;
     equation=NULL;
     iter=temporary("tIter");
     setToIter=temporary("tSet");
 }
 void Qualifier::accept(MbolElementVisitor& visitor) {
+    if(tupleIndices!=NULL) {
+        tupleIndices->accept(visitor);
+    }
     if(equation!=NULL) {
         equation->accept(visitor);
     }
@@ -458,4 +473,3 @@ void Program::accept(MbolElementVisitor& visitor) {
     constraints->accept(visitor);
     visitor.visit(this);
 }
-

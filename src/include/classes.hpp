@@ -54,7 +54,8 @@ class ElementNumbers : public MbolElement {
 };
 class TupleIndices : public MbolElement {
     public:
-    TupleIndices();
+    vector<string> indices;
+    TupleIndices(string a,string b);
     virtual void accept(MbolElementVisitor& visitor);
 };
 class ElementSubexpression : public MbolElement {
@@ -152,11 +153,13 @@ class NumberExpression : public MbolElement {
 class Qualifier : public MbolElement {
     public:
     ElementExpression* elementExpression;
+TupleIndices* tupleIndices;
     Equation* equation;
     string variable;
     string setCreator;
     string iter;
     string setToIter;
+    Qualifier(TupleIndices* a,ElementExpression* b);
     Qualifier(Equation* a);
     Qualifier(string a,string b,ElementExpression* c);
     virtual void accept(MbolElementVisitor& visitor);

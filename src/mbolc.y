@@ -131,38 +131,27 @@ qualifiers CO qualifier {
     $1->qualifiers.push_back($3);
 };
 tuple_indices:
-VA {
-    /*    int n=strs.size();
-    tupleHolder[n].push_back(string($1));
-    $$=n;*/
+VA CO VA {
+    $$=new TupleIndices($1,$3);
 }|
 tuple_indices CO VA {
-    /*    int n=strs.size();
-    tupleHolder[n]=tupleHolder[$1];
-    tupleHolder[n].push_back(string($3));
-    $$=n;*/
+    $1->indices.push_back(string($3));
 };
 qualifier:
 LP tuple_indices RP IN element_expression {
-    /*    int n=strs.size();
-    string tv=tempElement();
-    scopeStuff[n]=scopeStuff[$5];
-    setGraphEdge(tv,strs[$5],1);
-    strs[n]="for(TYPE_"+strs[$5]+"_::iterator "+tv+"="+strs[$5]+".begin();"+tv+"!="+strs[$5]+".end();"+tv+"++) {";
-    for(int i=0;i<tupleHolder[$2].size();i++) {
-        strs[n]+="\nTYPE_"+tupleHolder[$2][i]+"_ "+tupleHolder[$2][i]+"="+tv+"->e"+convert(i)+";";
-        setDeclType(tupleHolder[$2][i],"temporary");
-    }
-    tupleType[tv]=tupleHolder[$2];
-    $$=n;*/
+    $$=new Qualifier($2,$5);
 }|
 ES EQ element_expression {
+    $$=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberLiteral("0"))),new Inequality("=="),new NumberExpression(new NumberSubexpression(new SetSize($3)))));
 }|
 ES NE element_expression {
+    $$=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberLiteral("0"))),new Inequality("!="),new NumberExpression(new NumberSubexpression(new SetSize($3)))));
 }|
 VA EQ VA {
+    $$=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberVariable($1))),new Inequality("=="),new NumberExpression(new NumberSubexpression(new NumberVariable($3)))));
 }|
 VA inequality VA {
+    $$=new Qualifier(new Equation(new NumberExpression(new NumberSubexpression(new NumberVariable($1))),$2,new NumberExpression(new NumberSubexpression(new NumberVariable($3)))));
 }|
 VA SS element_expression {
     $$=new Qualifier(string($1),"subset",$3);
@@ -336,7 +325,7 @@ void usage() {
     }
 }
 void version() {
-    cout << "MBOLC Version 0.2.0" << endl;
+    cout << "MBOLC Version 0.3.0" << endl;
     exit(0);
 }
 void help() {

@@ -7,7 +7,7 @@
 #include<map>
 #include<set>
 using namespace std;
-set<int> V;
+set<int> VV;
 map<int,map<int,double> > w;
 map<int,map<int,double> > e;
 void addEdge(int a,int b) {
@@ -19,7 +19,7 @@ void addEdge(int a,int b) {
 void makeGraph() {
     int n=15;
     for(int i=1;i<=15;i++) {
-        V.insert(i);
+        VV.insert(i);
     }
     addEdge(1,3);
     addEdge(1,9);
@@ -46,7 +46,7 @@ void makeGraph() {
 void writeGraph() {
     ofstream out("misc-files/graph.dot");
     out << "graph test {\n";
-    for(set<int>::iterator i=V.begin();i!=V.end();i++) {
+    for(set<int>::iterator i=VV.begin();i!=VV.end();i++) {
         out << (*i) << " [label=\"" << (*i) << "\",width=.5,height=.5,shape=circle];\n";
     }
     for(map<int,map<int,double> >::iterator i=w.begin();i!=w.end();i++) {
@@ -64,6 +64,36 @@ int main(int argc,char* argv[]) {
     if(argc==2&&string(argv[1])=="justgraph") {
         writeGraph();
         exit(0);
+    }
+    set<Thing,ThingCompare> V=thingConversion(VV);
+    {
+        cout << "Thing test:" << endl;
+        Thing a=5;
+        Thing b=4;
+        Thing e=3;
+        Thing f=9;
+        set<Thing,ThingCompare> c;
+        c.insert(a);
+        c.insert(b);
+        Thing d=c;
+        vector<Thing> g;
+        g.push_back(d);
+        g.push_back(e);
+        vector<Thing> i;
+        i.push_back(d);
+        i.push_back(f);
+        Thing k=g;
+        k.print();
+        cout << endl;
+        Thing l=i;
+        l.print();
+        cout << endl;
+        set<Thing,ThingCompare> h;
+        h.insert(k);
+        h.insert(l);
+        Thing j=h;
+        j.print();
+        cout << endl;
     }
     cout << "HelloWorld:" << endl;
     {
