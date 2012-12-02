@@ -155,6 +155,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                 } else {
                     code+=i->first+"=readSetThing(tokens);\n";
                 }
+//code+="cout << Thing("+i->first+").print() << endl;\n";
             } else if(i->second->isNumber) {
                 NumberType* nType=(NumberType*)i->second;
                 code+="while(!tokens.empty()&&!isVariable(tokens.front())) {\n";
