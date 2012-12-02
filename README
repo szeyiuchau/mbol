@@ -41,6 +41,11 @@ cd samples
 make graph.pdf
 
 
+USING MBOLC:
+
+The initial step is always to write an optimization problem in MBOL which is simply a subset of latex using the mbol latex environment (many examples shown in samples/mbol-source). Then, you have choices what to do with this MBOL source that describes an optimization program. First, with the mbolc's -pdf flag you can produce the nice typesetted latex output. Second, with mbolc's -hpp flag you can produce c++ code that invokes CPLEX to solve the optimization program, and this c++ code can be integrated into your own project. Finally, with mbolc's -bin flag you can produce a binary that invokes CPLEX to solve the optimization program while using files as I/O.
+
+
 COMING SOON:
 
 Full documentation has not been created yet.

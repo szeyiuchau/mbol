@@ -29,47 +29,54 @@
   19  qualifiers : qualifier
   20             | qualifiers ',' qualifier
 
-  21  qualifier : VARIABLE inequality VARIABLE
-  22            | VARIABLE '\subset' element_expression
-  23            | VARIABLE '\subseteq' element_expression
-  24            | NUMBER '\le' VARIABLE '\le' number_expression
-  25            | VARIABLE '\in' element_expression
+  21  tuple_indices : VARIABLE ',' VARIABLE
+  22                | tuple_indices ',' VARIABLE
 
-  26  element_expression : element_subexpression
-  27                     | element_expression '\setminus' element_subexpression
-  28                     | element_expression '\cup' element_subexpression
-  29                     | element_expression '\cap' element_subexpression
+  23  qualifier : '(' tuple_indices ')' '\in' element_expression
+  24            | ES '=' element_expression
+  25            | ES '\ne' element_expression
+  26            | VARIABLE '=' VARIABLE
+  27            | VARIABLE inequality VARIABLE
+  28            | VARIABLE '\subset' element_expression
+  29            | VARIABLE '\subseteq' element_expression
+  30            | NUMBER '\le' VARIABLE '\le' element_expression
+  31            | NUMBER '\le' VARIABLE '\le' NUMBER
+  32            | VARIABLE '\in' element_expression
 
-  30  number_expression : number_subexpression
-  31                    | number_expression number_subexpression
-  32                    | number_expression operator number_subexpression
+  33  element_expression : element_subexpression
+  34                     | element_expression '\setminus' element_subexpression
+  35                     | element_expression '\cup' element_subexpression
+  36                     | element_expression '\cap' element_subexpression
 
-  33  element_subexpression : '\{' VARIABLE ':' qualifiers '\}'
-  34                        | '\{' element_expression '\}'
-  35                        | '(' element_expression ')'
-  36                        | VARIABLE
+  37  number_expression : number_subexpression
+  38                    | number_expression number_subexpression
+  39                    | number_expression number_operator number_subexpression
 
-  37  number_subexpression : sum
-  38                       | '|' element_expression '|'
-  39                       | '\frac' '{' number_expression '}' '{' number_expression '}'
-  40                       | '(' number_expression ')'
-  41                       | NUMBER
-  42                       | VARIABLE
-  43                       | VARIABLE '_' '{' indices '}'
-  44                       | VARIABLE '_' element_expression
+  40  element_subexpression : '\{' VARIABLE ':' qualifiers '\}'
+  41                        | '\{' element_expression '\}'
+  42                        | '(' element_expression ')'
+  43                        | VARIABLE
 
-  45  operator : '+'
-  46           | '-'
-  47           | '/'
-  48           | '*'
+  44  number_subexpression : sum
+  45                       | '|' element_expression '|'
+  46                       | '(' number_expression ')' '^' '{' number_expression '}'
+  47                       | '\frac' '{' number_expression '}' '{' number_expression '}'
+  48                       | '(' number_expression ')'
+  49                       | NUMBER
+  50                       | VARIABLE
+  51                       | VARIABLE '_' '{' indices '}'
+  52                       | VARIABLE '_' VARIABLE
 
-  49  indices : element_expression
-  50          | indices ',' element_expression
+  53  number_operator : '+'
+  54                  | '-'
+  55                  | '/'
+  56                  | '*'
 
-  51  sum : sum_product sum_product_qualifiers '(' number_expression ')'
+  57  indices : element_expression
+  58          | indices ',' element_expression
 
-  52  sum_product : '\sum'
-  53              | '\prod'
+  59  sum : '\sum' sum_qualifiers '(' number_expression ')'
 
-  54  sum_product_qualifiers : '_' '{' VARIABLE '=' number_subexpression '}' '^' '{' number_subexpression '}'
-  55                         | '_' '{' qualifiers '}'
+  60  sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression '}'
+  61                 | '_' '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}'
+  62                 | '_' '{' qualifiers '}'
