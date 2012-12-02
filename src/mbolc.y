@@ -410,7 +410,6 @@ int main(int argc,char* argv[]) {
     }
     
     if(hpp||bin) {
-        
         yyin=fopen(inputName.c_str(),"r");
         yyparse();
         fclose(yyin);
@@ -428,7 +427,6 @@ int main(int argc,char* argv[]) {
         ofstream out((outputDirectory+className+".hpp").c_str());
         out << code;
         out.close();
-
     }
     
     if(bin) {
@@ -451,7 +449,7 @@ int main(int argc,char* argv[]) {
             cplexHome+="/";
         }
         string cppName=outputDirectory+className+".cpp";
-        string cppCode="#include<"+className+".hpp>\nusing namespace std;\nint main(int argc,char* argv[]) {\n"+className+" x;\nx.readAll();\nx.solve();\nx.writeAll();\n}\n";
+        string cppCode="#include<"+className+".hpp>\nusing namespace std;\nint main(int argc,char* argv[]) {\n"+className+" x;\nstring input,output;\nif(argc>=2) {\ninput=string(argv[1]);\n} else {\ninput=\"input.txt\";\n}\nif(argc>=3) {\noutput=string(argv[2]);\n} else {\noutput=\"output.txt\";\n}\nx.readAll(input);\nx.solve();\nx.writeAll(output);\n}\n";
         ofstream cpp(cppName.c_str());
         cpp << indentCode(cppCode);
         cpp.close();
@@ -482,6 +480,7 @@ int main(int argc,char* argv[]) {
         system(("pdflatex -output-directory "+outputDirectory+" "+texMainName+".tex > /dev/null").c_str());
         system(("rm -rf "+texMainName+".log").c_str());
         system(("rm -rf "+texMainName+".aux").c_str());
+        system(("rm -rf "+texMainName+".tex").c_str());
         system(("mv "+texMainName+".pdf "+texMainName.substr(0,texMainName.size()-5)+".pdf").c_str());
     }
     

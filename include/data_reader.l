@@ -4,6 +4,9 @@
 list<string> tokens;
 %}
 %%
+[a-zA-Z]+ {
+    tokens.push_back(string(yytext));
+};
 (\+|-){0,1}[0-9]+(\.[0-9]*){0,1} {
     tokens.push_back(string(yytext));
 };

@@ -101,21 +101,21 @@ void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
     
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isConstant) {
-            code+="void read_"+i->first+"();\n";
+            code+="void read_"+i->first+"(list<string>& tokens);\n";
         }
     }
     
-    code+="void readAll();\n";
+    code+="void readAll(string f);\n";
     
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isVariable) {
-            code+="void write_"+i->first+"();\n";
+            code+="void write_"+i->first+"(ofstream& out);\n";
         }
     }
     
-    code+="void writeObj();\n";
+    code+="void writeObj(ofstream& out);\n";
     
-    code+="void writeAll();\n";
+    code+="void writeAll(string f);\n";
     
     code+="};\n#endif\n";
     code+=className+"::"+className+"() {\nhasInitialized=false;\n}\nbool "+className+"::init() {\n";
@@ -147,8 +147,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
     
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isConstant) {
-            code+="void "+className+"::read_"+i->first+"() {\n";
-            code+="list<string> tokens=getTokens(\""+i->first+".var\");\n";
+            code+="void "+className+"::read_"+i->first+"(list<string>& tokens) {\n";
             if(i->second->isSet) {
                 SetType* sType=(SetType*)i->second;
                 if(sType->setPaths.begin()->first==0) {
@@ -158,7 +157,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                 }
             } else if(i->second->isNumber) {
                 NumberType* nType=(NumberType*)i->second;
-                code+="while(!tokens.empty()) {\n";
+                code+="while(!tokens.empty()&&!isVariable(tokens.front())) {\n";
                 list<SetType*> example=nType->indices.front();
                 int num=0;
                 for(list<SetType*>::iterator j=example.begin();j!=example.end();j++) {
@@ -181,20 +180,26 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
         }
     }
     
-    code+="void "+className+"::readAll() {\n";
-    
+    code+="void "+className+"::readAll(string f) {\n";
+    code+="list<string> tokens=getTokens(f.c_str());\n";
+    code+="while(!tokens.empty()) {\n";
+
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isConstant) {
-            code+="read_"+i->first+"();\n";
+            code+="if(tokens.front()==\""+i->first+"\") {\n";
+            code+="tokens.pop_front();\n";
+            code+="read_"+i->first+"(tokens);\n";
+            code+="}\n";
         }
     }
     
     code+="}\n";
+    code+="}\n";
     
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isVariable) {
-            code+="void "+className+"::write_"+i->first+"() {\n";
-            code+="ofstream out(\""+i->first+".var\");\n";
+            code+="void "+className+"::write_"+i->first+"(ofstream& out) {\n";
+            code+="out << \""+i->first+"\" << endl;\n";
             NumberType* t=(NumberType*)i->second;
             list<SetType*> example=t->indices.front();
             int tVal=0;
@@ -247,18 +252,19 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
         }
     }
     
-    code+="void "+className+"::writeObj() {\n";
-    code+="ofstream out(\"obj.var\");\n";
+    code+="void "+className+"::writeObj(ofstream& out) {\n";
+    code+="out << \"objValue\" << endl;\n";
     code+="out << objValue << endl;\n";
     code+="}\n";
     
-    code+="void "+className+"::writeAll() {\n";
-    
+    code+="void "+className+"::writeAll(string f) {\n";
+    code+="ofstream out(f.c_str());\n";
+    code+="writeObj(out);\n";
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isVariable) {
-            code+="write_"+i->first+"();\n";
+code+="out << endl;\n";
+            code+="write_"+i->first+"(out);\n";
         }
-code+="writeObj();\n";
     }
     
     code+="}\n";

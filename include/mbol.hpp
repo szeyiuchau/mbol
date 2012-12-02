@@ -346,4 +346,8 @@ Thing getThing(list<string>& x) {
     }
     return y;
 }
+bool isVariable(string x) {
+    int y=(int)x[0];
+    return (y>=97&&y<=122)||(y>=65&&y<=90);
+}
 #endif

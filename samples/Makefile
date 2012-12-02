@@ -1,5 +1,5 @@
 all: main maxflow/MaxFlow $(patsubst mbol-source/%.tex,pdfs/%.pdf,$(wildcard mbol-source/*.tex))
-maxflow/MaxFlow:
+maxflow/MaxFlow: ../bin/mbolc
 	mkdir -p maxflow
 	../bin/mbolc -bin -d maxflow mbol-source/MaxFlow.tex
 graph: main
@@ -28,4 +28,4 @@ main: main.cpp $(patsubst mbol-source/%.tex,mbol-include/%.hpp,$(wildcard mbol-s
 	mkdir -p misc-files
 	g++ -O3 -fopenmp -m64 -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I../include -I$(CPLEX_HOME)/cplex/include -I$(CPLEX_HOME)/concert/include -I./mbol-include/ main.cpp -o main -L$(CPLEX_HOME)/cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L$(CPLEX_HOME)/concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread
 clean:
-	rm -rf main misc-files *eps mbol-include maxflow/MaxFlow* pdfs maxflow/obj.var maxflow/f.var
+	rm -rf main misc-files *eps mbol-include maxflow/MaxFlow* pdfs maxflow/output.txt
