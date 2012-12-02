@@ -353,12 +353,19 @@ string indentCode(string code) {
 int main(int argc,char* argv[]) {
     bool inputRead=false;
     quiet=false;
-    string outputName,inputName;
-    bool customClassName=false;
+    string inputName;
+    string outputDirectory="./";
+    string className;
+    bool hpp=false;
+    bool bin=false;
+    bool pdf=false;
     options["-v"]="Print version information and exit";
     options["-h"]="Print help information and exit";
     options["-q"]="Put CPLEX in quiet mode";
-    options["-o <arg>"]="Use <arg> as output class which makes output file <arg>.hpp";
+    options["-d <arg>"]="Use <arg> as output directory";
+    options["-bin"]="Compile a binary for default file I/O";
+    options["-pdf"]="Compile a pdf of the program";
+    options["-hpp"]="Compile a hpp header of the program";
     for(int i=1;i<argc;i++) {
         if(string(argv[i])=="-q") {
             quiet=true;
@@ -366,55 +373,117 @@ int main(int argc,char* argv[]) {
             version();
         } else if(string(argv[i])=="-h") {
             help();
-        } else if(string(argv[i])=="-o") {
+        } else if(string(argv[i])=="-pdf") {
+            pdf=true;
+        } else if(string(argv[i])=="-bin") {
+            bin=true;
+        } else if(string(argv[i])=="-hpp") {
+            hpp=true;
+        } else if(string(argv[i])=="-d") {
             i++;
             if(i<argc) {
-                customClassName=true;
-                outputName=string(argv[i]);
+                outputDirectory=string(argv[i]);
+                if(outputDirectory[outputDirectory.size()-1]!='/') {
+                    outputDirectory+="/";
+                }
             } else {
                 badArgs();
             }
         } else if(!inputRead) {
             inputRead=true;
             inputName=string(argv[i]);
-            if(!customClassName) {
-                if(inputName.find(".")!=string::npos) {
-                    outputName=inputName.substr(0,inputName.find("."))+".hpp";
-                } else {
-                    outputName=inputName+".hpp";
-                }
+            if(inputName.find(".tex")!=inputName.size()-4) {
+                cout << "Input file must be of the form *.tex" << endl;
+                exit(1);
+            }
+            className=inputName.substr(0,inputName.size()-4);
+            if(className.find("/")!=string::npos) {
+                className=className.substr(className.rfind("/")+1);
             }
         } else {
             badArgs();
         }
     }
     
-    string className=outputName.substr(0,outputName.find("."));
-    if(className.find("/")!=string::npos) {
-        className=className.substr(className.rfind("/")+1);
-    }
-    yyin=fopen(inputName.c_str(),"r");
-    string code;    
-    yyparse();
-    map<string,Type*> types;
-    {
-        MbolElementVisitor* v=new MbolElementVisitorTypeHelper();
-        program->accept(*v);
-        types=((MbolElementVisitorTypeHelper*)v)->types;
-    }
-    {
-        MbolElementVisitor* v=new MbolElementVisitorCPLEX(types,quiet,className);
-        program->accept(*v);
-        code=indentCode(((MbolElementVisitorCPLEX*)v)->code);
-    }
-    
     if(!inputRead) {
         badArgs();
     }
     
-    fclose(yyin);
+    if(hpp||bin) {
+        
+        yyin=fopen(inputName.c_str(),"r");
+        yyparse();
+        fclose(yyin);
+        
+        map<string,Type*> types;
+        MbolElementVisitor* vTypes=new MbolElementVisitorTypeHelper();
+        program->accept(*vTypes);
+        types=((MbolElementVisitorTypeHelper*)vTypes)->types;
+        
+        string code;    
+        MbolElementVisitor* vCplex=new MbolElementVisitorCPLEX(types,quiet,className);
+        program->accept(*vCplex);
+        code=indentCode(((MbolElementVisitorCPLEX*)vCplex)->code);
+        
+        ofstream out((outputDirectory+className+".hpp").c_str());
+        out << code;
+        out.close();
+
+    }
     
-    ofstream out((outputName).c_str());
-    out << code;
-    out.close();
+    if(bin) {
+        char* mbolHomeC=getenv("MBOL_HOME");
+        if(mbolHomeC==NULL) {
+            cout << "ERROR: must set environment variable \"MBOL_HOME\" to create binary for default file I/O" << endl;
+            exit(1);
+        }
+        string mbolHome(mbolHomeC);
+        if(mbolHome[mbolHome.size()-1]!='/') {
+            mbolHome+="/";
+        }
+        char* cplexHomeC=getenv("CPLEX_HOME");
+        if(cplexHomeC==NULL) {
+            cout << "ERROR: must set environment variable \"CPLEX_HOME\" to create binary for default file I/O" << endl;
+            exit(1);
+        }
+        string cplexHome(cplexHomeC);
+        if(cplexHome[cplexHome.size()-1]!='/') {
+            cplexHome+="/";
+        }
+        string cppName=outputDirectory+className+".cpp";
+        string cppCode="#include<"+className+".hpp>\nusing namespace std;\nint main(int argc,char* argv[]) {\n"+className+" x;\nx.readAll();\nx.solve();\nx.writeAll();\n}\n";
+        ofstream cpp(cppName.c_str());
+        cpp << indentCode(cppCode);
+        cpp.close();
+        
+        string compileCmd="g++ -O3 -fopenmp -m64 -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I"+mbolHome+"include -I"+cplexHome+"cplex/include -I"+cplexHome+"concert/include -I"+outputDirectory+" "+cppName+" -o "+outputDirectory+className+" -L"+cplexHome+"cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L"+cplexHome+"concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
+        //       cout << compileCmd << endl; 
+        system(compileCmd.c_str());
+    }
+    
+    if(pdf) {
+        char* mbolHomeC=getenv("MBOL_HOME");
+        if(mbolHomeC==NULL) {
+            cout << "ERROR: must set environment variable \"MBOL_HOME\" to create pdf" << endl;
+            exit(1);
+        }
+        string mbolHome(mbolHomeC);
+        if(mbolHome[mbolHome.size()-1]!='/') {
+            mbolHome+="/";
+        }
+        string texMainName=outputDirectory+className+"_main";
+        ofstream texMain((texMainName+".tex").c_str());
+        texMain << "\\documentclass{article}" << endl;
+        texMain << "\\input{" << mbolHome << "include/mbol.tex}" << endl;
+        texMain << "\\begin{document}" << endl;
+        texMain << "\\input{"+inputName+"}" << endl;
+        texMain << "\\end{document}" << endl;
+        texMain.close();
+        system(("pdflatex -output-directory "+outputDirectory+" "+texMainName+".tex > /dev/null").c_str());
+        system(("rm -rf "+texMainName+".log").c_str());
+        system(("rm -rf "+texMainName+".aux").c_str());
+        system(("mv "+texMainName+".pdf "+texMainName.substr(0,texMainName.size()-5)+".pdf").c_str());
+    }
+    
+    return 0;
 }

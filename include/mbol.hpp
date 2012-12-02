@@ -1,4 +1,5 @@
 #include<set>
+#include<list>
 #include<iostream>
 #include<vector>
 #include<map>
@@ -6,6 +7,7 @@
 using namespace std;
 #ifndef CPLEX_SETUP_STUFF
 #define CPLEX_SETUP_STUFF
+#include<lex.yy.c>
 IloEnv g_env;
 class MyIloIntVar : public IloIntVar {
     public:
@@ -15,6 +17,11 @@ class MyIloNumVar : public IloNumVar {
     public:
 MyIloNumVar() : IloNumVar(g_env,-1*IloInfinity,IloInfinity) {}
 };
+string convert(int x) {
+    stringstream ss;
+    ss << x;
+    return ss.str();
+}
 struct set1comp {
     bool operator() (const set<int>& lhs,const set<int>& rhs) const {
         if(lhs.size()!=rhs.size()) {
@@ -198,31 +205,33 @@ class Thing {
     operator set<Thing,ThingCompare>() const {
         return setThing;
     }
-    void print() const {
+    string print() const {
+        string x="";
         if(isInteger) {
-            cout << intThing;
+            x+=convert(intThing);
         }
         if(isSet) {
-            cout << "{";
+            x+="{";
             for(set<Thing,ThingCompare>::const_iterator i=setThing.begin();i!=setThing.end();i++) {
                 if(i!=setThing.begin()) {
-                    cout << ",";
+                    x+=",";
                 }
                 Thing j=*i;
-                j.print();
+                x+=j.print();
             }
-            cout << "}";
+            x+="}";
         }
         if(isTuple) {
-            cout << "(";
+            x+="(";
             for(int i=0;i<tupleThing.size();i++) {
                 if(i>0) {
-                    cout << ",";
+                    x+=",";
                 }
-                tupleThing[i].print();
+                x+=tupleThing[i].print();
             }
-            cout << ")";
+            x+=")";
         }
+        return x;
     }
 };
 bool ThingCompare::operator() (const Thing& lhs,const Thing& rhs) const {
@@ -296,5 +305,45 @@ set<Thing,ThingCompare> powerset(set<Thing,ThingCompare> x) {
     }
     return pset;
 }
-
+Thing getThing(list<string>& x);
+vector<Thing> readTupleThing(list<string>& x) {
+    vector<Thing> y;
+    x.pop_front();
+    while(x.front()!=")") {
+        if(x.front()==",") {
+            x.pop_front();
+        }
+        y.push_back(getThing(x));
+    }
+    x.pop_front();
+    return y;
+}
+Thing readIntegerThing(list<string>& x) {
+    Thing a=(atoi(x.front().c_str()));
+    x.pop_front();
+    return a;
+}
+set<Thing,ThingCompare> readSetThing(list<string>& x) {
+    set<Thing,ThingCompare> y;
+    x.pop_front();
+    while(x.front()!="}") {
+        if(x.front()==",") {
+            x.pop_front();
+        }
+        y.insert(getThing(x));
+    }
+    x.pop_front();
+    return y;
+}
+Thing getThing(list<string>& x) {
+    Thing y;
+    if(x.front()=="{") {
+        y=readSetThing(x);
+    } else if(x.front()=="(") {
+        y=readTupleThing(x);
+    } else {
+        y=readIntegerThing(x);
+    }
+    return y;
+}
 #endif

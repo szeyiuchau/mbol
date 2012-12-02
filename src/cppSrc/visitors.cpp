@@ -99,6 +99,24 @@ void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
         }
     }
     
+    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+        if(i->second->isConstant) {
+            code+="void read_"+i->first+"();\n";
+        }
+    }
+    
+    code+="void readAll();\n";
+    
+    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+        if(i->second->isVariable) {
+            code+="void write_"+i->first+"();\n";
+        }
+    }
+    
+    code+="void writeObj();\n";
+    
+    code+="void writeAll();\n";
+    
     code+="};\n#endif\n";
     code+=className+"::"+className+"() {\nhasInitialized=false;\n}\nbool "+className+"::init() {\n";
     code+="IloModel model(env);\ng_env=env;\ntry {\n";
@@ -125,22 +143,62 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
     if(quiet) {
         code+="cplex.setOut(env.getNullStream());\n";
     }
-    code+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nhasInitialized=true;\nreturn true;\n}\nbool "+className+"::solve() {\nif(!hasInitialized) {\ninit();\n}\nif(!hasInitialized) {\nreturn false;\n}\ntry{\ncplex.solve();\nobjValue=cplex.getValue(objExp);\n";
-    
-    
-    // fill in simple variable values
-    /*for(map<string,string>::iterator i=declType.begin();i!=declType.end();i++) {
-        if(i->second=="variable"&&varType[i->first]=="a number"&&mapTypes.count(i->first)==0) {
-            code+=i->first.substr(0,i->first.size()-4)+"=cplex.getValue("+i->first+");\n";
-        }
-    }*/
+    code+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nhasInitialized=true;\nreturn true;\n}\n";
     
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
-        if(i->second->isReturn) {
+        if(i->second->isConstant) {
+            code+="void "+className+"::read_"+i->first+"() {\n";
+            code+="list<string> tokens=getTokens(\""+i->first+".var\");\n";
+            if(i->second->isSet) {
+                SetType* sType=(SetType*)i->second;
+                if(sType->setPaths.begin()->first==0) {
+                    code+=i->first+"=readIntegerThing(tokens);\n";
+                } else {
+                    code+=i->first+"=readSetThing(tokens);\n";
+                }
+            } else if(i->second->isNumber) {
+                NumberType* nType=(NumberType*)i->second;
+                code+="while(!tokens.empty()) {\n";
+                list<SetType*> example=nType->indices.front();
+                int num=0;
+                for(list<SetType*>::iterator j=example.begin();j!=example.end();j++) {
+                    if((*j)->setPaths.begin()->first==0) {
+                        code+="int index"+convert(num++)+"=readIntegerThing(tokens);\n";
+                    } else {
+                        code+="set<Thing,ThingCompare> index"+convert(num++)+"=readSetThing(tokens);\n";
+                    }
+                }
+                num=0;
+                code+=i->first;
+                for(list<SetType*>::iterator j=example.begin();j!=example.end();j++) {
+                    code+="[index"+convert(num++)+"]";
+                }
+                code+="=atof(tokens.front().c_str());\n";
+                code+="tokens.pop_front();\n";
+                code+="}\n";
+            }
+            code+="}\n";
+        }
+    }
+    
+    code+="void "+className+"::readAll() {\n";
+    
+    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+        if(i->second->isConstant) {
+            code+="read_"+i->first+"();\n";
+        }
+    }
+    
+    code+="}\n";
+    
+    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+        if(i->second->isVariable) {
+            code+="void "+className+"::write_"+i->first+"() {\n";
+            code+="ofstream out(\""+i->first+".var\");\n";
             NumberType* t=(NumberType*)i->second;
             list<SetType*> example=t->indices.front();
             int tVal=0;
-            string prev=i->first.substr(0,i->first.size()-4);
+            string prev=i->first;
             string indices="";
             for(int j=0;j<example.size();j++) {
                 code+="for(";
@@ -153,7 +211,6 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                         }
                         if((*k)->setPaths.begin()->first==1) {
                             code+="map<set<Thing,ThingCompare>,";
-                            //code+="map<set<int>,";
                         }
                     }
                 }
@@ -174,7 +231,78 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                         }
                         if((*k)->setPaths.begin()->first==1) {
                             code+=",ThingCompare>";
-                            //code+=",set1comp>";
+                        }
+                    }
+                }
+                code+="::iterator iter"+convert(tVal)+"="+prev+".begin();iter"+convert(tVal)+"!="+prev+".end();iter"+convert(tVal)+"++) {\n";
+                indices+="Thing(iter"+convert(tVal)+"->first).print() << \" \" << ";
+                prev="iter"+convert(tVal)+"->second";
+                tVal++;
+            }
+            code+="out << "+indices+"cplex.getValue("+prev+") << endl;\n";
+            for(list<SetType*>::iterator j=example.begin();j!=example.end();j++) {
+                code+="}\n";
+            }
+            code+="}\n";
+        }
+    }
+    
+    code+="void "+className+"::writeObj() {\n";
+    code+="ofstream out(\"obj.var\");\n";
+    code+="out << objValue << endl;\n";
+    code+="}\n";
+    
+    code+="void "+className+"::writeAll() {\n";
+    
+    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+        if(i->second->isVariable) {
+            code+="write_"+i->first+"();\n";
+        }
+code+="writeObj();\n";
+    }
+    
+    code+="}\n";
+    
+    code+="bool "+className+"::solve() {\nif(!hasInitialized) {\ninit();\n}\nif(!hasInitialized) {\nreturn false;\n}\ntry{\ncplex.solve();\nobjValue=cplex.getValue(objExp);\n";
+    
+    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+        if(i->second->isReturn) {
+            NumberType* t=(NumberType*)i->second;
+            list<SetType*> example=t->indices.front();
+            int tVal=0;
+            string prev=i->first.substr(0,i->first.size()-4);
+            string indices="";
+            for(int j=0;j<example.size();j++) {
+                code+="for(";
+                int temp=0;
+                for(list<SetType*>::iterator k=example.begin();k!=example.end();k++) {
+                    temp++;
+                    if(temp>j) {
+                        if((*k)->setPaths.begin()->first==0) {
+                            code+="map<int,";
+                        }
+                        if((*k)->setPaths.begin()->first==1) {
+                            code+="map<set<Thing,ThingCompare>,";
+                        }
+                    }
+                }
+                if(t->isInteger) {
+                    code+="MyIloIntVar";
+                } else {
+                    code+="MyIloNumVar";
+                }
+                temp=example.size()-j;
+                for(list<SetType*>::reverse_iterator k=example.rbegin();k!=example.rend();k++) {
+                    temp--;
+                    if(temp>=0) {
+                        if((*k)->setPaths.begin()->first==0) {
+                            if(code[code.size()-1]=='>') {
+                                code+=" ";
+                            }
+                            code+=">";
+                        }
+                        if((*k)->setPaths.begin()->first==1) {
+                            code+=",ThingCompare>";
                         }
                     }
                 }
@@ -264,9 +392,7 @@ void MbolElementVisitorCPLEX::specialVisit(const SetCreator* setCreator) {
 void MbolElementVisitorCPLEX::visit(const SetCreator* setCreator) {
     code+=setCreator->value+".insert("+setCreator->variable+");\n";
     for(list<Qualifier*>::iterator i=setCreator->qualifiers->qualifiers.begin();i!=setCreator->qualifiers->qualifiers.end();i++) {
-        //    if((*i)->equation==NULL) {
-            code+="}\n";
-        //    }
+        code+="}\n";
     }
 }
 void MbolElementVisitorCPLEX::visit(const Equation* equation) {
@@ -288,9 +414,7 @@ void MbolElementVisitorCPLEX::specialVisit(const Sum* sum) {
 void MbolElementVisitorCPLEX::visit(const Sum* sum) {
     code+=sum->value+"="+sum->value+sum->sumType+sum->numberExpression->value+";\n";
     for(list<Qualifier*>::iterator i=sum->sumQualifiers->qualifiers->qualifiers.begin();i!=sum->sumQualifiers->qualifiers->qualifiers.end();i++) {
-        //   if((*i)->equation==NULL) {
-            code+="}\n";
-        //   }
+        code+="}\n";
     }
 }
 void MbolElementVisitorCPLEX::visit(const NumberExpression* numberExpression) {
@@ -327,11 +451,11 @@ void MbolElementVisitorCPLEX::visit(const ElementSet* elementSet) {
     code+=elementSet->value+".insert("+elementSet->elementExpression->value+");\n";
 }
 void MbolElementVisitorCPLEX::visit(const Fraction* fraction) {
-if(justDouble) {
-    code+="double "+fraction->value+"=0;\n";
-} else {
-    code+="IloExpr "+fraction->value+"(env);\n";
-}
+    if(justDouble) {
+        code+="double "+fraction->value+"=0;\n";
+    } else {
+        code+="IloExpr "+fraction->value+"(env);\n";
+    }
     code+=fraction->value+"="+fraction->value+"+"+fraction->numerator->value+"/"+fraction->denominator->value+";\n";
 }
 void MbolElementVisitorCPLEX::visit(const SetSize* setSize) {
@@ -349,9 +473,7 @@ void MbolElementVisitorCPLEX::visit(const Constraint* constraint) {
     }
     if(constraint->qualifiers!=NULL) {
         for(list<Qualifier*>::iterator i=constraint->qualifiers->qualifiers.begin();i!=constraint->qualifiers->qualifiers.end();i++) {
-            //    if((*i)->equation==NULL) {
-                code+="}\n";
-            //    }
+            code+="}\n";
         }
     }
 }
