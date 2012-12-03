@@ -624,6 +624,7 @@ int main(int argc,char* argv[]) {
         string texMainName=outputDirectory+className+"_main";
         ofstream texMain((texMainName+".tex").c_str());
         texMain << "\\documentclass{article}" << endl;
+        texMain << "\\usepackage{fullpage}" << endl;
         texMain << "\\input{" << mbolHome << "include/mbol.tex}" << endl;
         texMain << "\\begin{document}" << endl;
         texMain << "\\input{"+inputName+"}" << endl;
@@ -638,7 +639,7 @@ int main(int argc,char* argv[]) {
     
     return 0;
 }
-#line 641 "y.tab.c"
+#line 642 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1219,7 +1220,7 @@ case 62:
     yyval.sumQualifiersVal=new SumQualifiers(yystack.l_mark[-1].qualifiersVal);
 }
 break;
-#line 1222 "y.tab.c"
+#line 1223 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

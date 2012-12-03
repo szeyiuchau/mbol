@@ -155,7 +155,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                 } else {
                     code+=i->first+"=readSetThing(tokens);\n";
                 }
-//code+="cout << Thing("+i->first+").print() << endl;\n";
+                //code+="cout << Thing("+i->first+").print() << endl;\n";
             } else if(i->second->isNumber) {
                 NumberType* nType=(NumberType*)i->second;
                 code+="while(!tokens.empty()&&!isVariable(tokens.front())) {\n";
@@ -184,7 +184,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
     code+="void "+className+"::readAll(string f) {\n";
     code+="list<string> tokens=getTokens(f.c_str());\n";
     code+="while(!tokens.empty()) {\n";
-
+    
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isConstant) {
             code+="if(tokens.front()==\""+i->first+"\") {\n";
@@ -263,7 +263,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
     code+="writeObj(out);\n";
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isVariable) {
-code+="out << endl;\n";
+            code+="out << endl;\n";
             code+="write_"+i->first+"(out);\n";
         }
     }
@@ -344,7 +344,7 @@ void MbolElementVisitorCPLEX::visit(const ElementExpression* elementExpression) 
         }
         code+="for("+types[elementExpression->value]->getCPLEXType()+"::iterator iter="+elementExpression->elementSubexpression->value+".begin();iter!="+elementExpression->elementSubexpression->value+".end();iter++) {\n";
         if(elementExpression->elementOperator->value=="intersect") {
-            code+="if("+elementExpression->elementExpression->value+".count(*iter)&&"+elementExpression->elementSubexpression->value+".count(*iter) {\n";
+            code+="if("+elementExpression->elementExpression->value+".count(*iter)&&"+elementExpression->elementSubexpression->value+".count(*iter)) {\n";
             code+=elementExpression->value+".insert(*iter);\n";
             code+="}\n";
         }
@@ -366,7 +366,11 @@ void MbolElementVisitorCPLEX::visit(const NumberPower* numberPower) {
     code+=numberPower->value+"=pow("+numberPower->base->value+","+numberPower->power->value+");\n";
 }
 void MbolElementVisitorCPLEX::visit(const NumberLiteral* numberLiteral) {
-    code+="IloExpr "+numberLiteral->value+"(env);\n";
+    if(justDouble) {
+        code+="double "+numberLiteral->value+";\n";
+    } else {
+        code+="IloExpr "+numberLiteral->value+"(env);\n";
+    }
     code+=numberLiteral->value+"="+numberLiteral->value+"+"+numberLiteral->number+";\n";
 }
 void MbolElementVisitorCPLEX::visit(const Qualifier* qualifier) {
@@ -405,7 +409,11 @@ void MbolElementVisitorCPLEX::visit(const SetCreator* setCreator) {
 void MbolElementVisitorCPLEX::visit(const Equation* equation) {
 }
 void MbolElementVisitorCPLEX::visit(const VariableMap* variableMap) {
-    code+="IloExpr "+variableMap->value+"(env);\n";
+    if(justDouble) {
+        code+="double "+variableMap->value+";\n";
+    } else {
+        code+="IloExpr "+variableMap->value+"(env);\n";
+    }
     code+=variableMap->value+"="+variableMap->value+"+"+variableMap->variableName;
     for(list<ElementExpression*>::iterator i=variableMap->indices->elementExpressions.begin();i!=variableMap->indices->elementExpressions.end();i++) {
         code+="["+(*i)->value+"]";
@@ -562,7 +570,13 @@ void MbolElementVisitorTypeHelper::visit(const Qualifier* qualifier) {
             graph[qualifier->variable][qualifier->elementExpression->value].weight=1;
         }
     }
-    temporaries.insert(qualifier->variable);
+    if(qualifier->tupleIndices!=NULL) {
+        for(int i=0;i<qualifier->tupleIndices->indices.size();i++) {
+            temporaries.insert(qualifier->tupleIndices->indices[i]);
+        }
+    } else {
+        temporaries.insert(qualifier->variable);
+    }
 }
 void MbolElementVisitorTypeHelper::visit(const SetCreator* setCreator) {
     graph[setCreator->variable][setCreator->value].weight=1;

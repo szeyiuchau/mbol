@@ -325,6 +325,7 @@ Qualifier::Qualifier(string a,Inequality* b,SetSize* c) {
     lhs=a;
     inequality=b;
     rhs=c->value;
+setSize=c;
     elementExpression=NULL;
     tupleIndices=NULL;
 }

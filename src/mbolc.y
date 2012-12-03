@@ -472,6 +472,7 @@ int main(int argc,char* argv[]) {
         string texMainName=outputDirectory+className+"_main";
         ofstream texMain((texMainName+".tex").c_str());
         texMain << "\\documentclass{article}" << endl;
+        texMain << "\\usepackage{fullpage}" << endl;
         texMain << "\\input{" << mbolHome << "include/mbol.tex}" << endl;
         texMain << "\\begin{document}" << endl;
         texMain << "\\input{"+inputName+"}" << endl;

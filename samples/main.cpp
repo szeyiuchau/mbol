@@ -84,19 +84,14 @@ int main(int argc,char* argv[]) {
         i.push_back(d);
         i.push_back(f);
         Thing k=g;
-        k.print();
-        cout << endl;
         Thing l=i;
-        l.print();
-        cout << endl;
         set<Thing,ThingCompare> h;
         h.insert(k);
         h.insert(l);
         Thing j=h;
-        j.print();
-        cout << endl;
+        cout << l.print() << " and " << k.print() << " are tuples in the set " << j.print() << endl;
     }
-    cout << "HelloWorld:" << endl;
+    cout << "\nHelloWorld:" << endl;
     {
         HelloWorld hw;
         hw.e=5.8;
