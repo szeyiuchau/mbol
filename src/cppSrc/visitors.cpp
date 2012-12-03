@@ -362,12 +362,11 @@ void MbolElementVisitorCPLEX::specialVisit(const NumberPower* numberPower) {
 }
 void MbolElementVisitorCPLEX::visit(const NumberPower* numberPower) {
     justDouble=false;
-    code+="double "+numberPower->value+";\n";
-    code+=numberPower->value+"=pow("+numberPower->base->value+","+numberPower->power->value+");\n";
+    code+="double "+numberPower->value+"=pow("+numberPower->base->value+","+numberPower->power->value+");\n";
 }
 void MbolElementVisitorCPLEX::visit(const NumberLiteral* numberLiteral) {
     if(justDouble) {
-        code+="double "+numberLiteral->value+";\n";
+        code+="double "+numberLiteral->value+"=0;\n";
     } else {
         code+="IloExpr "+numberLiteral->value+"(env);\n";
     }
@@ -410,7 +409,7 @@ void MbolElementVisitorCPLEX::visit(const Equation* equation) {
 }
 void MbolElementVisitorCPLEX::visit(const VariableMap* variableMap) {
     if(justDouble) {
-        code+="double "+variableMap->value+";\n";
+        code+="double "+variableMap->value+"=0;\n";
     } else {
         code+="IloExpr "+variableMap->value+"(env);\n";
     }
@@ -434,7 +433,7 @@ void MbolElementVisitorCPLEX::visit(const Sum* sum) {
 }
 void MbolElementVisitorCPLEX::visit(const NumberExpression* numberExpression) {
     if(justDouble) {
-        code+="double "+numberExpression->value+";\n";
+        code+="double "+numberExpression->value+"=0;\n";
     } else {
         code+="IloExpr "+numberExpression->value+"(env);\n";
     }
