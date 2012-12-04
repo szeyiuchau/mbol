@@ -218,3 +218,55 @@ bool NumberType::errorCheck() {
     return ret;
 }
 
+string SetType::print(bool plural) {
+    string val;
+    if(isTuple) {
+        if(plural) {
+            val+="tuples with ";
+        } else {
+            val+="tuple with ";
+        }
+        for(int i=0;i<tupleIndices.size();i++) {
+            if(i!=0) {
+                val+=" and ";
+            }
+            val+=tupleIndices[i]->print();
+        }
+    } else {
+        int setDepth=setPaths.begin()->first;
+        if(setDepth==0) {
+            if(plural) {
+                val+="integers";
+            } else {
+                val+="integer";
+            }
+        } else {
+            for(int i=0;i<setDepth;i++) {
+                if(i!=0||plural) {
+                    val+="sets of ";
+                } else {
+                    val+="set of ";
+                }
+            }
+            val+=setPaths.begin()->second.front().front()->print(true);
+        }
+    }
+    return val;
+}
+
+string NumberType::print(bool plural) {
+    string val;
+    if(indices.begin()->size()==0) {
+        val+="number";
+    } else {
+        val+="mapping from ";
+        for(list<SetType*>::iterator i=indices.begin()->begin();i!=indices.begin()->end();i++) {
+            if(i!=indices.begin()->begin()) {
+                val+=" and ";
+            }
+            val+=(*i)->print();
+        }
+        val+=" to number";
+    }
+    return val;
+}

@@ -1,4 +1,5 @@
 #include<sstream>
+#include<vector>
 #include<iostream>
 #include<list>
 #include<map>
@@ -28,14 +29,18 @@ class Type {
     }
     virtual bool errorCheck() {
     }
+    virtual string print(bool plural=false) {
+    }
 };
 
 class SetType : public Type {
     public:
     map<int,list<list<SetType*> > > setPaths;
+    vector<SetType*> tupleIndices;
     SetType(string a);
     string getCPLEXType();
     bool errorCheck();
+    string print(bool plural=false);
 };
 
 class NumberType : public Type {
@@ -44,6 +49,7 @@ class NumberType : public Type {
     NumberType(string a);
     string getCPLEXType();
     bool errorCheck();
+    string print(bool plural=false);
 };
 
 #endif

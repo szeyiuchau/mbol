@@ -335,6 +335,7 @@ Qualifier::Qualifier(TupleIndices* a,ElementExpression* b) {
     elementExpression=b;
     inequality=NULL;
     setSize=NULL;
+variable=temporary("tTuple");
     iter=temporary("tIter");
     setToIter=temporary("tSet");
 }

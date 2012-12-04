@@ -513,6 +513,12 @@ void MbolElementVisitorTypeHelper::visit(const Program* program) {
         }
     }
     bfs();
+    for(map<string,vector<string> >::iterator i=tupleTypes.begin();i!=tupleTypes.end();i++) {
+        types[i->first]->isTuple=true;
+        for(int j=0;j<i->second.size();j++) {
+            ((SetType*)types[i->first])->tupleIndices.push_back((SetType*)types[i->second[j]]);
+        }
+    }
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isNumber) {
             for(list<list<string> >::iterator j=mapTypes[i->first].begin();j!=mapTypes[i->first].end();j++) {
@@ -570,8 +576,12 @@ void MbolElementVisitorTypeHelper::visit(const Qualifier* qualifier) {
         }
     }
     if(qualifier->tupleIndices!=NULL) {
+        if(!tupleTypes[qualifier->variable].empty()) {
+            cout << "bad usage of tuples, something terribly wrong has occured" << endl;
+        }
         for(int i=0;i<qualifier->tupleIndices->indices.size();i++) {
             temporaries.insert(qualifier->tupleIndices->indices[i]);
+            tupleTypes[qualifier->variable].push_back(qualifier->tupleIndices->indices[i]);
         }
     } else {
         temporaries.insert(qualifier->variable);

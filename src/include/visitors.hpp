@@ -55,7 +55,7 @@ class MbolElementVisitor {
     virtual void specialVisit(const SetCreator* setCreator) {
     }
     virtual void specialVisit(const NumberPower* numberPower) {
-}
+    }
     virtual void visit(const NumberPower* numberPower) {
     }
     virtual void visit(const ElementExpression* elementExpression) {
@@ -144,7 +144,7 @@ class MbolElementVisitorPrinter : public MbolElementVisitor {
 
 class MbolElementVisitorCPLEX : public MbolElementVisitor {
     public:
-bool justDouble;
+    bool justDouble;
     string code;
     map<string,Type*> types;
     string className;

@@ -511,10 +511,12 @@ int main(int argc,char* argv[]) {
     bool hpp=false;
     bool bin=false;
     bool pdf=false;
+    bool typ=false;
     options["-v"]="Print version information and exit";
     options["-h"]="Print help information and exit";
     options["-q"]="Put CPLEX in quiet mode";
     options["-d <arg>"]="Use <arg> as output directory";
+    options["-typ"]="Print types inferred by mbolc";
     options["-bin"]="Compile a binary for default file I/O";
     options["-pdf"]="Compile a pdf of the program";
     options["-hpp"]="Compile a hpp header of the program";
@@ -525,6 +527,8 @@ int main(int argc,char* argv[]) {
             version();
         } else if(string(argv[i])=="-h") {
             help();
+        } else if(string(argv[i])=="-typ") {
+            typ=true;
         } else if(string(argv[i])=="-pdf") {
             pdf=true;
         } else if(string(argv[i])=="-bin") {
@@ -561,16 +565,47 @@ int main(int argc,char* argv[]) {
         badArgs();
     }
     
-    if(hpp||bin) {
+    map<string,Type*> types;
+    if(hpp||bin||typ) {
         yyin=fopen(inputName.c_str(),"r");
         yyparse();
         fclose(yyin);
         
-        map<string,Type*> types;
         MbolElementVisitor* vTypes=new MbolElementVisitorTypeHelper();
         program->accept(*vTypes);
         types=((MbolElementVisitorTypeHelper*)vTypes)->types;
-        
+    }
+    
+    if(typ) {
+        cout << "Program variables:" << endl;
+        for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+            if(!getTemporaries().count(i->first)) {
+                if(i->second->isVariable) {
+                    cout << "  " << i->first << ": " << i->second->print() << endl;
+                }
+            }
+        }
+        cout << endl;
+        cout << "Program constants:" << endl;
+        for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+            if(!getTemporaries().count(i->first)) {
+                if(i->second->isConstant) {
+                    cout << "  " << i->first << ": " << i->second->print() << endl;
+                }
+            }
+        }
+        cout << endl;
+        cout << "Program constant temporaries:" << endl;
+        for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+            if(!getTemporaries().count(i->first)) {
+                if(i->second->isTemporary) {
+                    cout << "  " << i->first << ": " << i->second->print() << endl;
+                }
+            }
+        }
+    }
+    
+    if(hpp||bin) {   
         string code;    
         MbolElementVisitor* vCplex=new MbolElementVisitorCPLEX(types,quiet,className);
         program->accept(*vCplex);
@@ -639,7 +674,7 @@ int main(int argc,char* argv[]) {
     
     return 0;
 }
-#line 642 "y.tab.c"
+#line 677 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1220,7 +1255,7 @@ case 62:
     yyval.sumQualifiersVal=new SumQualifiers(yystack.l_mark[-1].qualifiersVal);
 }
 break;
-#line 1223 "y.tab.c"
+#line 1258 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
