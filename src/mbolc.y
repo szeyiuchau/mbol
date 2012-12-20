@@ -14,7 +14,7 @@
     #include<classes.hpp>
     using namespace std;
 %}
-%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR GT LT NE LJ CN CL ES
+%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR GT LT NE LJ CN CL ES IC MC
 %union {
     int ival;
     char* sval;
@@ -84,28 +84,28 @@ MI {
     $$=new ObjectiveType("min");
 };
 constraints:
-CN LC constraint RC {
-    $$=new Constraints($3);
+constraint {
+    $$=new Constraints($1);
 }|
-constraints CN LC constraint RC {
-    $1->constraints.push_back($4);
+constraints constraint {
+    $1->constraints.push_back($2);
 };
 constraint:
-equation {
-    $$=new Constraint($1);
+CN LC equation RC {
+    $$=new Constraint($3);
 }|
-VA IN ZC {
-    $$=new Constraint(string($1));
+IC LC VA RC {
+    $$=new Constraint(string($3));
 }|
-equation CO qualifiers {
-    $$=new Constraint($1,$3);
+MC LC equation RC LC qualifiers RC {
+    $$=new Constraint($3,$6);
 };
 equation:
-number_expression inequality number_expression {
-    $$=new Equation($1,$2,$3);
+number_expression RC LC inequality RC LC number_expression {
+    $$=new Equation($1,$4,$7);
 }|
-number_expression EQ number_expression {
-    $$=new Equation($1,new Inequality("=="),$3);
+number_expression RC LC EQ RC LC number_expression {
+    $$=new Equation($1,new Inequality("=="),$7);
 };
 inequality:
 GT {

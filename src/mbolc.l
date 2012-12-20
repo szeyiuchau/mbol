@@ -6,6 +6,8 @@
     int li=0;
 %}
 %%
+\\mcon return MC;
+\\intcon return IC;
 \\ne return NE;
 \\emptyset return ES;
 ":" return CL;

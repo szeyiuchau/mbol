@@ -42,7 +42,9 @@
 #define CN 298
 #define CL 299
 #define ES 300
-#define NU 301
+#define IC 301
+#define MC 302
+#define NU 303
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
