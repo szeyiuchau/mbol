@@ -1,7 +1,7 @@
 \begin{mbol}
 \minf{x,c}{\sum_{i \in V}(x_{i})}
-\mcon{ \sum_{i \in V} (c_{i,j})}{=}{1}{j \in V }
-\intcon{c}
-\mcon{c_{k,i} + c_{k,j} + e_{i,j}}{\le}{2}{i\in V, j \in V, k \in V}
-\mcon{x_{i}}{\ge}{c_{i,j}}{i \in V,\; j \in V}
+\con[j \in V ]{ \sum_{i \in V} (c_{i,j}) = 1}
+\con{c \in \mathbb{Z}}
+\con[i\in V, j \in V, k \in V]{c_{k,i} + c_{k,j} + e_{i,j} \le 2}
+\con[i \in V,\; j \in V]{x_{i} \ge c_{i,j}}
 \end{mbol}

@@ -1,15 +1,15 @@
 \begin{mbol}
 \minf{w,b,R,X,Y,x,y}{R+\alpha*\sum_{i=1}^{n}(X_{i}+Y_{i})}
-\intcon{X}
-\intcon{Y}
-\mcon{X_i }{\le}{ 1}{ 1 \le i \le n}
-\mcon{Y_i }{\le}{ 1}{ 1 \le i \le n}
-\mcon{10000*X_i }{\ge}{ x_i}{ 1 \le i \le n}
-\mcon{10000*Y_i }{\ge}{ y_i}{ 1 \le i \le n}
-\mcon{\sum_{j=1}^{d}(w_j*P_{i,j})+b }{=}{ 1 - x_i }{ 1 \le i \le n}
-\mcon{\sum_{j=1}^{d}(w_j*N_{i,j})+b }{=}{ -1 + y_i }{ 1 \le i \le n}
+\con{X\in \mathbb{Z}}
+\con{Y \in \mathbb{Z}}
+\con[ 1 \le i \le n]{X_i \le 1}
+\con[ 1 \le i \le n]{Y_i \le 1}
+\con[ 1 \le i \le n]{10000*X_i \ge x_i}
+\con[ 1 \le i \le n]{10000*Y_i \ge y_i}
+\con[ 1 \le i \le n]{\sum_{j=1}^{d}(w_j*P_{i,j})+b = 1 - x_i }
+\con[ 1 \le i \le n]{\sum_{j=1}^{d}(w_j*N_{i,j})+b = -1 + y_i }
 %\con{R \ge b}
 %\con{R \ge -1*b}
-\mcon{R }{\ge}{ w_{i}}{ 1 \le i \le d}
-\mcon{R }{\ge}{ -1*w_{i}}{ 1 \le i \le d}
+\con[ 1 \le i \le d]{R \ge w_{i}}
+\con[ 1 \le i \le d]{R \ge -1*w_{i}}
 \end{mbol}

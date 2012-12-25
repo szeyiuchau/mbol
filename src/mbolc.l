@@ -6,6 +6,8 @@
     int li=0;
 %}
 %%
+"[" return LS;
+"]" return RS;
 \\mcon return MC;
 \\intcon return IC;
 \\ne return NE;

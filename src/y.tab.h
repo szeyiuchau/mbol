@@ -44,7 +44,9 @@
 #define ES 300
 #define IC 301
 #define MC 302
-#define NU 303
+#define LS 303
+#define RS 304
+#define NU 305
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1

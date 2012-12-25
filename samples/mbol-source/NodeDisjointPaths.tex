@@ -1,8 +1,8 @@
 \begin{mbol}
 \maxf{f}{\sum_{j \in V}(f_{s,j})}
-\mcon{\sum_{j \in V} (f_{i,j}) }{=}{ \sum_{j \in V} (f_{j,i}) }{ i \in V \setminus (\{s\} \cup \{t\})}
-\mcon{f_{i,j} }{\le}{ e_{i,j} }{ i \in V, \; j \in V}
-\mcon{f_{i,s} }{=}{ 0 }{ i \in V}
-\mcon{f_{t,i} }{=}{ 0 }{ i \in V}
-\mcon{\sum_{j \in V} (f_{i,j}) }{\le}{ 1 }{ i \in V \setminus \{s\}}
+\con[ i \in V \setminus (\{s\} \cup \{t\})]{\sum_{j \in V} (f_{i,j}) = \sum_{j \in V} (f_{j,i}) }
+\con[ i \in V, \; j \in V]{f_{i,j} \le e_{i,j} }
+\con[ i \in V]{f_{i,s} = 0 }
+\con[ i \in V]{f_{t,i} = 0 }
+\con[ i \in V \setminus \{s\}]{\sum_{j \in V} (f_{i,j}) \le 1 }
 \end{mbol}

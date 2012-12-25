@@ -14,7 +14,7 @@
     #include<classes.hpp>
     using namespace std;
 %}
-%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR GT LT NE LJ CN CL ES IC MC
+%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR GT LT NE LJ CN CL ES IC MC LS RS
 %union {
     int ival;
     char* sval;
@@ -94,18 +94,18 @@ constraint:
 CN LC equation RC {
     $$=new Constraint($3);
 }|
-IC LC VA RC {
+CN LC VA IN ZC RC {
     $$=new Constraint(string($3));
 }|
-MC LC equation RC LC qualifiers RC {
-    $$=new Constraint($3,$6);
+CN LS qualifiers RS LC equation RC {
+    $$=new Constraint($6,$3);
 };
 equation:
-number_expression RC LC inequality RC LC number_expression {
-    $$=new Equation($1,$4,$7);
+number_expression inequality number_expression {
+    $$=new Equation($1,$2,$3);
 }|
-number_expression RC LC EQ RC LC number_expression {
-    $$=new Equation($1,new Inequality("=="),$7);
+number_expression EQ number_expression {
+    $$=new Equation($1,new Inequality("=="),$3);
 };
 inequality:
 GT {

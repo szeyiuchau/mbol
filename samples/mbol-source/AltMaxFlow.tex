@@ -1,8 +1,8 @@
 \begin{mbol}
 \maxf{f}{\sum_{(v,u) \in E,s=v}(f_{s,u})}
-\mcon{\sum_{(v,u) \in E,v=w} (f_{w, u})}{=}{\sum_{(v,u) \in E,u=w} (f_{v,w})}{ w \in V \setminus ( \{ s \} \cup \{ t \})}
-\mcon{f_{v,u}}{\le}{d_{v,u}}{(v,u) \in E}
-\mcon{f_{v,u}}{\ge}{0}{(v,u) \in E}
-\mcon{f_{v,s}}{=}{0}{(v,u) \in E, u=s}
-\mcon{f_{t,u}}{=}{0}{(v,u) \in E, v=t}
+\con[w \in V \setminus ( \{ s \} \cup \{ t \})]{\sum_{(v,u) \in E,v=w} (f_{w, u})=\sum_{(v,u) \in E,u=w} (f_{v,w})}
+\con[(v,u) \in E]{f_{v,u} \le d_{v,u}}
+\con[(v,u) \in E]{f_{v,u} \ge 0}
+\con[(v,u) \in E, u=s]{f_{v,s} = 0}
+\con[(v,u) \in E, v=t]{f_{t,u} = 0}
 \end{mbol}
