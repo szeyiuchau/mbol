@@ -418,7 +418,6 @@ int main(int argc,char* argv[]) {
         yyin=fopen(inputName.c_str(),"r");
         yyparse();
         fclose(yyin);
-        
         MbolElementVisitor* vTypes=new MbolElementVisitorTypeHelper();
         program->accept(*vTypes);
         types=((MbolElementVisitorTypeHelper*)vTypes)->types;
