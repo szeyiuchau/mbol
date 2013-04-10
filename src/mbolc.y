@@ -517,7 +517,6 @@ int main(int argc,char* argv[]) {
         system(("rm -rf "+texMainName+".aux").c_str());
         system(("rm -rf "+texMainName+".tex").c_str());
         system(("mv "+texMainName+".pdf "+texMainName.substr(0,texMainName.size()-5)+".pdf").c_str());
-    }
-    
+    }    
     return 0;
 }
