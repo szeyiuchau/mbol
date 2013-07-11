@@ -1,4 +1,7 @@
+#include<fstream>
+#include<iostream>
 #include<ChromaticNumber.hpp>
+#include<iomanip>
 #include<HelloWorld.hpp>
 #include<MaxFlow.hpp>
 #include<NodeDisjointPaths.hpp>
@@ -65,30 +68,30 @@ int main(int argc,char* argv[]) {
         writeGraph();
         exit(0);
     }
-    //set<Thing,ThingCompare> V=VV;
-        set<Thing,ThingCompare> V=thingConversion(VV);
+    //set<Element,ElementCompare> V=VV;
+        set<Element,ElementCompare> V=thingConversion(VV);
     {
-        cout << "Thing test:" << endl;
-        Thing a=5;
-        Thing b=4;
-        Thing e=3;
-        Thing f=9;
-        set<Thing,ThingCompare> c;
+        cout << "Element test:" << endl;
+        Element a=5;
+        Element b=4;
+        Element e=3;
+        Element f=9;
+        set<Element,ElementCompare> c;
         c.insert(a);
         c.insert(b);
-        Thing d=c;
-        vector<Thing> g;
+        Element d=c;
+        vector<Element> g;
         g.push_back(d);
         g.push_back(e);
-        vector<Thing> i;
+        vector<Element> i;
         i.push_back(d);
         i.push_back(f);
-        Thing k=g;
-        Thing l=i;
-        set<Thing,ThingCompare> h;
+        Element k=g;
+        Element l=i;
+        set<Element,ElementCompare> h;
         h.insert(k);
         h.insert(l);
-        Thing j=h;
+        Element j=h;
         cout << l.print() << " and " << k.print() << " are tuples in the set " << j.print() << endl;
     }
     cout << "\nHelloWorld:" << endl;

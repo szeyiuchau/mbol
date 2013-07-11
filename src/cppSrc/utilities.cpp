@@ -15,8 +15,6 @@ string temporary(string val) {
 set<string> getTemporaries() {
     return globalTemporaries;
 }
-
-
 SetType::SetType(string a) {
     name=a;
     isReturn=false;
@@ -35,7 +33,7 @@ string SetType::getCPLEXType() {
     if(length==0) {
         type="int";
     } else {
-        type="set<Thing,ThingCompare>";
+        type="set<Element,ElementCompare>";
     }
     /*    if(base->isTuple) {
         for(int i=0;i<length;i++) {
@@ -127,7 +125,7 @@ string NumberType::getCPLEXType() {
             pre+="map<int,";
         }
         if((*j)->setPaths.begin()->first==1) {
-            pre+="map<set<Thing,ThingCompare>,";
+            pre+="map<set<Element,ElementCompare>,";
             //pre+="map<set<int>,";
         }
     }
@@ -140,15 +138,15 @@ string NumberType::getCPLEXType() {
             post+=">";
         }
         if((*j)->setPaths.begin()->first==1) {
-            post+=",ThingCompare>";
+            post+=",ElementCompare>";
             //post+=",set1comp>";
         }
     }
     if(isVariable) {
         if(isInteger) {
-            return pre+"MyIloIntVar"+post;
+            return pre+"MBOLIntVar"+post;
         } else {
-            return pre+"MyIloNumVar"+post;
+            return pre+"MBOLNumVar"+post;
         }
     } else {
         if(isInteger) {

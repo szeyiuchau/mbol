@@ -52,4 +52,5 @@ class NumberType : public Type {
     string print(bool plural=false);
 };
 
+
 #endif

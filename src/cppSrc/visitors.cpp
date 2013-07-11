@@ -54,7 +54,8 @@ void MbolElementVisitorPrinter::visit(const Constraint* constraint) {
 void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
     
     // start making all the code
-    code="#include<set>\n#include<map>\n#include<ilcplex/ilocplex.h>\n#include<mbol.hpp>\nusing namespace std;\n#ifndef MBOL_"+className+"\n#define MBOL_"+className+"\nclass "+className+" {\npublic:\nbool init();\nbool solve();\n"+className+"();\n~"+className+"();\nbool hasInitialized;\nIloCplex cplex;\nIloEnv env;\ndouble objValue;\nIloExpr objExp;\n";
+//#include<ilcplex/ilocplex.h>\n
+    code="#include<set>\n#include<map>\n#include<mbol.hpp>\nusing namespace std;\n#ifndef MBOL_"+className+"\n#define MBOL_"+className+"\nclass "+className+" {\npublic:\nbool init();\nbool solve();\n"+className+"();\n~"+className+"();\nbool hasInitialized;\nMBOLSolver solver;\nMBOLEnv env;\ndouble objValue;\nMBOLExpr objExp;\n";
     
     // create struct for returning variables 
     /*
@@ -119,31 +120,33 @@ void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
     
     code+="};\n#endif\n";
     code+=className+"::"+className+"() {\nhasInitialized=false;\n}\nbool "+className+"::init() {\n";
-    code+="IloModel model(env);\ng_env=env;\ntry {\n";
-    
+    code+="g_env=env;\nMBOLModel model;\n";
+//try {\n     }";
     
     // take care of simple variables
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isVariable&&i->second->isNumber&&((NumberType*)i->second)->indices.front().size()==0) {
             if(i->second->isInteger) {
-                code+="MyIloIntVar";
+                code+="MBOLIntVar";
             } else {
-                code+="MyIloNumVar";
+                code+="MBOLNumVar";
             }
             code+=" temp"+i->first+";\n"+i->first+"=temp"+i->first+";\n";
         }
     }
     
-    code+="IloExpr tempObj(env);\n";
+    code+="MBOLExpr tempObj(env);\n";
     code+="objExp=tempObj;\n";
 }    
 
 void MbolElementVisitorCPLEX::visit(const Program* program) {
-    code+="IloCplex tempCplex(model);\ncplex=tempCplex;\n";
+    code+="MBOLSolver tempSolver(model);\nsolver=tempSolver;\n";
     if(quiet) {
-        code+="cplex.setOut(env.getNullStream());\n";
+//        code+="solver.setOut(env.getNullStream());\n";
+code+="solver.quiet();\n";
     }
-    code+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nhasInitialized=true;\nreturn true;\n}\n";
+//    code+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\n";
+    code+="hasInitialized=true;\nreturn true;\n}\n";
     
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isConstant) {
@@ -151,11 +154,11 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
             if(i->second->isSet) {
                 SetType* sType=(SetType*)i->second;
                 if(sType->setPaths.begin()->first==0) {
-                    code+=i->first+"=readIntegerThing(tokens);\n";
+                    code+=i->first+"=readIntegerElement(tokens);\n";
                 } else {
-                    code+=i->first+"=readSetThing(tokens);\n";
+                    code+=i->first+"=readSetElement(tokens);\n";
                 }
-                //code+="cout << Thing("+i->first+").print() << endl;\n";
+                //code+="cout << Element("+i->first+").print() << endl;\n";
             } else if(i->second->isNumber) {
                 NumberType* nType=(NumberType*)i->second;
                 code+="while(!tokens.empty()&&!isVariable(tokens.front())) {\n";
@@ -163,9 +166,9 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                 int num=0;
                 for(list<SetType*>::iterator j=example.begin();j!=example.end();j++) {
                     if((*j)->setPaths.begin()->first==0) {
-                        code+="int index"+convert(num++)+"=readIntegerThing(tokens);\n";
+                        code+="int index"+convert(num++)+"=readIntegerElement(tokens);\n";
                     } else {
-                        code+="set<Thing,ThingCompare> index"+convert(num++)+"=readSetThing(tokens);\n";
+                        code+="set<Element,ElementCompare> index"+convert(num++)+"=readSetElement(tokens);\n";
                     }
                 }
                 num=0;
@@ -216,14 +219,14 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                             code+="map<int,";
                         }
                         if((*k)->setPaths.begin()->first==1) {
-                            code+="map<set<Thing,ThingCompare>,";
+                            code+="map<set<Element,ElementCompare>,";
                         }
                     }
                 }
                 if(t->isInteger) {
-                    code+="MyIloIntVar";
+                    code+="MBOLIntVar";
                 } else {
-                    code+="MyIloNumVar";
+                    code+="MBOLNumVar";
                 }
                 temp=example.size()-j;
                 for(list<SetType*>::reverse_iterator k=example.rbegin();k!=example.rend();k++) {
@@ -236,16 +239,16 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                             code+=">";
                         }
                         if((*k)->setPaths.begin()->first==1) {
-                            code+=",ThingCompare>";
+                            code+=",ElementCompare>";
                         }
                     }
                 }
                 code+="::iterator iter"+convert(tVal)+"="+prev+".begin();iter"+convert(tVal)+"!="+prev+".end();iter"+convert(tVal)+"++) {\n";
-                indices+="Thing(iter"+convert(tVal)+"->first).print() << \" \" << ";
+                indices+="Element(iter"+convert(tVal)+"->first).print() << \" \" << ";
                 prev="iter"+convert(tVal)+"->second";
                 tVal++;
             }
-            code+="out << "+indices+"cplex.getValue("+prev+") << endl;\n";
+            code+="out << "+indices+"solver.getValue("+prev+") << endl;\n";
             for(list<SetType*>::iterator j=example.begin();j!=example.end();j++) {
                 code+="}\n";
             }
@@ -270,7 +273,9 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
     
     code+="}\n";
     
-    code+="bool "+className+"::solve() {\nif(!hasInitialized) {\ninit();\n}\nif(!hasInitialized) {\nreturn false;\n}\ntry{\ncplex.solve();\nobjValue=cplex.getValue(objExp);\n";
+    code+="bool "+className+"::solve() {\nif(!hasInitialized) {\ninit();\n}\nif(!hasInitialized) {\nreturn false;\n}\n";
+//try{\n     }
+    code+="solver.solve();\nobjValue=solver.getValue(objExp);\n";
     
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isReturn) {
@@ -289,14 +294,14 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                             code+="map<int,";
                         }
                         if((*k)->setPaths.begin()->first==1) {
-                            code+="map<set<Thing,ThingCompare>,";
+                            code+="map<set<Element,ElementCompare>,";
                         }
                     }
                 }
                 if(t->isInteger) {
-                    code+="MyIloIntVar";
+                    code+="MBOLIntVar";
                 } else {
-                    code+="MyIloNumVar";
+                    code+="MBOLNumVar";
                 }
                 temp=example.size()-j;
                 for(list<SetType*>::reverse_iterator k=example.rbegin();k!=example.rend();k++) {
@@ -309,7 +314,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                             code+=">";
                         }
                         if((*k)->setPaths.begin()->first==1) {
-                            code+=",ThingCompare>";
+                            code+=",ElementCompare>";
                         }
                     }
                 }
@@ -318,7 +323,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
                 prev="iter"+convert(tVal)+"->second";
                 tVal++;
             }
-            code+=i->first+indices+"=cplex.getValue("+prev+");\n";
+            code+=i->first+indices+"=solver.getValue("+prev+");\n";
             for(list<SetType*>::iterator j=example.begin();j!=example.end();j++) {
                 code+="}\n";
             }
@@ -326,7 +331,8 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
         
     }
     
-    code+="} catch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\nreturn true;\n}\n"+className+"::~"+className+"() {\nenv.end();\n}\n";
+//    code+="} catch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\n
+code+="return true;\n}\n"+className+"::~"+className+"() {\nenv.end();\n}\n";
     
 }
 MbolElementVisitorCPLEX::MbolElementVisitorCPLEX(map<string,Type*> a,bool d,string e) {
@@ -368,7 +374,7 @@ void MbolElementVisitorCPLEX::visit(const NumberLiteral* numberLiteral) {
     if(justDouble) {
         code+="double "+numberLiteral->value+"=0;\n";
     } else {
-        code+="IloExpr "+numberLiteral->value+"(env);\n";
+        code+="MBOLExpr "+numberLiteral->value+"(env);\n";
     }
     code+=numberLiteral->value+"="+numberLiteral->value+"+"+numberLiteral->number+";\n";
 }
@@ -391,7 +397,7 @@ void MbolElementVisitorCPLEX::visit(const Qualifier* qualifier) {
             code+=types[qualifier->variable]->getCPLEXType()+" "+qualifier->variable+"=*"+qualifier->iter+";\n";
         } else {
             for(int i=0;i<qualifier->tupleIndices->indices.size();i++) {
-                code+=types[qualifier->tupleIndices->indices[i]]->getCPLEXType()+" "+qualifier->tupleIndices->indices[i]+"="+qualifier->iter+"->tupleThing["+convert(i)+"];\n";
+                code+=types[qualifier->tupleIndices->indices[i]]->getCPLEXType()+" "+qualifier->tupleIndices->indices[i]+"="+qualifier->iter+"->tupleElement["+convert(i)+"];\n";
             }
         }
     }
@@ -411,7 +417,7 @@ void MbolElementVisitorCPLEX::visit(const VariableMap* variableMap) {
     if(justDouble) {
         code+="double "+variableMap->value+"=0;\n";
     } else {
-        code+="IloExpr "+variableMap->value+"(env);\n";
+        code+="MBOLExpr "+variableMap->value+"(env);\n";
     }
     code+=variableMap->value+"="+variableMap->value+"+"+variableMap->variableName;
     for(list<ElementExpression*>::iterator i=variableMap->indices->elementExpressions.begin();i!=variableMap->indices->elementExpressions.end();i++) {
@@ -420,7 +426,7 @@ void MbolElementVisitorCPLEX::visit(const VariableMap* variableMap) {
     code+=";\n";
 }
 void MbolElementVisitorCPLEX::specialVisit(const Sum* sum) {
-    code+="IloExpr "+sum->value+"(env);\n";
+    code+="MBOLExpr "+sum->value+"(env);\n";
     if(sum->sumType=="*") {
         code+=sum->value+"="+sum->value+"+1;\n";
     }
@@ -435,7 +441,7 @@ void MbolElementVisitorCPLEX::visit(const NumberExpression* numberExpression) {
     if(justDouble) {
         code+="double "+numberExpression->value+"=0;\n";
     } else {
-        code+="IloExpr "+numberExpression->value+"(env);\n";
+        code+="MBOLExpr "+numberExpression->value+"(env);\n";
     }
     code+=numberExpression->value+"="+numberExpression->value+"+";
     list<NumberOperator*>::const_iterator j=numberExpression->numberOperators.begin();
@@ -450,15 +456,14 @@ void MbolElementVisitorCPLEX::visit(const NumberExpression* numberExpression) {
 }
 void MbolElementVisitorCPLEX::visit(const Objective* objective) {
     code+="objExp="+objective->numberExpression->value+";\n";
-    code+="IloObjective obj=Ilo";
+    code+="model.";
     if(objective->objectiveType->value=="max") {
-        code+="Maximize";
+        code+="maximize";
     }
     if(objective->objectiveType->value=="min") {
-        code+="Minimize";
+        code+="minimize";
     }
-    code+="(env,objExp);\n";
-    code+="model.add(obj);\n";
+    code+="(objExp);\n";
 }
 void MbolElementVisitorCPLEX::visit(const ElementSet* elementSet) {
     code+=types[elementSet->value]->getCPLEXType()+" "+elementSet->value+";\n";
@@ -468,7 +473,7 @@ void MbolElementVisitorCPLEX::visit(const Fraction* fraction) {
     if(justDouble) {
         code+="double "+fraction->value+"=0;\n";
     } else {
-        code+="IloExpr "+fraction->value+"(env);\n";
+        code+="MBOLExpr "+fraction->value+"(env);\n";
     }
     code+=fraction->value+"="+fraction->value+"+"+fraction->numerator->value+"/"+fraction->denominator->value+";\n";
 }
