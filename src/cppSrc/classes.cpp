@@ -386,16 +386,16 @@ void SumQualifiers::accept(MbolElementVisitor& visitor) {
     qualifiers->accept(visitor);
     visitor.visit(this);
 }
-Sum::Sum(string a,SumQualifiers* b,NumberExpression* c) {
+Sum::Sum(string a,SumQualifiers* b,NumberSubexpression* c) {
     sumType=a;
     sumQualifiers=b;
-    numberExpression=c;
+    numberSubexpression=c;
     value=temporary("tSetSum");
 }
 void Sum::accept(MbolElementVisitor& visitor) {
     visitor.specialVisit(this);
     sumQualifiers->accept(visitor);
-    numberExpression->accept(visitor);
+    numberSubexpression->accept(visitor);
     visitor.visit(this);
 }
 ElementOperator::ElementOperator(string a) {

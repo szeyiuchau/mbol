@@ -255,8 +255,8 @@ indices CO element_expression {
     $1->elementExpressions.push_back($3);
 };
 sum:
-SM sum_qualifiers LP number_expression RP {
-    $$=new Sum(string($1),$2,$4);
+SM sum_qualifiers number_subexpression {
+    $$=new Sum(string($1),$2,$3);
 };
 sum_qualifiers:
 US LC VA EQ NU RC CT LC element_expression RC {

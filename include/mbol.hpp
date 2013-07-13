@@ -1,4 +1,5 @@
 #include<set>
+#include<assert.h>
 #include<list>
 #include<iostream>
 #include<vector>
@@ -350,6 +351,7 @@ bool isVariable(string x) {
     return (y>=97&&y<=122)||(y>=65&&y<=90);
 }
 
+map<string,string> variableConversion;
 //#define CPLEX
 
 #ifdef CPLEX
@@ -385,11 +387,13 @@ class MBOLSolver : public IloCplex {
 };
 class MBOLIntVar : public IloIntVar {
     public:
+    string name;
     MBOLIntVar() : IloIntVar(g_env) {
     }
 };
 class MBOLNumVar : public IloNumVar {
     public:
+    string name;
     MBOLNumVar() : IloNumVar(g_env,-1*IloInfinity,IloInfinity) {
     }
 };
@@ -411,9 +415,13 @@ MBOLEnv g_env;
 
 class MBOLExpr {
     public:
+    string name;
+enum EXPR_TYPE {EXPR,INT,NUM};
+    EXPR_TYPE type;
     double constant;
     map<string,double> expressions;
     MBOLExpr() {
+        type=EXPR;
         constant=0;
     }
     MBOLExpr(MBOLEnv a) {
@@ -606,11 +614,19 @@ int problem=0;
 
 class MBOLSolver {
     public:
+    double objective;
+    map<string,string> results;
+    string mps;
+double multiplier;
     MBOLSolver() {
     }
     MBOLSolver(MBOLModel a) {
-        //a.print();
-        string mps="NAME THING\n";
+        mps="NAME THING\n";
+if(a.type=="MAX") {
+multiplier=-1;
+} else {
+multiplier=1;
+}
         mps+="OBJSENSE\n";
         mps+=" "+a.type+"\n";
         mps+="ROWS\n";
@@ -628,11 +644,17 @@ class MBOLSolver {
                 string constraint="CONSTRAINT"+convert(num++);
                 if(i->lhs.expressions.count(var)&&i->lhs.expressions[var]) {
                     active.insert(var);
-                    mps+="    "+var+" "+constraint+" "+convert(i->lhs.expressions[var])+"\n";
+if(variableConversion.count(var)==0) {
+cout << var << endl;
+}
+                    mps+="    "+variableConversion[var]+" "+constraint+" "+convert(i->lhs.expressions[var])+"\n"; //
                 }
             }
             if(a.obj.expressions.count(var)) {
-                mps+="    "+var+" OBJ "+convert(a.obj.expressions[var])+"\n";
+if(variableConversion.count(var)==0) {
+cout << var << endl;
+}
+                mps+="    "+variableConversion[var]+" OBJ "+convert(a.obj.expressions[var])+"\n"; //
             }
         }
         mps+="RHS\n";
@@ -644,29 +666,58 @@ class MBOLSolver {
         mps+="BOUNDS\n";
         for(set<string>::iterator i=MBOLIntegers.begin();i!=MBOLIntegers.end();i++) {
             if(active.count(*i)) {
-                mps+=" LI BOUND "+(*i)+" 0\n";
+assert(variableConversion.count(*i)==1);
+                mps+=" LI BOUND "+variableConversion[(*i)]+" 0\n"; //
             }
         }
         mps+="ENDATA\n";
-        ofstream out(("/tmp/problem_"+convert(problem++)+".mps").c_str());
-        out << mps << endl;
-        out.close();
-        //cout << mps << endl;
     }
     void solve() {
+        ofstream out("/tmp/problem.mps");
+        out << mps << endl;
+        out.close();
+        system("symphony -F /tmp/problem.mps > /tmp/solution.txt");
+        ifstream in("/tmp/solution.txt");
+        string dummy;
+        string prev="";
+        while(in >> dummy) {
+            if(dummy=="Cost:"&&prev=="Solution") {
+                break;
+            }
+            prev=dummy;
+        }
+        in >> objective;
+        for(int i=0;i<11;i++) {
+            in >> dummy;
+        }
+        string key,val;
+        while(in >> key >> val) {
+            results[key]=val;
+        }
+        in.close();
     }
     void quiet() {
     }
     double getValue(MBOLExpr a) {
-        return 0;
+        if(a.type==MBOLExpr::INT) {
+            return atof(results[variableConversion[a.name]].c_str());
+        } else if(a.type==MBOLExpr::NUM) {
+            return atof(results[variableConversion[a.name]].c_str());
+        } else if(a.type==MBOLExpr::EXPR) {
+            return multiplier*objective;
+        } else {
+            assert(0);
+        }
     }
 };
 
 class MBOLIntVar : public MBOLExpr {
     public:
     MBOLIntVar() {
+        type=INT;
         string val="t"+convert(MBOLIndexCounter++);
         MBOLIntegers.insert(val);
+        name=val;
         expressions[val]=1;
     }
 };
@@ -674,7 +725,9 @@ class MBOLIntVar : public MBOLExpr {
 class MBOLNumVar : public MBOLExpr {
     public:
     MBOLNumVar() {
+        type=NUM;
         string val="t"+convert(MBOLIndexCounter++);
+        name=val;
         expressions[val]=1;
     }
 };

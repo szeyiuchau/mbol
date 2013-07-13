@@ -2,32 +2,34 @@
 \usepackage{xstring}
 \usepackage{amsmath}
 \newcounter{subjto}
-\newcommand{\maxf}[2]{\underset{#1}{\text{maximize}}&\multicolumn{4}{l}{#2}\\}
-\newcommand{\minf}[2]{\underset{#1}{\text{minimize}}&\multicolumn{4}{l}{#2}\\}
+\let\oldsum\sum
+\renewcommand{\sum}{\oldsum\limits}
+\newcommand{\maxf}[2]{\underset{#1}{\text{maximize}}&&\multicolumn{5}{l}{#2,}\\}
+\newcommand{\minf}[2]{\underset{#1}{\text{minimize}}&&\multicolumn{5}{l}{#2,}\\}
 \newcommand{\con}[2][]{
     \ifnum \value{subjto}>0
     \setcounter{subjto}{0}
     \text{subject to}
     \fi
     \IfSubStr{#2}{\in}{
-        & \StrBefore{#2}{\in} & \in & \mathbb{Z}
+        &\hspace{0.3in}& \StrBefore{#2}{\in} & \in & \mathbb{Z}
         }{
         \IfSubStr{#2}{=}{
-            & \StrBefore{#2}{=} & = & \StrBehind{#2}{=}
+            &\hspace{0.3in}& \StrBefore{#2}{=} & = & \StrBehind{#2}{=}
             }{\IfSubStr{#2}{\le}{
-                & \StrBefore{#2}{\le} & \le & \StrBehind{#2}{\le}
+                &\hspace{0.3in}& \StrBefore{#2}{\le} & \le & \StrBehind{#2}{\le}
                 }{\IfSubStr{#2}{\ge}{
-                    & \StrBefore{#2}{\ge} & \ge & \StrBehind{#2}{\ge}
+                    &\hspace{0.3in}& \StrBefore{#2}{\ge} & \ge & \StrBehind{#2}{\ge}
                     }{
                     error
                 }
             }
         }
-    }
+    },
     \IfStrEq{#1}{}{
-        & 
+        &\hspace{0.3in}& 
         } {
-        & \forall #1
+        &\hspace{0.3in}& \forall #1,
     }
     \\
 }
@@ -35,7 +37,7 @@
 {
 \setcounter{subjto}{1}
 \begin{equation*}
-\begin{array}{crcll}
+\begin{array}{ccrclcl}
 }
 {
 \end{array}

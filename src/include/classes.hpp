@@ -197,8 +197,8 @@ class Sum : public MbolElement {
     string value;
     string sumType;
     SumQualifiers* sumQualifiers;
-    NumberExpression* numberExpression;
-    Sum(string a,SumQualifiers* b,NumberExpression* c);
+    NumberSubexpression* numberSubexpression;
+    Sum(string a,SumQualifiers* b,NumberSubexpression* c);
     virtual void accept(MbolElementVisitor& visitor);
 };
 class ElementOperator : public MbolElement {

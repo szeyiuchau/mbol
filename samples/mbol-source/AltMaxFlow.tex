@@ -1,6 +1,6 @@
 \begin{mbol}
 \maxf{f}{\sum_{(v,u) \in E,s=v}(f_{s,u})}
-\con[w \in V \setminus ( \{ s \} \cup \{ t \})]{\sum_{(v,u) \in E,v=w} (f_{w, u})=\sum_{(v,u) \in E,u=w} (f_{v,w})}
+\con[w \in V \setminus ( \{ s \} \cup \{ t \})]{\sum_{(v,u) \in E,v=w} f_{w, u}=\sum_{(v,u) \in E,u=w} (f_{v,w})}
 \con[(v,u) \in E]{f_{v,u} \le d_{v,u}}
 \con[(v,u) \in E]{f_{v,u} \ge 0}
 \con[(v,u) \in E, u=s]{f_{v,s} = 0}

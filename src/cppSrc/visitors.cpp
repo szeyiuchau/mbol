@@ -50,11 +50,10 @@ void MbolElementVisitorPrinter::visit(const Constraint* constraint) {
     cout << "constraint" << endl;
 }
 
-
 void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
     
     // start making all the code
-//#include<ilcplex/ilocplex.h>\n
+    //#include<ilcplex/ilocplex.h>\n
     code="#include<set>\n#include<map>\n#include<mbol.hpp>\nusing namespace std;\n#ifndef MBOL_"+className+"\n#define MBOL_"+className+"\nclass "+className+" {\npublic:\nbool init();\nbool solve();\n"+className+"();\n~"+className+"();\nbool hasInitialized;\nMBOLSolver solver;\nMBOLEnv env;\ndouble objValue;\nMBOLExpr objExp;\n";
     
     // create struct for returning variables 
@@ -124,7 +123,7 @@ void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
 //try {\n     }";
     
     // take care of simple variables
-    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+    /*for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isVariable&&i->second->isNumber&&((NumberType*)i->second)->indices.front().size()==0) {
             if(i->second->isInteger) {
                 code+="MBOLIntVar";
@@ -133,19 +132,73 @@ void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
             }
             code+=" temp"+i->first+";\n"+i->first+"=temp"+i->first+";\n";
         }
-    }
+    }*/
     
     code+="MBOLExpr tempObj(env);\n";
     code+="objExp=tempObj;\n";
 }    
 
 void MbolElementVisitorCPLEX::visit(const Program* program) {
+
+    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+        if(i->second->isVariable) {
+            NumberType* t=(NumberType*)i->second;
+            list<SetType*> example=t->indices.front();
+            int tVal=0;
+            string prev=i->first;
+            string indices="";
+            for(int j=0;j<example.size();j++) {
+                code+="for(";
+                int temp=0;
+                for(list<SetType*>::iterator k=example.begin();k!=example.end();k++) {
+                    temp++;
+                    if(temp>j) {
+                        if((*k)->setPaths.begin()->first==0) {
+                            code+="map<int,";
+                        }
+                        if((*k)->setPaths.begin()->first==1) {
+                            code+="map<set<Element,ElementCompare>,";
+                        }
+                    }
+                }
+                if(t->isInteger) {
+                    code+="MBOLIntVar";
+                } else {
+                    code+="MBOLNumVar";
+                }
+                temp=example.size()-j;
+                for(list<SetType*>::reverse_iterator k=example.rbegin();k!=example.rend();k++) {
+                    temp--;
+                    if(temp>=0) {
+                        if((*k)->setPaths.begin()->first==0) {
+                            if(code[code.size()-1]=='>') {
+                                code+=" ";
+                            }
+                            code+=">";
+                        }
+                        if((*k)->setPaths.begin()->first==1) {
+                            code+=",ElementCompare>";
+                        }
+                    }
+                }
+                code+="::iterator iter"+convert(tVal)+"="+prev+".begin();iter"+convert(tVal)+"!="+prev+".end();iter"+convert(tVal)+"++) {\n";
+                indices+="+string(\"_\")+convert(iter"+convert(tVal)+"->first)";
+                prev="iter"+convert(tVal)+"->second";
+                tVal++;
+            }
+            code+="variableConversion["+prev+".name]=string(\""+i->first+"\")"+indices+";\n";
+            for(list<SetType*>::iterator j=example.begin();j!=example.end();j++) {
+                code+="}\n";
+            }
+        }
+    }
+
     code+="MBOLSolver tempSolver(model);\nsolver=tempSolver;\n";
     if(quiet) {
-//        code+="solver.setOut(env.getNullStream());\n";
-code+="solver.quiet();\n";
+        //        code+="solver.setOut(env.getNullStream());\n";
+        code+="solver.quiet();\n";
     }
-//    code+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\n";
+    //    code+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\n";
     code+="hasInitialized=true;\nreturn true;\n}\n";
     
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
@@ -331,8 +384,7 @@ code+="solver.quiet();\n";
         
     }
     
-//    code+="} catch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\n
-code+="return true;\n}\n"+className+"::~"+className+"() {\nenv.end();\n}\n";
+    code+="return true;\n}\n"+className+"::~"+className+"() {\nenv.end();\n}\n";
     
 }
 MbolElementVisitorCPLEX::MbolElementVisitorCPLEX(map<string,Type*> a,bool d,string e) {
@@ -432,7 +484,7 @@ void MbolElementVisitorCPLEX::specialVisit(const Sum* sum) {
     }
 }
 void MbolElementVisitorCPLEX::visit(const Sum* sum) {
-    code+=sum->value+"="+sum->value+sum->sumType+sum->numberExpression->value+";\n";
+    code+=sum->value+"="+sum->value+sum->sumType+sum->numberSubexpression->value+";\n";
     for(list<Qualifier*>::iterator i=sum->sumQualifiers->qualifiers->qualifiers.begin();i!=sum->sumQualifiers->qualifiers->qualifiers.end();i++) {
         code+="}\n";
     }
