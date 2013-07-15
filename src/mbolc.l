@@ -6,6 +6,7 @@
     int li=0;
 %}
 %%
+",...," return DD;
 "[" return LS;
 "]" return RS;
 \\mcon return MC;

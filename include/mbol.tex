@@ -4,12 +4,16 @@
 \newcounter{subjto}
 \let\oldsum\sum
 \renewcommand{\sum}{\oldsum\limits}
-\newcommand{\maxf}[2]{\underset{#1}{\text{maximize}}&&\multicolumn{5}{l}{#2,}\\}
-\newcommand{\minf}[2]{\underset{#1}{\text{minimize}}&&\multicolumn{5}{l}{#2,}\\}
+\newcommand{\maxf}[2]{\underset{#1}{\text{maximize}}&&#2}
+\newcommand{\minf}[2]{\underset{#1}{\text{minimize}}&&#2}
 \newcommand{\con}[2][]{
     \ifnum \value{subjto}>0
     \setcounter{subjto}{0}
+    \\
     \text{subject to}
+    \else
+    ,
+    \\
     \fi
     \IfSubStr{#2}{\in}{
         &\hspace{0.3in}& \StrBefore{#2}{\in} & \in & \mathbb{Z}
@@ -25,13 +29,13 @@
                 }
             }
         }
-    },
-    \IfStrEq{#1}{}{
-        &\hspace{0.3in}& 
-        } {
-        &\hspace{0.3in}& \forall #1,
     }
-    \\
+    \IfStrEq{#1}{}{
+%        &\hspace{0.3in}& 
+        } {
+        ,&\hspace{0.3in}& \forall #1
+    }
+    
 }
 \newenvironment{mbol}
 {
@@ -40,6 +44,7 @@
 \begin{array}{ccrclcl}
 }
 {
+.\\
 \end{array}
 \end{equation*}
 }

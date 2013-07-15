@@ -162,8 +162,14 @@ VA SE element_expression {
 NU LE VA LE element_expression {
     $$=new Qualifier(string($3),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string($1),$5))));
 }|
+VA EQ NU DD element_expression {
+    $$=new Qualifier(string($1),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string($3),$5))));
+}|
 NU LE VA LE NU {
     $$=new Qualifier(string($3),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string($1),string($5)))));
+}|
+VA EQ NU DD NU {
+    $$=new Qualifier(string($1),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string($3),string($5)))));
 }|
 VA IN element_expression {
     $$=new Qualifier(string($1),"in",$3);

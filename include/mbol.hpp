@@ -617,16 +617,16 @@ class MBOLSolver {
     double objective;
     map<string,string> results;
     string mps;
-double multiplier;
+    double multiplier;
     MBOLSolver() {
     }
     MBOLSolver(MBOLModel a) {
         mps="NAME THING\n";
-if(a.type=="MAX") {
-multiplier=-1;
-} else {
-multiplier=1;
-}
+        if(a.type=="MAX") {
+            multiplier=-1;
+        } else {
+            multiplier=1;
+        }
         mps+="OBJSENSE\n";
         mps+=" "+a.type+"\n";
         mps+="ROWS\n";
@@ -644,16 +644,16 @@ multiplier=1;
                 string constraint="CONSTRAINT"+convert(num++);
                 if(i->lhs.expressions.count(var)&&i->lhs.expressions[var]) {
                     active.insert(var);
-if(variableConversion.count(var)==0) {
-cout << var << endl;
-}
+                    if(variableConversion.count(var)==0) {
+                        cout << var << endl;
+                    }
                     mps+="    "+variableConversion[var]+" "+constraint+" "+convert(i->lhs.expressions[var])+"\n"; //
                 }
             }
             if(a.obj.expressions.count(var)) {
-if(variableConversion.count(var)==0) {
-cout << var << endl;
-}
+                if(variableConversion.count(var)==0) {
+                    cout << var << endl;
+                }
                 mps+="    "+variableConversion[var]+" OBJ "+convert(a.obj.expressions[var])+"\n"; //
             }
         }
@@ -664,19 +664,27 @@ cout << var << endl;
             mps+="    RHS1 "+constraint+" "+convert(i->rhs.constant)+"\n";
         }
         mps+="BOUNDS\n";
-        for(set<string>::iterator i=MBOLIntegers.begin();i!=MBOLIntegers.end();i++) {
-            if(active.count(*i)) {
-assert(variableConversion.count(*i)==1);
-                mps+=" LI BOUND "+variableConversion[(*i)]+" 0\n"; //
+        for(int i=0;i<MBOLIndexCounter;i++) {
+            string var="t"+convert(i);
+            num=0;
+            if(active.count(var)) {
+                if(MBOLIntegers.count(var)) {
+                    mps+=" LI BOUND "+variableConversion[var]+" -1000000\n"; //
+                } else {
+                    mps+=" LO BOUND "+variableConversion[var]+" -1000000\n"; //
+                }
             }
         }
         mps+="ENDATA\n";
     }
-    void solve() {
-        ofstream out("/tmp/problem.mps");
+    void write(string s) {
+        ofstream out(s.c_str());
         out << mps << endl;
         out.close();
-        system("symphony -F /tmp/problem.mps > /tmp/solution.txt");
+    }
+    void solve() {
+        write("/tmp/problem.mps");
+        int dontcare=system("symphony -F /tmp/problem.mps > /tmp/solution.txt");
         ifstream in("/tmp/solution.txt");
         string dummy;
         string prev="";
@@ -720,6 +728,13 @@ class MBOLIntVar : public MBOLExpr {
         name=val;
         expressions[val]=1;
     }
+    MBOLExpr& operator=(const MBOLIntVar& a) {
+        expressions.erase(name);
+        name=a.name;
+        expressions[name]=1;
+        type=INT;
+        return *this;
+    }
 };
 
 class MBOLNumVar : public MBOLExpr {
@@ -729,6 +744,13 @@ class MBOLNumVar : public MBOLExpr {
         string val="t"+convert(MBOLIndexCounter++);
         name=val;
         expressions[val]=1;
+    }
+    MBOLExpr& operator=(const MBOLNumVar& a) {
+        expressions.erase(name);
+        name=a.name;
+        expressions[name]=1;
+        type=NUM;
+        return *this;
     }
 };
 

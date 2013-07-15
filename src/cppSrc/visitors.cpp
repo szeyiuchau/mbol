@@ -123,7 +123,7 @@ void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
 //try {\n     }";
     
     // take care of simple variables
-    /*for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
+    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isVariable&&i->second->isNumber&&((NumberType*)i->second)->indices.front().size()==0) {
             if(i->second->isInteger) {
                 code+="MBOLIntVar";
@@ -132,7 +132,7 @@ void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
             }
             code+=" temp"+i->first+";\n"+i->first+"=temp"+i->first+";\n";
         }
-    }*/
+    }
     
     code+="MBOLExpr tempObj(env);\n";
     code+="objExp=tempObj;\n";
