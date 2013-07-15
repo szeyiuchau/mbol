@@ -671,7 +671,7 @@ class MBOLSolver {
                 if(MBOLIntegers.count(var)) {
                     mps+=" LI BOUND "+variableConversion[var]+" -1000000\n"; //
                 } else {
-                    mps+=" LO BOUND "+variableConversion[var]+" -1000000\n"; //
+                    mps+=" FR BOUND "+variableConversion[var]+"\n"; //
                 }
             }
         }
