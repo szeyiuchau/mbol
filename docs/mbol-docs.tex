@@ -40,11 +40,48 @@ This document should explain the MBOL language which is a subset of the Latex la
     \label{lab:overview}
 \end{figure}
 
-Figure~\ref{lab:overview} shows 
+Figure~\ref{lab:overview} shows an overview of the problem
 
 \section{Getting Started}
 
-\section{MBOL Grammar Details}
+The best flow to get started is to compile the code, setup your environment, and try out the sample programs.
+
+\subsection{Compiling}
+
+\textbf{Requirements}: yacc, lex, and g++ which are all common utilities especially for compiling compilers.
+
+\textbf{Compile}: Execute ``make'' in the top-level directory. The resulting binary ``mbolc'' (MBOL compiler), will be in the ``bin'' directory.
+
+\textbf{Install}: Execute ``sudo make install'' if you would like ``mbolc'' to be added to /usr/bin.
+
+\subsection{Environment setup}
+
+The MBOL compiler creates code that requires files in the include directory. In the top-level directory execute the following:
+\begin{verbatim}
+export MBOL_HOME=`pwd`
+\end{verbatim}
+You may want to add some equivalent of this in your ``.bashrc''.
+
+Currently, we support solving with CPLEX through their Concert API or any other solver that can read the mixed integer program format ``.mps''. To solve with CPLEX through Concert, you must setup the CPLEX\_HOME environment variable to point to CPLEX's home directory. For other solvers, e.g. ``symphony'', you need to ensure the executable that solves a given ``.mps'' is available to be invoked.
+
+\subsection{Sample programs}
+
+Sample programs are provided in the ``samples'' directory. Type ``make'' to create code, ``./main'' to try running the code, and ``make svm'' to create some visuals based on the SVM part of the sample code. 
+
+After compiling, notice that the pdf directory contains the pdf versions of each mbol-source file. By understanding how things were built here, much of mbolc can be understood to see how to create code, pdfs, and binaries. 
+
+A binary is created in the maxflow directory for one particular problem. The binary requires no c++ code for data input, but it requires a special input file format shown in this maxflow directory.
+
+\section{MBOL Language}
+
+The language for MBOL is a subset of the Latex language. Latex is the standard for nearly any commonly used mathematical notation. MBOL is a subset of mathematical notation which is already commonly used to describe optimization problems. By specifying this strict subset of the language, MBOL syntax can be compiled into an optimization program that can be used by various state-of-the-art solvers.
+
+The goal here is to describe the details of the grammar of the language. The full grammar is included in this directory under mbol-grammar.txt which is comprehensive as it is automatically generated, but this full grammar does not explain how the grammar affects the optimization programs.
+
+\subsection{Grammar}
+
+
+\subsection{Operators}
 
 \mboldescrip{Strict subset}{X \textbackslash subset Y}{$X \subset Y$}{Creates all possible subsets for summations or constraints}{$Y=\{1,2,3\}$ implies that we get the following 7 sets $X=\{\},\{1\},\{2\},\{3\},\{1,2\},\{1,3\},\{2,3\}$}
 
