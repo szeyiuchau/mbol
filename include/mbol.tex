@@ -15,7 +15,7 @@
     ,
     \\
     \fi
-    \IfSubStr{#2}{\in}{
+    \IfSubStr{#2}{\mathbb{Z}}{
         &\hspace{0.3in}& \StrBefore{#2}{\in} & \in & \mathbb{Z}
         }{
         \IfSubStr{#2}{=}{
@@ -24,14 +24,17 @@
                 &\hspace{0.3in}& \StrBefore{#2}{\le} & \le & \StrBehind{#2}{\le}
                 }{\IfSubStr{#2}{\ge}{
                     &\hspace{0.3in}& \StrBefore{#2}{\ge} & \ge & \StrBehind{#2}{\ge}
-                    }{
-                    error
+                    }{\IfSubStr{#2}{\in}{
+                        &\hspace{0.3in}& \StrBefore{#2}{\in} & \in & \StrBehind{#2}{\in}
+                        }{
+                        error
+                    }
                 }
             }
         }
     }
     \IfStrEq{#1}{}{
-%        &\hspace{0.3in}& 
+        %        &\hspace{0.3in}& 
         } {
         ,&\hspace{0.3in}& \forall #1
     }
@@ -39,12 +42,12 @@
 }
 \newenvironment{mbol}
 {
-\setcounter{subjto}{1}
-\begin{equation*}
-\begin{array}{ccrclcl}
-}
-{
-.\\
-\end{array}
-\end{equation*}
+    \setcounter{subjto}{1}
+    \begin{equation*}
+        \begin{array}{ccrclcl}
+        }
+        {
+            .\\
+        \end{array}
+    \end{equation*}
 }

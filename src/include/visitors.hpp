@@ -56,6 +56,8 @@ class MbolElementVisitor {
     }
     virtual void specialVisit(const NumberPower* numberPower) {
     }
+    virtual void specialVisit(const Constraint* constraint) {
+    }
     virtual void visit(const NumberPower* numberPower) {
     }
     virtual void visit(const ElementExpression* elementExpression) {
@@ -164,6 +166,7 @@ class MbolElementVisitorCPLEX : public MbolElementVisitor {
     virtual void specialVisit(const Sum* sum);
     virtual void visit(const Sum* sum);
     virtual void visit(const NumberExpression* numberExpression);
+    virtual void specialVisit(const Constraint* constraint);
     virtual void visit(const Objective* objective);
     virtual void visit(const ElementSet* elementSet);
     virtual void visit(const Fraction* fraction);

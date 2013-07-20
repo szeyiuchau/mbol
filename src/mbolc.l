@@ -6,7 +6,8 @@
     int li=0;
 %}
 %%
-",...," return DD;
+\\\{" "*0" "*," "*1" "*\\\} return BI;
+," "*\.\.\." "*, return DD;
 "[" return LS;
 "]" return RS;
 \\mcon return MC;

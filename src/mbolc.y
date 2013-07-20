@@ -14,13 +14,14 @@
     #include<classes.hpp>
     using namespace std;
 %}
-%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR GT LT NE LJ CN CL ES IC MC LS RS
+%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR GT LT NE LJ CN CL ES IC MC LS RS BI
 %union {
     int ival;
     char* sval;
     Objective* objectiveVal;
     ObjectiveType* objectiveTypeVal;
     Constraints* constraintsVal;
+    Constraints* binaryConstraintVal;
     Constraint* constraintVal;
     Equation* equationVal;
     Inequality* inequalityVal;
@@ -33,6 +34,7 @@
     NumberExpression* numberExpressionVal;
     ElementExpression* elementExpressionVal;
     NumberSubexpression* numberSubexpressionVal;
+    VariableMap* variableMap;
     ProgramVariables* programVariablesVal;
     ElementSubexpression* elementSubexpressionVal;
     TupleIndices* tupleIndicesVal;
@@ -41,6 +43,8 @@
 %token <sval> NU SM
 %token <sval> VA
 %type <objectiveVal> objective
+%type <binaryConstraintVal> binary_constraint
+%type <variableMap> variable_map;
 %type <constraintsVal> constraints
 %type <programVal> program
 %type <constraintVal> constraint
@@ -84,21 +88,38 @@ MI {
     $$=new ObjectiveType("min");
 };
 constraints:
+binary_constraint {
+    $$=$1;
+}|
 constraint {
     $$=new Constraints($1);
 }|
 constraints constraint {
     $1->constraints.push_back($2);
+}|
+constraints binary_constraint {
+    for(list<Constraint*>::iterator i=$2->constraints.begin();i!=$2->constraints.end();i++) {
+        $1->constraints.push_back(*i);
+    }
+};
+binary_constraint:
+CN LS qualifiers RS LC variable_map IN BI RC {
+    $$=new Constraints(new Constraint($6->variableName));
+    $$->constraints.push_back(new Constraint(new Equation(new NumberExpression(new NumberSubexpression($6)),new Inequality(">="),new NumberExpression(new NumberSubexpression(new NumberLiteral("0")))),$3));
+    $$->constraints.push_back(new Constraint(new Equation(new NumberExpression(new NumberSubexpression($6)),new Inequality("<="),new NumberExpression(new NumberSubexpression(new NumberLiteral("1")))),$3));
 };
 constraint:
 CN LC equation RC {
     $$=new Constraint($3);
 }|
-CN LC VA IN ZC RC {
-    $$=new Constraint(string($3));
+CN LC variable_map IN ZC RC {
+    $$=new Constraint($3->variableName);
 }|
 CN LS qualifiers RS LC equation RC {
     $$=new Constraint($6,$3);
+}|
+CN LS qualifiers RS LC variable_map IN ZC RC {
+    $$=new Constraint($6->variableName);
 };
 equation:
 number_expression inequality number_expression {
@@ -231,14 +252,18 @@ LP number_expression RP {
 NU {
     $$=new NumberSubexpression(new NumberLiteral(string($1)));
 }|
+variable_map {
+    $$=new NumberSubexpression($1);
+};
+variable_map:
 VA {
-    $$=new NumberSubexpression(new NumberVariable(string($1)));
+    $$=new VariableMap(string($1));
 }|
 VA US LC indices RC {
-    $$=new NumberSubexpression(new VariableMap(string($1),$4));
+    $$=new VariableMap(string($1),$4);
 }|
 VA US VA {
-    $$=new NumberSubexpression(new VariableMap(string($1),string($3)));
+    $$=new VariableMap(string($1),string($3));
 };
 number_operator:
 PL {

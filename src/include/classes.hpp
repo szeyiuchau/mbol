@@ -93,6 +93,7 @@ class VariableMap : public MbolElement {
     string variableName;
     Indices* indices;
     VariableMap(string a,string b);
+    VariableMap(string a);
     VariableMap(string a,Indices* b);
     virtual void accept(MbolElementVisitor& visitor);
 };
@@ -139,7 +140,7 @@ class NumberSubexpression : public MbolElement {
     SetSize* setSize;
     NumberLiteral* numberLiteral;
     NumberVariable* numberVariable;
-NumberPower* numberPower;
+    NumberPower* numberPower;
     Sum* sum;
     NumberParantheses* numberParantheses;
     NumberSubexpression(Fraction* a);
@@ -158,6 +159,7 @@ class NumberExpression : public MbolElement {
     list<NumberSubexpression*> numberSubexpressions;
     list<NumberOperator*> numberOperators;
     NumberExpression(NumberSubexpression* a);
+    void getFirstVariableName(); 
     virtual void accept(MbolElementVisitor& visitor);
 };
 class Qualifier : public MbolElement {
@@ -221,6 +223,7 @@ class Indices : public MbolElement {
     public:
     list<ElementExpression*> elementExpressions;
     Indices(ElementExpression* a);
+    Indices();
     virtual void accept(MbolElementVisitor& visitor);
 };
 class Inequality : public MbolElement {
@@ -251,6 +254,7 @@ class Constraints : public MbolElement {
     public:
     list<Constraint*> constraints;
     Constraints(Constraint* a);
+    void add(Constraint* a);
     virtual void accept(MbolElementVisitor& visitor);
 };
 class ObjectiveType : public MbolElement {

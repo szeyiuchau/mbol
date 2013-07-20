@@ -136,6 +136,11 @@ VariableMap::VariableMap(string a,string b) {
     indices=new Indices(new ElementExpression(new ElementSubexpression(new ElementVariable(b))));
     value=temporary("tVariableMap");
 }
+VariableMap::VariableMap(string a) {
+    variableName=a;
+    indices=new Indices();
+value=temporary("tVaraibleMap");
+}
 VariableMap::VariableMap(string a,Indices* b) {
     variableName=a;
     indices=b;
@@ -325,7 +330,7 @@ Qualifier::Qualifier(string a,Inequality* b,SetSize* c) {
     lhs=a;
     inequality=b;
     rhs=c->value;
-setSize=c;
+    setSize=c;
     elementExpression=NULL;
     tupleIndices=NULL;
 }
@@ -335,7 +340,7 @@ Qualifier::Qualifier(TupleIndices* a,ElementExpression* b) {
     elementExpression=b;
     inequality=NULL;
     setSize=NULL;
-variable=temporary("tTuple");
+    variable=temporary("tTuple");
     iter=temporary("tIter");
     setToIter=temporary("tSet");
 }
@@ -428,6 +433,8 @@ void ElementExpression::accept(MbolElementVisitor& visitor) {
     }
     visitor.visit(this);
 }
+Indices::Indices() {
+}
 Indices::Indices(ElementExpression* a) {
     elementExpressions.push_back(a);
 }
@@ -470,6 +477,7 @@ Constraint::Constraint(Equation* a,Qualifiers* b) {
     qualifiers=b;
 }
 void Constraint::accept(MbolElementVisitor& visitor) {
+    visitor.specialVisit(this);
     if(qualifiers!=NULL) {
         qualifiers->accept(visitor);
     }
@@ -479,6 +487,9 @@ void Constraint::accept(MbolElementVisitor& visitor) {
     visitor.visit(this);
 }
 Constraints::Constraints(Constraint* a) {
+    constraints.push_back(a);
+}
+void Constraints::add(Constraint* a) {
     constraints.push_back(a);
 }
 void Constraints::accept(MbolElementVisitor& visitor) {

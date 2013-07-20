@@ -1,4 +1,7 @@
 %%
+BI printf("'\\{0,1\\}'");
+RS printf("']'");
+LS printf("'['");
 DD printf("',...,'");
 ES printf("'\\emptyset'");
 CL printf("':'");

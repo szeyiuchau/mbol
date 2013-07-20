@@ -139,7 +139,7 @@ void MbolElementVisitorCPLEX::specialVisit(const Program* program) {
 }    
 
 void MbolElementVisitorCPLEX::visit(const Program* program) {
-
+    
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
         if(i->second->isVariable) {
             NumberType* t=(NumberType*)i->second;
@@ -192,7 +192,7 @@ void MbolElementVisitorCPLEX::visit(const Program* program) {
             }
         }
     }
-
+    
     code+="MBOLSolver tempSolver(model);\nsolver=tempSolver;\n";
     if(quiet) {
         //        code+="solver.setOut(env.getNullStream());\n";
@@ -538,6 +538,9 @@ void MbolElementVisitorCPLEX::visit(const ElementNumbers* elementNumbers) {
     code+=elementNumbers->value+".insert(iter);\n";
     code+="}\n";
 }
+void MbolElementVisitorCPLEX::specialVisit(const Constraint* constraint) {
+    code+="{\n";
+}
 void MbolElementVisitorCPLEX::visit(const Constraint* constraint) {
     if(constraint->equation!=NULL) {
         code+="model.add("+constraint->equation->lhs->value+constraint->equation->inequality->value+constraint->equation->rhs->value+");\n";
@@ -547,6 +550,7 @@ void MbolElementVisitorCPLEX::visit(const Constraint* constraint) {
             code+="}\n";
         }
     }
+    code+="}\n";
 }
 
 

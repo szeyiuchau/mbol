@@ -1,9 +1,7 @@
 \begin{mbol}
 \minf{w,b,R,X,Y,x,y}{R+\alpha*\sum_{i=1}^{n}(X_{i}+Y_{i})}
-\con{X\in \mathbb{Z}}
-\con{Y \in \mathbb{Z}}
-\con[ 1 \le i \le n]{X_i \le 1}
-\con[ 1 \le i \le n]{Y_i \le 1}
+\con[ 1 \le i \le n]{X_i \in \{ 0,1\}}
+\con[ 1 \le i \le n]{Y_i \in \{ 0 ,  1\}}
 \con[ 1 \le i \le n]{10000*X_i \ge x_i}
 \con[ 1 \le i \le n]{10000*Y_i \ge y_i}
 \con[ 1 \le i \le n]{\sum_{j=1}^{d}(w_j*P_{i,j})+b = 1 - x_i }

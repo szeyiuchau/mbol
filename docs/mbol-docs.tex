@@ -1,4 +1,5 @@
 \documentclass{article}
+\input{../include/mbol.tex}
 \usepackage{amssymb}
 \usepackage{xstring}
 \usepackage{amsmath}
@@ -6,11 +7,9 @@
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{color} \usepackage{transparent}
-\let\oldsum\sum
-\renewcommand{\sum}{\oldsum\limits}
 
 \newcommand{\mboldescrip}[5]{
-\vspace{0.5in}
+    \vspace{0.5in}
     \textbf{#1}:
     \begin{itemize}
         \item Latex: #2
@@ -58,7 +57,7 @@ The best flow to get started is to compile the code, setup your environment, and
 
 The MBOL compiler creates code that requires files in the include directory. In the top-level directory execute the following:
 \begin{verbatim}
-export MBOL_HOME=`pwd`
+    export MBOL_HOME=`pwd`
 \end{verbatim}
 You may want to add some equivalent of this in your ``.bashrc''.
 
@@ -80,6 +79,12 @@ The goal here is to describe the details of the grammar of the language. The ful
 
 \subsection{Grammar}
 
+\begin{mbol}
+    \maxf{x}{\sum_{v \in V} x_v}
+    \con[(u, v) \in E]{x_u + x_v \ge 1}
+    \con[v \in V]{x_v \in \{0,1\}}
+\con{x \in \mathbb{Z}}
+\end{mbol}
 
 \subsection{Operators}
 

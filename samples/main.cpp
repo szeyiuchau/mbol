@@ -2,6 +2,7 @@
 #include<iostream>
 #include<ChromaticNumber.hpp>
 #include<iomanip>
+#include<VertexCover.hpp>
 #include<HelloWorld.hpp>
 #include<MaxFlow.hpp>
 #include<NodeDisjointPaths.hpp>
@@ -69,7 +70,7 @@ int main(int argc,char* argv[]) {
         exit(0);
     }
     //set<Element,ElementCompare> V=VV;
-        set<Element,ElementCompare> V=thingConversion(VV);
+    set<Element,ElementCompare> V=thingConversion(VV);
     {
         cout << "Element test:" << endl;
         Element a=5;
@@ -120,6 +121,32 @@ int main(int argc,char* argv[]) {
         }
     }
     cout << "\nGraph algorithms computed on the graph shown in graph.pdf." << endl;
+    cout << "\nVertexCover:" << endl;
+    {
+        set<Element,ElementCompare> E;
+        for(map<int,map<int,double> >::iterator i=e.begin();i!=e.end();i++) {
+            for(map<int,double>::iterator j=i->second.begin();j!=i->second.end();j++) {
+                if(j->second>0.5) {
+                    vector<Element> temp;
+                    temp.push_back(i->first);
+                    temp.push_back(j->first);
+                    E.insert(temp);
+                }
+            }
+        }
+        VertexCover vc;
+        vc.V=V;
+        vc.E=E;
+        vc.solve();
+        cout << "Vertices required to cover is " << vc.objValue << endl;
+        cout << "Vertices covered ";
+        for(map<int,int>::iterator i=vc.x_ret.begin();i!=vc.x_ret.end();i++) {
+            if(i->second>0.5) {
+                cout << i->first << " ";
+            }
+        }
+cout << endl;
+    }
     cout << "\nChromaticNumber:" << endl;
     {
         ChromaticNumber cn;
