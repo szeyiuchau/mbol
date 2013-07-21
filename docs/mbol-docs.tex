@@ -8,16 +8,22 @@
 \usepackage{listings}
 \usepackage{color} \usepackage{transparent}
 
-\newcommand{\mboldescrip}[5]{
+\newcommand{\subheader}[1]{
     \vspace{0.5in}
-    \textbf{#1}:
+    \noindent\textbf{#1}:
+}
+
+\newcommand{\mboldescrip}[5]{
+    \subheader{#1}
     \begin{itemize}
-        \item Latex: #2
+        \item Latex: \texttt{#2}
         \item Mathematical notation: #3
         \item Description: #4
         \item Example: #5
     \end{itemize}
 }
+
+\newcommand{\hil}[1]{\textcolor{red}{#1}}
 
 \begin{document}
 
@@ -39,7 +45,7 @@ This document should explain the MBOL language which is a subset of the Latex la
     \label{lab:overview}
 \end{figure}
 
-Figure~\ref{lab:overview} shows an overview of the problem
+Figure~\ref{lab:overview} shows an overview of MBOL. The goal is to automate and simplify the implementation of optimization programs.
 
 \section{Getting Started}
 
@@ -47,11 +53,11 @@ The best flow to get started is to compile the code, setup your environment, and
 
 \subsection{Compiling}
 
-\textbf{Requirements}: yacc, lex, and g++ which are all common utilities especially for compiling compilers.
+\subheader{Requirements} yacc, lex, and g++ which are all common utilities especially for compiling compilers.
 
-\textbf{Compile}: Execute ``make'' in the top-level directory. The resulting binary ``mbolc'' (MBOL compiler), will be in the ``bin'' directory.
+\subheader{Compile} Execute \texttt{make} in the top-level directory. The resulting binary \texttt{mbolc} (MBOL compiler), will be in the \texttt{bin} directory.
 
-\textbf{Install}: Execute ``sudo make install'' if you would like ``mbolc'' to be added to /usr/bin.
+\subheader{Install} Execute \texttt{sudo make install} if you would like \texttt{mbolc} to be added to /usr/bin.
 
 \subsection{Environment setup}
 
@@ -59,13 +65,13 @@ The MBOL compiler creates code that requires files in the include directory. In 
 \begin{verbatim}
     export MBOL_HOME=`pwd`
 \end{verbatim}
-You may want to add some equivalent of this in your ``.bashrc''.
+You may want to add some equivalent of this in your \texttt{.bashrc}. This can be added automatically by typing \texttt{make env} in the top-level directory. You will need to invoke \texttt{source ~/.bashrc} or load a new shell.
 
-Currently, we support solving with CPLEX through their Concert API or any other solver that can read the mixed integer program format ``.mps''. To solve with CPLEX through Concert, you must setup the CPLEX\_HOME environment variable to point to CPLEX's home directory. For other solvers, e.g. ``symphony'', you need to ensure the executable that solves a given ``.mps'' is available to be invoked.
+Currently, we support solving with CPLEX through their Concert API or any other solver that can read the mixed integer program format \texttt{.mps}. To solve with CPLEX through Concert, you must setup the \texttt{CPLEX\_HOME} environment variable to point to CPLEX's home directory. For other solvers, e.g. \texttt{symphony}, you need to ensure the executable that solves a given \texttt{.mps} is available to be invoked.
 
 \subsection{Sample programs}
 
-Sample programs are provided in the ``samples'' directory. Type ``make'' to create code, ``./main'' to try running the code, and ``make svm'' to create some visuals based on the SVM part of the sample code. 
+Sample programs are provided in the \texttt{samples} directory. Type \texttt{make} to create code, \texttt{./main} to try running the code, and \texttt{make svm} to create some visuals based on the SVM part of the sample code. 
 
 After compiling, notice that the pdf directory contains the pdf versions of each mbol-source file. By understanding how things were built here, much of mbolc can be understood to see how to create code, pdfs, and binaries. 
 
@@ -77,16 +83,94 @@ The language for MBOL is a subset of the Latex language. Latex is the standard f
 
 The goal here is to describe the details of the grammar of the language. The full grammar is included in this directory under mbol-grammar.txt which is comprehensive as it is automatically generated, but this full grammar does not explain how the grammar affects the optimization programs.
 
-\subsection{Grammar}
+
+We will focus on a well-known problem of vertex cover which can be expressed in latex as follows:
+
+\begin{verbatim}
+    \begin{mbol}
+        \minf{x}{\sum_{v \in V} x_v}
+        \con[(u, v) \in E]{x_u + x_v \ge 1}
+        \con[v \in V]{x_v \in \{0,1\}}
+    \end{mbol}
+\end{verbatim}
+
+The programs are described with a series of MBOL latex commands \texttt{\textbackslash maxf}, \texttt{\textbackslash minf}, and \texttt{\textbackslash con} for maximum objective, minimum objective, and constraint respectively. These commands help create an unamibiguous language which is compiled to be solved. Additionally, these commands perform nice optimization typesetting, seen in the following:
 
 \begin{mbol}
-    \maxf{x}{\sum_{v \in V} x_v}
+    \minf{x}{\sum_{v \in V} x_v}
     \con[(u, v) \in E]{x_u + x_v \ge 1}
     \con[v \in V]{x_v \in \{0,1\}}
-\con{x \in \mathbb{Z}}
 \end{mbol}
 
-\subsection{Operators}
+To those familiar with optimization programs, this format is perfectly understandable and unambiguous. The goal of MBOL is to formally specify the language, and then automatically use this formulation to solve. This program will be disected, to describe what each part means mathematically. We note that the only input to the compiler is the above MBOL source, everything below about variables and constraints is inferred from the grammar.
+
+\subsection{Variables}
+
+\subheader{Program variables}
+
+\begin{mbol}
+    \minf{\hil{x}}{\sum_{v \in V} x_v}
+    \con[(u, v) \in E]{x_u + x_v \ge 1}
+    \con[v \in V]{x_v \in \{0,1\}}
+\end{mbol}
+
+The x under the minimize (or maximize), are variables of the program. All other variables are either temporaries or constants. We borrow these notions of variables from standard computer programming, but they have mathematical meaning which is not usually explicitly described.
+
+\subheader{Program temporaries}
+
+\begin{mbol}
+    \minf{x}{\sum_{\hil{v} \in V} x_{\hil{v}}}
+    ,\\&\hspace{0.3in}& x_{\hil{u}} + x_{\hil{v}} & \ge & 1 ,&\hspace{0.3in}& \forall (\hil{u}, \hil{v}) \in E
+    ,\\&\hspace{0.3in}& x_{\hil{v}} &\in& \{0,1\} ,&\hspace{0.3in}& \forall \hil{v} \in V
+\end{mbol}
+
+The u and v variables in this program are temporaries. They are described as elements of a set. Their purpose can either be to express a set of values for a sum or a set of inequalities for constraints. Temporaries are inferred by the grammar of MBOL.
+
+\subheader{Program constants}
+
+\begin{mbol}
+    \minf{x}{\sum_{v \in \hil{V}} x_v}
+    ,\\&\hspace{0.3in}& x_u + x_v & \ge & 1 ,&\hspace{0.3in}& \forall (u, v) \in \hil{E}
+    ,\\&\hspace{0.3in}& x_v &\in& \{0,1\} ,&\hspace{0.3in}& \forall v \in \hil{V}
+\end{mbol}
+
+These variables are constants, which are inferred by the grammar as well. They are those variables left over that are neither program variables nor temporaries. The constants are the inputs to the program while the objective value and values of the program variables are output.
+
+In addition to whether a variable is a program variable, program temporary, or program constant, the variables have another distinction based on their type as a number or and element described as follows:
+
+\subheader{Variable type, elements}
+
+\begin{mbol}
+    \minf{x}{\sum_{\hil{v} \in \hil{V}} x_{\hil{v}}} 
+    ,\\&\hspace{0.3in}& x_{\hil{u}} + x_{\hil{v}} & \ge & 1 ,&\hspace{0.3in}& \forall (\hil{u}, \hil{v}) \in \hil{E}
+    ,\\&\hspace{0.3in}& x_{\hil{v}} &\in& \{0,1\} ,&\hspace{0.3in}& \forall \hil{v} \in \hil{V}
+\end{mbol}
+
+These are elements in this program. An element is an integer, set of elements, or set of tuples. There is a lot of recursive possibilities here which is intentional. Also, these types are not supplied by the user, they are all inferred by the grammar. The inference creates a graph based with edges that define relationships between elements. In this program, the elements have the following types and meaning in terms of the graph used for vertex cut:
+\begin{itemize}
+    \item $v$: integer (single vertex)
+    \item $u$: integer (single vertex)
+    \item $V$: set of integers (vertices)
+    \item $E$: set of tuples where each tuple has two integers (edges)
+\end{itemize}
+
+\subheader{Variable type, numbers}
+
+\begin{mbol}
+    \minf{\hil{x}}{\sum_{v \in V} \hil{x_v}}
+    ,\\&\hspace{0.3in}& \hil{x_u} + \hil{x_v} & \ge & 1 ,&\hspace{0.3in}& \forall (u, v) \in E
+    ,\\&\hspace{0.3in}& \hil{x_{v}} &\in& \{0,1\} ,&\hspace{0.3in}& \forall v \in V
+\end{mbol}
+
+The other variable type are simply numbers. These are initially assumed to be unbounded real numbers until constraints are placed on them. In this case, the variable $x$ is constrained to be a binary variable. Numbers can be indexed, so they behave similar to a map in computer programming. In this case $x$ has one integer index, so it has a separate integer value $x_v$ for each integer $v$ used as an index. Note that indices must be elements, and these elements can be very complicated. In this program nothing would prevent a new number variable $y$ being used indexed by $y_E$ meaning that it is indexed by a set of 2-tuples. These cases seem strange, but in combinatorial optimization they can be incredible powerful in describing realistic problems.
+
+\begin{mbol}
+    \minf{x}{\sum_{v \in V} x_v}
+    \con[(u, v) \in E]{x_u + x_v \ge 1}
+    \con[v \in V]{x_v \in \{0,1\}}
+\end{mbol}
+
+\section{Additional grammar features}
 
 \mboldescrip{Strict subset}{X \textbackslash subset Y}{$X \subset Y$}{Creates all possible subsets for summations or constraints}{$Y=\{1,2,3\}$ implies that we get the following 7 sets $X=\{\},\{1\},\{2\},\{3\},\{1,2\},\{1,3\},\{2,3\}$}
 

@@ -391,6 +391,7 @@ int main(int argc,char* argv[]) {
     bool bin=false;
     bool pdf=false;
     bool typ=false;
+    bool cpx=false;
     options["-v"]="Print version information and exit";
     options["-h"]="Print help information and exit";
     options["-q"]="Put CPLEX in quiet mode";
@@ -399,6 +400,7 @@ int main(int argc,char* argv[]) {
     options["-bin"]="Compile a binary for default file I/O";
     options["-pdf"]="Compile a pdf of the program";
     options["-hpp"]="Compile a hpp header of the program";
+    options["-cpx"]="User CPLEX as solver (COIN-OR symphony is deafult)";
     for(int i=1;i<argc;i++) {
         if(string(argv[i])=="-q") {
             quiet=true;
@@ -406,6 +408,8 @@ int main(int argc,char* argv[]) {
             version();
         } else if(string(argv[i])=="-h") {
             help();
+        } else if(string(argv[i])=="-cpx") {
+            cpx=true;
         } else if(string(argv[i])=="-typ") {
             typ=true;
         } else if(string(argv[i])=="-pdf") {
@@ -487,8 +491,11 @@ int main(int argc,char* argv[]) {
         string code;    
         MbolElementVisitor* vCplex=new MbolElementVisitorCPLEX(types,quiet,className);
         program->accept(*vCplex);
-        code=indentCode(((MbolElementVisitorCPLEX*)vCplex)->code);
-        
+        code=((MbolElementVisitorCPLEX*)vCplex)->code;
+        if(cpx) {
+            code="#define CPLEX\n"+code;
+        }
+        code=indentCode(code);
         ofstream out((outputDirectory+className+".hpp").c_str());
         out << code;
         out.close();

@@ -18,5 +18,3 @@ obj/%.o: cppSrc/%.cpp include/%.hpp
 	g++ -I./include/ -g obj/classes.o obj/utilities.o obj/visitors.o lex.yy.c y.tab.c -lfl -o ../bin/mbolc
 clean:
 	rm -rf ../bin/mbolc obj mbol-grammar-tool *.c *.h *.output
-install:
-	cp ../bin/mbolc /usr/bin
