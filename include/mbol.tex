@@ -4,8 +4,8 @@
 \newcounter{subjto}
 \let\oldsum\sum
 \renewcommand{\sum}{\oldsum\limits}
-\newcommand{\maxf}[2]{\underset{#1}{\text{maximize}}&&#2}
-\newcommand{\minf}[2]{\underset{#1}{\text{minimize}}&&#2}
+\newcommand{\maxf}[2]{\underset{#1}{\text{maximize}}&&\multicolumn{5}{l}{#2}}
+\newcommand{\minf}[2]{\underset{#1}{\text{minimize}}&&\multicolumn{5}{l}{#2}}
 \newcommand{\con}[2][]{
     \ifnum \value{subjto}>0
     \setcounter{subjto}{0}
