@@ -297,6 +297,13 @@ set<Element,ElementCompare> thingConversion(set<int> a) {
   }
   return x;
 }
+map<set<Element,ElementCompare>,double,ElementCompare> thingConversion(map<set<int>,double,setcomp> x) {
+  map<set<Element,ElementCompare>,double,ElementCompare> y;
+  for(map<set<int>,double,setcomp>::iterator i=x.begin();i!=x.end();i++) {
+    y[thingConversion(i->first)]=i->second;
+  }
+  return y;
+}
 set<Element,ElementCompare> powerset(set<Element,ElementCompare> x) {
   set<Element,ElementCompare> pset;
   for(int i=0; i<pow(2,x.size()); i++) {
