@@ -84,7 +84,7 @@
   64  indices : element_expression
   65          | indices ',' element_expression
 
-  66  sum : '\sum' sum_qualifiers number_subexpression
+  66  sum : '\sum' sum_qualifiers number_expression
 
   67  sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression '}'
   68                 | '_' '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}'
@@ -260,7 +260,7 @@ state 18
 
 
 state 19
-	sum : '\sum' . sum_qualifiers number_subexpression  (66)
+	sum : '\sum' . sum_qualifiers number_expression  (66)
 
 	'_'  shift 38
 	.  error
@@ -501,7 +501,7 @@ state 38
 
 
 state 39
-	sum : '\sum' sum_qualifiers . number_subexpression  (66)
+	sum : '\sum' sum_qualifiers . number_expression  (66)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -513,7 +513,8 @@ state 39
 
 	variable_map  goto 41
 	sum  goto 27
-	number_subexpression  goto 79
+	number_expression  goto 79
+	number_subexpression  goto 29
 
 
 state 40
@@ -906,10 +907,44 @@ state 78
 	qualifier  goto 35
 
 
+79: shift/reduce conflict (shift 19, reduce 66) on '\sum'
+79: shift/reduce conflict (shift 20, reduce 66) on VARIABLE
+79: shift/reduce conflict (shift 54, reduce 66) on '+'
+79: shift/reduce conflict (shift 55, reduce 66) on '-'
+79: shift/reduce conflict (shift 56, reduce 66) on '/'
+79: shift/reduce conflict (shift 57, reduce 66) on '*'
+79: shift/reduce conflict (shift 21, reduce 66) on '('
+79: shift/reduce conflict (shift 22, reduce 66) on '|'
+79: shift/reduce conflict (shift 23, reduce 66) on '\frac'
+79: shift/reduce conflict (shift 24, reduce 66) on NUMBER
 state 79
-	sum : '\sum' sum_qualifiers number_subexpression .  (66)
+	number_expression : number_expression . number_subexpression  (44)
+	number_expression : number_expression . number_operator number_subexpression  (45)
+	sum : '\sum' sum_qualifiers number_expression .  (66)
 
-	.  reduce 66
+	'\sum'  shift 19
+	VARIABLE  shift 20
+	'+'  shift 54
+	'-'  shift 55
+	'/'  shift 56
+	'*'  shift 57
+	'('  shift 21
+	'|'  shift 22
+	'\frac'  shift 23
+	NUMBER  shift 24
+	'\ge'  reduce 66
+	'\le'  reduce 66
+	'='  reduce 66
+	'}'  reduce 66
+	')'  reduce 66
+	'>'  reduce 66
+	'<'  reduce 66
+	'\ne'  reduce 66
+
+	variable_map  goto 41
+	number_operator  goto 62
+	sum  goto 27
+	number_subexpression  goto 63
 
 
 state 80
@@ -1824,6 +1859,9 @@ state 162
 	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression '}' .  (67)
 
 	.  reduce 67
+
+
+State 79 contains 10 shift/reduce conflicts.
 
 
 52 terminals, 22 nonterminals

@@ -33,9 +33,9 @@
   SumQualifiers* sumQualifiersVal;
   NumberExpression* numberExpressionVal;
   ElementExpression* elementExpressionVal;
-  NumberSubexpression* numberSubexpressionVal;
   VariableMap* variableMap;
   ProgramVariables* programVariablesVal;
+  NumberSubexpression* numberSubexpressionVal;
   ElementSubexpression* elementSubexpressionVal;
   TupleIndices* tupleIndicesVal;
   Program* programVal;
@@ -105,8 +105,7 @@ constraints binary_constraint {
 binary_constraint:
 CN LS qualifiers RS LC variable_map IN BI RC {
   $$=new Constraints(new Constraint($6->variableName));
-  $$->constraints.push_back(new Constraint(new Equation(new NumberExpression(new NumberSubexpression($6)),new Inequality(">="),new NumberExpression(new NumberSubexpression(new NumberLiteral("0")))),$3));
-  $$->constraints.push_back(new Constraint(new Equation(new NumberExpression(new NumberSubexpression($6)),new Inequality("<="),new NumberExpression(new NumberSubexpression(new NumberLiteral("1")))),$3));
+  $$->constraints.push_back(new Constraint(new Equation(new NumberExpression($6),new Inequality("<="),new NumberExpression(new NumberLiteral("1"))),new Equation(new NumberExpression($6),new Inequality(">="),new NumberExpression(new NumberLiteral("0"))),$3));
 };
 constraint:
 CN LC equation RC {
@@ -235,25 +234,25 @@ VA {
 };
 number_subexpression:
 sum {
-  $$=new NumberSubexpression($1);
+  $$=$1;
 }|
 LI element_expression LJ {
-  $$=new NumberSubexpression(new SetSize($2));
+  $$=new SetSize($2);
 }|
 LP number_expression RP CT LC number_expression RC {
-  $$=new NumberSubexpression(new NumberPower($2,$6));    
+  $$=new NumberPower($2,$6);
 }|
 FR LC number_expression RC LC number_expression RC {
-  $$=new NumberSubexpression(new Fraction($3,$6));
+  $$=new Fraction($3,$6);
 }|
 LP number_expression RP {
-  $$=new NumberSubexpression(new NumberParantheses($2));
+  $$=new NumberParantheses($2);
 }|
 NU {
-  $$=new NumberSubexpression(new NumberLiteral(string($1)));
+  $$=new NumberLiteral(string($1));
 }|
 variable_map {
-  $$=new NumberSubexpression($1);
+  $$=$1;
 };
 variable_map:
 VA {
@@ -286,7 +285,7 @@ indices CO element_expression {
   $1->elementExpressions.push_back($3);
 };
 sum:
-SM sum_qualifiers number_subexpression {
+SM sum_qualifiers number_expression {
   $$=new Sum(string($1),$2,$3);
 };
 sum_qualifiers:
@@ -372,7 +371,7 @@ string indentCode(string code) {
       depth--;
     }
     for(int j=0;j<depth;j++) {
-      indentedCode+="    ";
+      indentedCode+="  ";
     }
     indentedCode+=line;
     if(line.find("{")!=string::npos) {

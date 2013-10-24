@@ -73,23 +73,28 @@ class ElementSubexpression : public MbolElement {
   ElementSubexpression(ElementNumbers* a);
   virtual void accept(MbolElementVisitor& visitor);
 };
+//class NumberParanthesis;
+class NumberSubexpression : public MbolElement {
+  public:
+  string value;
+NumberSubexpression() {}
+  virtual void accept(MbolElementVisitor& visitor);
+};
 class NumberOperator : public MbolElement {
   public:
   string value;
   NumberOperator(string a);
   virtual void accept(MbolElementVisitor& visitor);
 };
-class Fraction : public MbolElement {
+class Fraction : public NumberSubexpression {
   public:
-  string value;
   NumberExpression* numerator;
   NumberExpression* denominator;
   Fraction(NumberExpression* a,NumberExpression* b);
   virtual void accept(MbolElementVisitor& visitor);
 };
-class VariableMap : public MbolElement {
+class VariableMap : public NumberSubexpression {
   public:
-  string value;
   string variableName;
   Indices* indices;
   VariableMap(string a,string b);
@@ -97,60 +102,34 @@ class VariableMap : public MbolElement {
   VariableMap(string a,Indices* b);
   virtual void accept(MbolElementVisitor& visitor);
 };
-class SetSize : public MbolElement {
+class SetSize : public NumberSubexpression {
   public:
-  string value;
   ElementExpression* elementExpression;
   SetSize(ElementExpression* a);
   virtual void accept(MbolElementVisitor& visitor);
 };
-class NumberVariable : public MbolElement {
+class NumberVariable : public NumberSubexpression {
   public:
-  string value;
   NumberVariable(string a);
   virtual void accept(MbolElementVisitor& visitor);
 };
-class NumberLiteral : public MbolElement {
+class NumberLiteral : public NumberSubexpression {
   public:
-  string value;
   string number;
   NumberLiteral(string a);
   virtual void accept(MbolElementVisitor& visitor);
 };
-class NumberPower : public MbolElement {
+class NumberPower : public NumberSubexpression {
   public:
-  string value;
   NumberExpression* power;
   NumberExpression* base;
   NumberPower(NumberExpression* a,NumberExpression* b);
   virtual void accept(MbolElementVisitor& visitor);
 };
-class NumberParantheses : public MbolElement {
+class NumberParantheses : public NumberSubexpression {
   public:
-  string value;
   NumberExpression* numberExpression;
   NumberParantheses(NumberExpression* a);
-  virtual void accept(MbolElementVisitor& visitor);
-};
-class NumberSubexpression : public MbolElement {
-  public:
-  string value;
-  Fraction* fraction;
-  VariableMap* variableMap;
-  SetSize* setSize;
-  NumberLiteral* numberLiteral;
-  NumberVariable* numberVariable;
-  NumberPower* numberPower;
-  Sum* sum;
-  NumberParantheses* numberParantheses;
-  NumberSubexpression(Fraction* a);
-  NumberSubexpression(VariableMap* a);
-  NumberSubexpression(SetSize* a);
-  NumberSubexpression(NumberLiteral* a);
-  NumberSubexpression(NumberVariable* a);
-  NumberSubexpression(Sum* a);
-  NumberSubexpression(NumberParantheses* a);
-  NumberSubexpression(NumberPower* a);
   virtual void accept(MbolElementVisitor& visitor);
 };
 class NumberExpression : public MbolElement {
@@ -194,13 +173,12 @@ class SumQualifiers : public MbolElement {
   SumQualifiers(string a,string b,string c);
   virtual void accept(MbolElementVisitor& visitor);
 };
-class Sum : public MbolElement {
+class Sum : public NumberSubexpression {
   public:
-  string value;
   string sumType;
   SumQualifiers* sumQualifiers;
-  NumberSubexpression* numberSubexpression;
-  Sum(string a,SumQualifiers* b,NumberSubexpression* c);
+  NumberExpression* numberExpression;
+  Sum(string a,SumQualifiers* b,NumberExpression* c);
   virtual void accept(MbolElementVisitor& visitor);
 };
 class ElementOperator : public MbolElement {
@@ -243,11 +221,13 @@ class Equation : public MbolElement {
 class Constraint : public MbolElement {
   public:
   Equation* equation;
+  Equation* secondEquation;
   Qualifiers* qualifiers;
   string integerConstraint;
   Constraint(string a);
   Constraint(Equation* a);
   Constraint(Equation* a,Qualifiers* b);
+  Constraint(Equation* a, Equation* b, Qualifiers* c);
   virtual void accept(MbolElementVisitor& visitor);
 };
 class Constraints : public MbolElement {
