@@ -1,3 +1,5 @@
+simple: obj/classes.o obj/visitors.o obj/utilities.o
+	g++ -I./include/ -g obj/classes.o obj/utilities.o obj/visitors.o lex.yy.c y.tab.c -lfl -o ../bin/mbolc
 all: ../docs/mbol-grammar.txt ../bin/mbolc
 ../docs/mbol-grammar.txt: mbol-grammar-tool y.output
 	more y.output | ./mbol-grammar-tool > ../docs/mbol-grammar.txt
