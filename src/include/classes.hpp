@@ -26,16 +26,26 @@ class MbolElement {
     return x;
   }
   virtual void accept(MbolElementVisitor& visitor) {
+    list<MbolElement*> x = getChildren();
+    specialVisit(visitor);
+    for (list<MbolElement*>::iterator i = x.begin(); i != x.end(); i++) {
+      if (*i != NULL) {
+        (*i)->accept(visitor);
+      }
+    }
+    visit(visitor);
+  }
+  virtual void specialVisit(MbolElementVisitor& visitor) {
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
     assert(0);
   }
 };
-
 class ElementSet : public MbolElement {
   public:
   string value;
   ElementExpression* elementExpression;
   ElementSet(ElementExpression* a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "ElementSet";
   }
@@ -44,13 +54,15 @@ class ElementSet : public MbolElement {
     x.push_back((MbolElement*)elementExpression);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ElementSet*)this);
+  }
 };
 class ElementParantheses : public MbolElement {
   public:
   string value;
   ElementExpression* elementExpression;
   ElementParantheses(ElementExpression* a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "ElementParantheses";
   }
@@ -59,14 +71,19 @@ class ElementParantheses : public MbolElement {
     x.push_back((MbolElement*)elementExpression);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ElementParantheses*)this);
+  }
 };
 class ElementVariable : public MbolElement {
   public:
   string value;
   ElementVariable(string a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "ElementVariable: " + value;
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ElementVariable*)this);
   }
 };
 class ElementNumbers : public MbolElement {
@@ -75,25 +92,29 @@ class ElementNumbers : public MbolElement {
   string lb;
   string ub;
   ElementExpression* elementExpression;
-  ElementNumbers(string a,ElementExpression* b);
-  ElementNumbers(string a,string b);
-  virtual void accept(MbolElementVisitor& visitor);
+  ElementNumbers(string a, ElementExpression* b);
+  ElementNumbers(string a, string b);
   string getName() {
-    return "ElementNumbers";
+    return "ElementNumbers: [" + lb + ", " + ub + "]";
   }
   list<MbolElement*> getChildren() {
     list<MbolElement*> x;
     x.push_back((MbolElement*)elementExpression);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ElementNumbers*)this);
+  }
 };
 class TupleIndices : public MbolElement {
   public:
   vector<string> indices;
-  TupleIndices(string a,string b);
-  virtual void accept(MbolElementVisitor& visitor);
+  TupleIndices(string a, string b);
   string getName() {
     return "TupleIndices";
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((TupleIndices*)this);
   }
 };
 class ElementSubexpression : public MbolElement {
@@ -109,45 +130,49 @@ class ElementSubexpression : public MbolElement {
   ElementSubexpression(ElementParantheses* a);
   ElementSubexpression(ElementVariable* a);
   ElementSubexpression(ElementNumbers* a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "ElementSubexpression";
   }
   list<MbolElement*> getChildren() {
     list<MbolElement*> x;
-    x.push_back((MbolElement*)elementSet);
     x.push_back((MbolElement*)setCreator);
+    x.push_back((MbolElement*)elementSet);
     x.push_back((MbolElement*)elementParantheses);
     x.push_back((MbolElement*)elementVariable);
     x.push_back((MbolElement*)elementNumbers);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ElementSubexpression*)this);
+  }
 };
-//class NumberParanthesis;
 class NumberSubexpression : public MbolElement {
   public:
   string value;
 NumberSubexpression() {}
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "NumberSubexpression";
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((NumberSubexpression*)this);
   }
 };
 class NumberOperator : public MbolElement {
   public:
   string value;
   NumberOperator(string a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "NumberOperator: " + value;
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((NumberOperator*)this);
   }
 };
 class Fraction : public NumberSubexpression {
   public:
   NumberExpression* numerator;
   NumberExpression* denominator;
-  Fraction(NumberExpression* a,NumberExpression* b);
-  virtual void accept(MbolElementVisitor& visitor);
+  Fraction(NumberExpression* a, NumberExpression* b);
   string getName() {
     return "Fraction";
   }
@@ -157,15 +182,17 @@ class Fraction : public NumberSubexpression {
     x.push_back((MbolElement*)denominator);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Fraction*)this);
+  }
 };
 class VariableMap : public NumberSubexpression {
   public:
   string variableName;
   Indices* indices;
-  VariableMap(string a,string b);
+  VariableMap(string a, string b);
   VariableMap(string a);
-  VariableMap(string a,Indices* b);
-  virtual void accept(MbolElementVisitor& visitor);
+  VariableMap(string a, Indices* b);
   string getName() {
     return "VariableMap: " + variableName;
   }
@@ -174,12 +201,14 @@ class VariableMap : public NumberSubexpression {
     x.push_back((MbolElement*)indices);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((VariableMap*)this);
+  }
 };
 class SetSize : public NumberSubexpression {
   public:
   ElementExpression* elementExpression;
   SetSize(ElementExpression* a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "SetSize";
   }
@@ -188,30 +217,36 @@ class SetSize : public NumberSubexpression {
     x.push_back((MbolElement*)elementExpression);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((SetSize*)this);
+  }
 };
 class NumberVariable : public NumberSubexpression {
   public:
   NumberVariable(string a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "NumberVariable";
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((NumberVariable*)this);
   }
 };
 class NumberLiteral : public NumberSubexpression {
   public:
   string number;
   NumberLiteral(string a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "NumberLiteral: " + number;
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((NumberLiteral*)this);
   }
 };
 class NumberPower : public NumberSubexpression {
   public:
   NumberExpression* power;
   NumberExpression* base;
-  NumberPower(NumberExpression* a,NumberExpression* b);
-  virtual void accept(MbolElementVisitor& visitor);
+  NumberPower(NumberExpression* a, NumberExpression* b);
   string getName() {
     return "NumberPower";
   }
@@ -221,12 +256,14 @@ class NumberPower : public NumberSubexpression {
     x.push_back((MbolElement*)power);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((NumberPower*)this);
+  }
 };
 class NumberParantheses : public NumberSubexpression {
   public:
   NumberExpression* numberExpression;
   NumberParantheses(NumberExpression* a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "NumberParantheses";
   }
@@ -235,6 +272,9 @@ class NumberParantheses : public NumberSubexpression {
     x.push_back((MbolElement*)numberExpression);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((NumberParantheses*)this);
+  }
 };
 class NumberExpression : public MbolElement {
   public:
@@ -242,8 +282,7 @@ class NumberExpression : public MbolElement {
   list<NumberSubexpression*> numberSubexpressions;
   list<NumberOperator*> numberOperators;
   NumberExpression(NumberSubexpression* a);
-  void getFirstVariableName(); 
-  virtual void accept(MbolElementVisitor& visitor);
+  void getFirstVariableName();
   string getName() {
     return "NumberExpression";
   }
@@ -259,6 +298,9 @@ class NumberExpression : public MbolElement {
     }
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((NumberExpression*)this);
+  }
 };
 class Qualifier : public MbolElement {
   public:
@@ -266,17 +308,16 @@ class Qualifier : public MbolElement {
   TupleIndices* tupleIndices;
   SetSize* setSize;
   Inequality* inequality;
-  string lhs,rhs;
+  string lhs, rhs;
   string variable;
   string setCreator;
   string iter;
   string setToIter;
-  Qualifier(TupleIndices* a,ElementExpression* b);
-  Qualifier(string a,Inequality* b,SetSize* c);
-  Qualifier(string a,Inequality* b,string c);
+  Qualifier(TupleIndices* a, ElementExpression* b);
+  Qualifier(string a, Inequality* b, SetSize* c);
+  Qualifier(string a, Inequality* b, string c);
   Qualifier(Equation* a);
-  Qualifier(string a,string b,ElementExpression* c);
-  virtual void accept(MbolElementVisitor& visitor);
+  Qualifier(string a, string b, ElementExpression* c);
   string getName() {
     return "Qualifier: " + variable;
   }
@@ -288,14 +329,16 @@ class Qualifier : public MbolElement {
     x.push_back((MbolElement*)inequality);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Qualifier*)this);
+  }
 };
 class SetCreator : public MbolElement {
   public:
   string value;
   string variable;
   Qualifiers* qualifiers;
-  SetCreator(string a,Qualifiers* b);
-  virtual void accept(MbolElementVisitor& visitor);
+  SetCreator(string a, Qualifiers* b);
   string getName() {
     return "SetCreator";
   }
@@ -304,12 +347,17 @@ class SetCreator : public MbolElement {
     x.push_back((MbolElement*)qualifiers);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((SetCreator*)this);
+  }
+  virtual void specialVisit(MbolElementVisitor& visitor) {
+    visitor.specialVisit((SetCreator*)this);
+  }
 };
 class Qualifiers : public MbolElement {
   public:
   list<Qualifier*> qualifiers;
   Qualifiers(Qualifier* a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "Qualifiers";
   }
@@ -320,14 +368,16 @@ class Qualifiers : public MbolElement {
     }
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Qualifiers*)this);
+  }
 };
 class SumQualifiers : public MbolElement {
   public:
   Qualifiers* qualifiers;
   SumQualifiers(Qualifiers* a);
-  SumQualifiers(string a,string b,ElementExpression* c);
-  SumQualifiers(string a,string b,string c);
-  virtual void accept(MbolElementVisitor& visitor);
+  SumQualifiers(string a, string b, ElementExpression* c);
+  SumQualifiers(string a, string b, string c);
   string getName() {
     return "SumQualifeirs";
   }
@@ -336,14 +386,16 @@ class SumQualifiers : public MbolElement {
     x.push_back((MbolElement*)qualifiers);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((SumQualifiers*)this);
+  }
 };
 class Sum : public NumberSubexpression {
   public:
   string sumType;
   SumQualifiers* sumQualifiers;
   NumberExpression* numberExpression;
-  Sum(string a,SumQualifiers* b,NumberExpression* c);
-  virtual void accept(MbolElementVisitor& visitor);
+  Sum(string a, SumQualifiers* b, NumberExpression* c);
   string getName() {
     return "Sum";
   }
@@ -353,14 +405,22 @@ class Sum : public NumberSubexpression {
     x.push_back((MbolElement*)numberExpression);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Sum*)this);
+  }
+  virtual void specialVisit(MbolElementVisitor& visitor) {
+    visitor.specialVisit((Sum*)this);
+  }
 };
 class ElementOperator : public MbolElement {
   public:
   string value;
   ElementOperator(string a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "ElementOperator: " + value;
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ElementOperator*)this);
   }
 };
 class ElementExpression : public MbolElement {
@@ -370,8 +430,7 @@ class ElementExpression : public MbolElement {
   ElementOperator* elementOperator;
   ElementSubexpression* elementSubexpression;
   ElementExpression(ElementSubexpression* a);
-  ElementExpression(ElementExpression* a,ElementOperator* b,ElementSubexpression *c);
-  virtual void accept(MbolElementVisitor& visitor);
+  ElementExpression(ElementExpression* a, ElementOperator* b, ElementSubexpression *c);
   string getName() {
     return "ElementExpression";
   }
@@ -382,13 +441,15 @@ class ElementExpression : public MbolElement {
     x.push_back((MbolElement*)elementSubexpression);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ElementExpression*)this);
+  }
 };
 class Indices : public MbolElement {
   public:
   list<ElementExpression*> elementExpressions;
   Indices(ElementExpression* a);
   Indices();
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "Indices";
   }
@@ -399,14 +460,19 @@ class Indices : public MbolElement {
     }
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Indices*)this);
+  }
 };
 class Inequality : public MbolElement {
   public:
   string value;
   Inequality(string a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "Inequality: " + value;
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Inequality*)this);
   }
 };
 class Equation : public MbolElement {
@@ -414,8 +480,7 @@ class Equation : public MbolElement {
   Inequality* inequality;
   NumberExpression* lhs;
   NumberExpression* rhs;
-  Equation(NumberExpression* a,Inequality* b,NumberExpression* c);
-  virtual void accept(MbolElementVisitor& visitor);
+  Equation(NumberExpression* a, Inequality* b, NumberExpression* c);
   string getName() {
     return "Equation";
   }
@@ -426,6 +491,9 @@ class Equation : public MbolElement {
     x.push_back((MbolElement*)rhs);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Equation*)this);
+  }
 };
 class Constraint : public MbolElement {
   public:
@@ -435,18 +503,20 @@ class Constraint : public MbolElement {
   string integerConstraint;
   Constraint(string a);
   Constraint(Equation* a);
-  Constraint(Equation* a,Qualifiers* b);
+  Constraint(Equation* a, Qualifiers* b);
   Constraint(Equation* a, Equation* b, Qualifiers* c);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "Constraint";
   }
   list<MbolElement*> getChildren() {
     list<MbolElement*> x;
+    x.push_back((MbolElement*)qualifiers);
     x.push_back((MbolElement*)equation);
     x.push_back((MbolElement*)secondEquation);
-    x.push_back((MbolElement*)qualifiers);
     return x;
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Constraint*)this);
   }
 };
 class Constraints : public MbolElement {
@@ -454,7 +524,6 @@ class Constraints : public MbolElement {
   list<Constraint*> constraints;
   Constraints(Constraint* a);
   void add(Constraint* a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "Constraints";
   }
@@ -465,23 +534,30 @@ class Constraints : public MbolElement {
     }
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Constraints*)this);
+  }
 };
 class ObjectiveType : public MbolElement {
   public:
   string value;
   ObjectiveType(string a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "ObjectiveType";
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ObjectiveType*)this);
   }
 };
 class ProgramVariables : public MbolElement {
   public:
   list<string> variables;
   ProgramVariables(string a);
-  virtual void accept(MbolElementVisitor& visitor);
   string getName() {
     return "ProgramVariables";
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ProgramVariables*)this);
   }
 };
 class Objective : public MbolElement {
@@ -489,8 +565,7 @@ class Objective : public MbolElement {
   ObjectiveType* objectiveType;
   ProgramVariables* programVariables;
   NumberExpression* numberExpression;
-  Objective(ObjectiveType* a,ProgramVariables* b,NumberExpression* c);
-  virtual void accept(MbolElementVisitor& visitor);
+  Objective(ObjectiveType* a, ProgramVariables* b, NumberExpression* c);
   string getName() {
     return "Objective";
   }
@@ -501,13 +576,15 @@ class Objective : public MbolElement {
     x.push_back((MbolElement*)numberExpression);
     return x;
   }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Objective*)this);
+  }
 };
 class Program : public MbolElement {
   public:
   Objective* objective;
   Constraints* constraints;
-  Program(Objective* a,Constraints* b);
-  virtual void accept(MbolElementVisitor& visitor);
+  Program(Objective* a, Constraints* b);
   string getName() {
     return "Program";
   }
@@ -516,6 +593,12 @@ class Program : public MbolElement {
     x.push_back((MbolElement*)objective);
     x.push_back((MbolElement*)constraints);
     return x;
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((Program*)this);
+  }
+  virtual void specialVisit(MbolElementVisitor& visitor) {
+    visitor.specialVisit((Program*)this);
   }
 };
 

@@ -40,7 +40,6 @@ void MbolElementVisitorPrinter::end() {
 }
 
 void MbolElementVisitorCPLEX::specialVisit(Program* program) {
-  
   // start making all the code
   //#include<ilcplex/ilocplex.h>\n
   code = "#include<set>\n#include<map>\n#include<mbol.hpp>\nusing namespace std;\n#ifndef MBOL_" + className + "\n#define MBOL_" + className + "\nclass " + className + " {\npublic:\nbool init();\nbool solve();\n" + className + "();\n~" + className + "();\nbool hasInitialized;\nMBOLSolver solver;\ndouble objValue;\nMBOLExpr objExp;\n";
