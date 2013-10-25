@@ -1,53 +1,42 @@
+#include <execinfo.h>
 #include<visitors.hpp>
 #include<classes.hpp>
 #include<utilities.hpp>
 
 MbolElementVisitorPrinter::MbolElementVisitorPrinter() {
+  out.open("/tmp/mbol-ast");
+  out << "digraph {\n";
 }
-void MbolElementVisitorPrinter::visit(ElementExpression* elementExpression) {
-  cout << "element expression" << endl;
+void MbolElementVisitorPrinter::makeNode(MbolElement* a, string label) {
+  if (mapping.count(a) == 0) {
+    mapping[a] = mapping.size();
+  }
+  out << mapping[a] << " [label=\"" << label << "\\n" << "Line: " << a->lineno << "\"];\n";
 }
-void MbolElementVisitorPrinter::visit(Qualifier* qualifier) {
-  cout << "qualifier" << endl;
+void MbolElementVisitorPrinter::makeEdge(MbolElement* a, MbolElement* b) {
+  if (a == NULL || b == NULL) {
+    return;
+  }
+  if (mapping.count(a) == 0) {
+    mapping[a] = mapping.size();
+  }
+  if (mapping.count(b) == 0) {
+    mapping[b] = mapping.size();
+  }
+  out << mapping[a] << " -> " << mapping[b] << ";\n";
 }
-void MbolElementVisitorPrinter::specialVisit(SetCreator* setCreator) {
-  cout << "set creator" << endl;
+void MbolElementVisitorPrinter::defaultVisit(MbolElement* element) {
+  makeNode(element, element->getName());
+  list<MbolElement*> x = element->getChildren();
+  for (list<MbolElement*>::iterator i = x.begin(); i != x.end(); i++) {
+    makeEdge(element, *i);
+  }
 }
-void MbolElementVisitorPrinter::visit(SetCreator* setCreator) {
-  cout << "set creator" << endl;
-}
-void MbolElementVisitorPrinter::visit(Equation* equation) {
-  cout << "equation" << endl;
-}
-void MbolElementVisitorPrinter::visit(VariableMap* variableMap) {
-  cout << "variablemap" << endl;
-}
-void MbolElementVisitorPrinter::specialVisit(Sum* sum) {
-  cout << "sum" << endl;
-}
-void MbolElementVisitorPrinter::visit(Sum* sum) {
-  cout << "sum" << endl;
-}
-void MbolElementVisitorPrinter::visit(NumberExpression* numberExpression) {
-  cout << "numberexpression" << endl;
-}
-void MbolElementVisitorPrinter::visit(Objective* objective) {
-  cout << "objective" << endl;
-}
-void MbolElementVisitorPrinter::visit(ElementSet* elementSet) {
-  cout << "elementset" << endl;
-}
-void MbolElementVisitorPrinter::visit(Fraction* fraction) {
-  cout << "fraction" << endl;
-}
-void MbolElementVisitorPrinter::visit(SetSize* setSize) {
-  cout << "setsize" << endl;
-}
-void MbolElementVisitorPrinter::visit(ElementNumbers* elementNumbers) {
-  cout << "elementnumbers" << endl;
-}
-void MbolElementVisitorPrinter::visit(Constraint* constraint) {
-  cout << "constraint" << endl;
+void MbolElementVisitorPrinter::end() {
+  out << "}" << endl;
+  out.close();
+  int dontcare = system("dot -Tps -O /tmp/mbol-ast");
+  dontcare = system("evince /tmp/mbol-ast.ps");
 }
 
 void MbolElementVisitorCPLEX::specialVisit(Program* program) {

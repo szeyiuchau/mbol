@@ -285,8 +285,8 @@ indices CO element_expression {
   $1->elementExpressions.push_back($3);
 };
 sum:
-SM sum_qualifiers number_expression {
-  $$=new Sum(string($1),$2,$3);
+SM sum_qualifiers number_subexpression {
+  $$=new Sum(string($1),$2,new NumberExpression($3));
 };
 sum_qualifiers:
 US LC VA EQ NU RC CT LC element_expression RC {
@@ -386,6 +386,7 @@ int main(int argc,char* argv[]) {
   string inputName;
   string outputDirectory="./";
   string className;
+  bool ast = false;
   bool hpp=false;
   bool bin=false;
   bool pdf=false;
@@ -400,6 +401,7 @@ int main(int argc,char* argv[]) {
   options["-pdf"]="Compile a pdf of the program";
   options["-hpp"]="Compile a hpp header of the program";
   options["-cpx"]="User CPLEX as solver (COIN-OR symphony is deafult)";
+  options["-ast"]="Graphviz abstract syntax tree";
   for(int i=1;i<argc;i++) {
     if(string(argv[i])=="-q") {
       quiet=true;
@@ -411,6 +413,8 @@ int main(int argc,char* argv[]) {
       cpx=true;
     } else if(string(argv[i])=="-typ") {
       typ=true;
+    } else if(string(argv[i])=="-ast") {
+      ast=true;
     } else if(string(argv[i])=="-pdf") {
       pdf=true;
     } else if(string(argv[i])=="-bin") {
@@ -448,13 +452,19 @@ int main(int argc,char* argv[]) {
   }
   
   map<string,Type*> types;
-  if(hpp||bin||typ) {
+  if (hpp || bin || typ || ast) {
     yyin=fopen(inputName.c_str(),"r");
     yyparse();
     fclose(yyin);
     MbolElementVisitor* vTypes=new MbolElementVisitorTypeHelper();
     program->accept(*vTypes);
     types=((MbolElementVisitorTypeHelper*)vTypes)->types;
+  }
+
+  if (ast) {
+    MbolElementVisitorPrinter* dot = new MbolElementVisitorPrinter();
+    program->accept(*dot);
+    dot->end();
   }
   
   if(typ) {
