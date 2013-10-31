@@ -32,46 +32,6 @@ TupleIndices::TupleIndices(string a, string b) {
   indices.push_back(a);
   indices.push_back(b);
 }
-ElementSubexpression::ElementSubexpression(SetCreator* a) {
-  setCreator = a;
-  elementSet = NULL;
-  elementParantheses = NULL;
-  elementVariable = NULL;
-  elementNumbers = NULL;
-  value = a->value;
-}
-ElementSubexpression::ElementSubexpression(ElementSet* a) {
-  setCreator = NULL;
-  elementSet = a;
-  elementParantheses = NULL;
-  elementVariable = NULL;
-  elementNumbers = NULL;
-  value = a->value;
-}
-ElementSubexpression::ElementSubexpression(ElementParantheses* a) {
-  setCreator = NULL;
-  elementSet = NULL;
-  elementParantheses = a;
-  elementVariable = NULL;
-  elementNumbers = NULL;
-  value = a->value;
-}
-ElementSubexpression::ElementSubexpression(ElementVariable* a) {
-  setCreator = NULL;
-  elementSet = NULL;
-  elementParantheses = NULL;
-  elementVariable = a;
-  elementNumbers = NULL;
-  value = a->value;
-}
-ElementSubexpression::ElementSubexpression(ElementNumbers* a) {
-  setCreator = NULL;
-  elementSet = NULL;
-  elementParantheses = NULL;
-  elementVariable = NULL;
-  elementNumbers = a;
-  value = a->value;
-}
 NumberOperator::NumberOperator(string a) {
   value = a;
 }
@@ -81,7 +41,7 @@ Fraction::Fraction(NumberExpression* a, NumberExpression* b) {
 }
 VariableMap::VariableMap(string a, string b) {
   variableName = a;
-  indices = new Indices(new ElementExpression(new ElementSubexpression(new ElementVariable(b))));
+  indices = new Indices(new ElementExpression(new ElementVariable(b)));
 }
 VariableMap::VariableMap(string a) {
   variableName = a;
@@ -154,10 +114,10 @@ SumQualifiers::SumQualifiers(Qualifiers* a) {
   qualifiers = a;
 }
 SumQualifiers::SumQualifiers(string a, string b, ElementExpression* c) {
-  qualifiers = new Qualifiers(new Qualifier(a, "in", new ElementExpression(new ElementSubexpression(new ElementNumbers(b, c)))));
+  qualifiers = new Qualifiers(new Qualifier(a, "in", new ElementExpression(new ElementNumbers(b, c))));
 }
 SumQualifiers::SumQualifiers(string a, string b, string c) {
-  qualifiers = new Qualifiers(new Qualifier(a, "in", new ElementExpression(new ElementSubexpression(new ElementNumbers(b, c)))));
+  qualifiers = new Qualifiers(new Qualifier(a, "in", new ElementExpression(new ElementNumbers(b, c))));
 }
 Sum::Sum(string a, SumQualifiers* b, NumberExpression* c) {
   sumType = a;

@@ -62,8 +62,8 @@
 "\le" return LE;
 "{" return LC;
 "}" return RC;
-"(" return LP;
-")" return RP;
+(\\left\(|\() return LP;
+(\\right\)|\)) return RP;
 "_" return US;
 "\cap" return SI;
 "\cup" return SU;
@@ -83,7 +83,6 @@
   yylval.sval=buf;
   return VA;
 };
-
 (\+|-){0,1}[0-9]+(\.[0-9]*){0,1} {
   char* buf=new char[strlen(yytext)+1];
   strcpy(buf,yytext);

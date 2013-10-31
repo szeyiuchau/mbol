@@ -51,44 +51,45 @@
   38            | VARIABLE '\in' element_expression
 
   39  element_expression : element_subexpression
-  40                     | element_expression '\setminus' element_subexpression
-  41                     | element_expression '\cup' element_subexpression
-  42                     | element_expression '\cap' element_subexpression
+  40                     | element_expression '+' element_subexpression
+  41                     | element_expression '\setminus' element_subexpression
+  42                     | element_expression '\cup' element_subexpression
+  43                     | element_expression '\cap' element_subexpression
 
-  43  number_expression : number_subexpression
-  44                    | number_expression number_subexpression
-  45                    | number_expression number_operator number_subexpression
+  44  number_expression : number_subexpression
+  45                    | number_expression number_subexpression
+  46                    | number_expression number_operator number_subexpression
 
-  46  element_subexpression : '\{' VARIABLE ':' qualifiers '\}'
-  47                        | '\{' element_expression '\}'
-  48                        | '(' element_expression ')'
-  49                        | VARIABLE
+  47  element_subexpression : '\{' VARIABLE ':' qualifiers '\}'
+  48                        | '\{' element_expression '\}'
+  49                        | '(' element_expression ')'
+  50                        | VARIABLE
 
-  50  number_subexpression : sum
-  51                       | '|' element_expression '|'
-  52                       | '(' number_expression ')' '^' '{' number_expression '}'
-  53                       | '\frac' '{' number_expression '}' '{' number_expression '}'
-  54                       | '(' number_expression ')'
-  55                       | NUMBER
-  56                       | variable_map
+  51  number_subexpression : sum
+  52                       | '|' element_expression '|'
+  53                       | '(' number_expression ')' '^' '{' number_expression '}'
+  54                       | '\frac' '{' number_expression '}' '{' number_expression '}'
+  55                       | '(' number_expression ')'
+  56                       | NUMBER
+  57                       | variable_map
 
-  57  variable_map : VARIABLE
-  58               | VARIABLE '_' '{' indices '}'
-  59               | VARIABLE '_' VARIABLE
+  58  variable_map : VARIABLE
+  59               | VARIABLE '_' '{' indices '}'
+  60               | VARIABLE '_' VARIABLE
 
-  60  number_operator : '+'
-  61                  | '-'
-  62                  | '/'
-  63                  | '*'
+  61  number_operator : '+'
+  62                  | '-'
+  63                  | '/'
+  64                  | '*'
 
-  64  indices : element_expression
-  65          | indices ',' element_expression
+  65  indices : element_expression
+  66          | indices ',' element_expression
 
-  66  sum : '\sum' sum_qualifiers number_subexpression
+  67  sum : '\sum' sum_qualifiers number_subexpression
 
-  67  sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression '}'
-  68                 | '_' '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}'
-  69                 | '_' '{' qualifiers '}'
+  68  sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression '}'
+  69                 | '_' '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}'
+  70                 | '_' '{' qualifiers '}'
 
 state 0
 	$accept : . program $end  (0)
@@ -260,7 +261,7 @@ state 18
 
 
 state 19
-	sum : '\sum' . sum_qualifiers number_subexpression  (66)
+	sum : '\sum' . sum_qualifiers number_subexpression  (67)
 
 	'_'  shift 38
 	.  error
@@ -269,35 +270,35 @@ state 19
 
 
 state 20
-	variable_map : VARIABLE .  (57)
-	variable_map : VARIABLE . '_' '{' indices '}'  (58)
-	variable_map : VARIABLE . '_' VARIABLE  (59)
+	variable_map : VARIABLE .  (58)
+	variable_map : VARIABLE . '_' '{' indices '}'  (59)
+	variable_map : VARIABLE . '_' VARIABLE  (60)
 
 	'_'  shift 40
-	'\sum'  reduce 57
-	'\in'  reduce 57
-	'\ge'  reduce 57
-	'\le'  reduce 57
-	'='  reduce 57
-	VARIABLE  reduce 57
-	'+'  reduce 57
-	'-'  reduce 57
-	'/'  reduce 57
-	'*'  reduce 57
-	'}'  reduce 57
-	'('  reduce 57
-	')'  reduce 57
-	'|'  reduce 57
-	'\frac'  reduce 57
-	'>'  reduce 57
-	'<'  reduce 57
-	'\ne'  reduce 57
-	NUMBER  reduce 57
+	'\sum'  reduce 58
+	'\in'  reduce 58
+	'\ge'  reduce 58
+	'\le'  reduce 58
+	'='  reduce 58
+	VARIABLE  reduce 58
+	'+'  reduce 58
+	'-'  reduce 58
+	'/'  reduce 58
+	'*'  reduce 58
+	'}'  reduce 58
+	'('  reduce 58
+	')'  reduce 58
+	'|'  reduce 58
+	'\frac'  reduce 58
+	'>'  reduce 58
+	'<'  reduce 58
+	'\ne'  reduce 58
+	NUMBER  reduce 58
 
 
 state 21
-	number_subexpression : '(' . number_expression ')' '^' '{' number_expression '}'  (52)
-	number_subexpression : '(' . number_expression ')'  (54)
+	number_subexpression : '(' . number_expression ')' '^' '{' number_expression '}'  (53)
+	number_subexpression : '(' . number_expression ')'  (55)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -314,7 +315,7 @@ state 21
 
 
 state 22
-	number_subexpression : '|' . element_expression '|'  (51)
+	number_subexpression : '|' . element_expression '|'  (52)
 
 	VARIABLE  shift 43
 	'('  shift 44
@@ -326,39 +327,39 @@ state 22
 
 
 state 23
-	number_subexpression : '\frac' . '{' number_expression '}' '{' number_expression '}'  (53)
+	number_subexpression : '\frac' . '{' number_expression '}' '{' number_expression '}'  (54)
 
 	'{'  shift 48
 	.  error
 
 
 state 24
-	number_subexpression : NUMBER .  (55)
+	number_subexpression : NUMBER .  (56)
 
-	.  reduce 55
+	.  reduce 56
 
 
 state 25
 	constraint : '\con' '{' variable_map . '\in' '\mathbb{Z}' '}'  (13)
-	number_subexpression : variable_map .  (56)
+	number_subexpression : variable_map .  (57)
 
 	'\in'  shift 49
-	'\sum'  reduce 56
-	'\ge'  reduce 56
-	'\le'  reduce 56
-	'='  reduce 56
-	VARIABLE  reduce 56
-	'+'  reduce 56
-	'-'  reduce 56
-	'/'  reduce 56
-	'*'  reduce 56
-	'('  reduce 56
-	'|'  reduce 56
-	'\frac'  reduce 56
-	'>'  reduce 56
-	'<'  reduce 56
-	'\ne'  reduce 56
-	NUMBER  reduce 56
+	'\sum'  reduce 57
+	'\ge'  reduce 57
+	'\le'  reduce 57
+	'='  reduce 57
+	VARIABLE  reduce 57
+	'+'  reduce 57
+	'-'  reduce 57
+	'/'  reduce 57
+	'*'  reduce 57
+	'('  reduce 57
+	'|'  reduce 57
+	'\frac'  reduce 57
+	'>'  reduce 57
+	'<'  reduce 57
+	'\ne'  reduce 57
+	NUMBER  reduce 57
 
 
 state 26
@@ -369,16 +370,16 @@ state 26
 
 
 state 27
-	number_subexpression : sum .  (50)
+	number_subexpression : sum .  (51)
 
-	.  reduce 50
+	.  reduce 51
 
 
 state 28
 	equation : number_expression . inequality number_expression  (16)
 	equation : number_expression . '=' number_expression  (17)
-	number_expression : number_expression . number_subexpression  (44)
-	number_expression : number_expression . number_operator number_subexpression  (45)
+	number_expression : number_expression . number_subexpression  (45)
+	number_expression : number_expression . number_operator number_subexpression  (46)
 
 	'\sum'  shift 19
 	'\ge'  shift 51
@@ -406,9 +407,9 @@ state 28
 
 
 state 29
-	number_expression : number_subexpression .  (43)
+	number_expression : number_subexpression .  (44)
 
-	.  reduce 43
+	.  reduce 44
 
 
 state 30
@@ -492,16 +493,16 @@ state 37
 
 
 state 38
-	sum_qualifiers : '_' . '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression '}'  (67)
-	sum_qualifiers : '_' . '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}'  (68)
-	sum_qualifiers : '_' . '{' qualifiers '}'  (69)
+	sum_qualifiers : '_' . '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression '}'  (68)
+	sum_qualifiers : '_' . '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}'  (69)
+	sum_qualifiers : '_' . '{' qualifiers '}'  (70)
 
 	'{'  shift 78
 	.  error
 
 
 state 39
-	sum : '\sum' sum_qualifiers . number_subexpression  (66)
+	sum : '\sum' sum_qualifiers . number_subexpression  (67)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -517,8 +518,8 @@ state 39
 
 
 state 40
-	variable_map : VARIABLE '_' . '{' indices '}'  (58)
-	variable_map : VARIABLE '_' . VARIABLE  (59)
+	variable_map : VARIABLE '_' . '{' indices '}'  (59)
+	variable_map : VARIABLE '_' . VARIABLE  (60)
 
 	VARIABLE  shift 80
 	'{'  shift 81
@@ -526,16 +527,16 @@ state 40
 
 
 state 41
-	number_subexpression : variable_map .  (56)
+	number_subexpression : variable_map .  (57)
 
-	.  reduce 56
+	.  reduce 57
 
 
 state 42
-	number_expression : number_expression . number_subexpression  (44)
-	number_expression : number_expression . number_operator number_subexpression  (45)
-	number_subexpression : '(' number_expression . ')' '^' '{' number_expression '}'  (52)
-	number_subexpression : '(' number_expression . ')'  (54)
+	number_expression : number_expression . number_subexpression  (45)
+	number_expression : number_expression . number_operator number_subexpression  (46)
+	number_subexpression : '(' number_expression . ')' '^' '{' number_expression '}'  (53)
+	number_subexpression : '(' number_expression . ')'  (55)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -557,13 +558,13 @@ state 42
 
 
 state 43
-	element_subexpression : VARIABLE .  (49)
+	element_subexpression : VARIABLE .  (50)
 
-	.  reduce 49
+	.  reduce 50
 
 
 state 44
-	element_subexpression : '(' . element_expression ')'  (48)
+	element_subexpression : '(' . element_expression ')'  (49)
 
 	VARIABLE  shift 43
 	'('  shift 44
@@ -575,8 +576,8 @@ state 44
 
 
 state 45
-	element_subexpression : '\{' . VARIABLE ':' qualifiers '\}'  (46)
-	element_subexpression : '\{' . element_expression '\}'  (47)
+	element_subexpression : '\{' . VARIABLE ':' qualifiers '\}'  (47)
+	element_subexpression : '\{' . element_expression '\}'  (48)
 
 	VARIABLE  shift 84
 	'('  shift 44
@@ -588,15 +589,17 @@ state 45
 
 
 state 46
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
-	number_subexpression : '|' element_expression . '|'  (51)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
+	number_subexpression : '|' element_expression . '|'  (52)
 
 	'\cap'  shift 86
 	'\cup'  shift 87
-	'\setminus'  shift 88
-	'|'  shift 89
+	'+'  shift 88
+	'\setminus'  shift 89
+	'|'  shift 90
 	.  error
 
 
@@ -607,7 +610,7 @@ state 47
 
 
 state 48
-	number_subexpression : '\frac' '{' . number_expression '}' '{' number_expression '}'  (53)
+	number_subexpression : '\frac' '{' . number_expression '}' '{' number_expression '}'  (54)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -619,14 +622,14 @@ state 48
 
 	variable_map  goto 41
 	sum  goto 27
-	number_expression  goto 90
+	number_expression  goto 91
 	number_subexpression  goto 29
 
 
 state 49
 	constraint : '\con' '{' variable_map '\in' . '\mathbb{Z}' '}'  (13)
 
-	'\mathbb{Z}'  shift 91
+	'\mathbb{Z}'  shift 92
 	.  error
 
 
@@ -661,32 +664,32 @@ state 53
 
 	variable_map  goto 41
 	sum  goto 27
-	number_expression  goto 92
+	number_expression  goto 93
 	number_subexpression  goto 29
 
 
 state 54
-	number_operator : '+' .  (60)
-
-	.  reduce 60
-
-
-state 55
-	number_operator : '-' .  (61)
+	number_operator : '+' .  (61)
 
 	.  reduce 61
 
 
-state 56
-	number_operator : '/' .  (62)
+state 55
+	number_operator : '-' .  (62)
 
 	.  reduce 62
 
 
-state 57
-	number_operator : '*' .  (63)
+state 56
+	number_operator : '/' .  (63)
 
 	.  reduce 63
+
+
+state 57
+	number_operator : '*' .  (64)
+
+	.  reduce 64
 
 
 state 58
@@ -720,12 +723,12 @@ state 61
 
 	variable_map  goto 41
 	sum  goto 27
-	number_expression  goto 93
+	number_expression  goto 94
 	number_subexpression  goto 29
 
 
 state 62
-	number_expression : number_expression number_operator . number_subexpression  (45)
+	number_expression : number_expression number_operator . number_subexpression  (46)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -737,13 +740,13 @@ state 62
 
 	variable_map  goto 41
 	sum  goto 27
-	number_subexpression  goto 94
+	number_subexpression  goto 95
 
 
 state 63
-	number_expression : number_expression number_subexpression .  (44)
+	number_expression : number_expression number_subexpression .  (45)
 
-	.  reduce 44
+	.  reduce 45
 
 
 state 64
@@ -754,7 +757,7 @@ state 64
 	'\{'  shift 45
 	.  error
 
-	element_expression  goto 95
+	element_expression  goto 96
 	element_subexpression  goto 47
 
 
@@ -763,8 +766,8 @@ state 65
 	qualifier : VARIABLE '=' . NUMBER ',...,' element_expression  (35)
 	qualifier : VARIABLE '=' . NUMBER ',...,' NUMBER  (37)
 
-	VARIABLE  shift 96
-	NUMBER  shift 97
+	VARIABLE  shift 97
+	NUMBER  shift 98
 	.  error
 
 
@@ -776,7 +779,7 @@ state 66
 	'\{'  shift 45
 	.  error
 
-	element_expression  goto 98
+	element_expression  goto 99
 	element_subexpression  goto 47
 
 
@@ -788,21 +791,21 @@ state 67
 	'\{'  shift 45
 	.  error
 
-	element_expression  goto 99
+	element_expression  goto 100
 	element_subexpression  goto 47
 
 
 state 68
 	qualifier : VARIABLE inequality . VARIABLE  (31)
 
-	VARIABLE  shift 100
+	VARIABLE  shift 101
 	.  error
 
 
 state 69
 	tuple_indices : VARIABLE . ',' VARIABLE  (25)
 
-	','  shift 101
+	','  shift 102
 	.  error
 
 
@@ -810,8 +813,8 @@ state 70
 	tuple_indices : tuple_indices . ',' VARIABLE  (26)
 	qualifier : '(' tuple_indices . ')' '\in' element_expression  (27)
 
-	','  shift 102
-	')'  shift 103
+	','  shift 103
+	')'  shift 104
 	.  error
 
 
@@ -823,7 +826,7 @@ state 71
 	'\{'  shift 45
 	.  error
 
-	element_expression  goto 104
+	element_expression  goto 105
 	element_subexpression  goto 47
 
 
@@ -835,7 +838,7 @@ state 72
 	'\{'  shift 45
 	.  error
 
-	element_expression  goto 105
+	element_expression  goto 106
 	element_subexpression  goto 47
 
 
@@ -843,7 +846,7 @@ state 73
 	qualifier : NUMBER '\le' . VARIABLE '\le' element_expression  (34)
 	qualifier : NUMBER '\le' . VARIABLE '\le' NUMBER  (36)
 
-	VARIABLE  shift 106
+	VARIABLE  shift 107
 	.  error
 
 
@@ -856,7 +859,7 @@ state 74
 	NUMBER  shift 33
 	.  error
 
-	qualifier  goto 107
+	qualifier  goto 108
 
 
 state 75
@@ -864,7 +867,7 @@ state 75
 	constraint : '\con' '[' qualifiers ']' . '{' equation '}'  (14)
 	constraint : '\con' '[' qualifiers ']' . '{' variable_map '\in' '\mathbb{Z}' '}'  (15)
 
-	'{'  shift 108
+	'{'  shift 109
 	.  error
 
 
@@ -887,125 +890,119 @@ state 77
 
 	variable_map  goto 41
 	sum  goto 27
-	number_expression  goto 109
+	number_expression  goto 110
 	number_subexpression  goto 29
 
 
 state 78
-	sum_qualifiers : '_' '{' . VARIABLE '=' NUMBER '}' '^' '{' element_expression '}'  (67)
-	sum_qualifiers : '_' '{' . VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}'  (68)
-	sum_qualifiers : '_' '{' . qualifiers '}'  (69)
+	sum_qualifiers : '_' '{' . VARIABLE '=' NUMBER '}' '^' '{' element_expression '}'  (68)
+	sum_qualifiers : '_' '{' . VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}'  (69)
+	sum_qualifiers : '_' '{' . qualifiers '}'  (70)
 
-	VARIABLE  shift 110
+	VARIABLE  shift 111
 	'('  shift 31
 	'\emptyset'  shift 32
 	NUMBER  shift 33
 	.  error
 
-	qualifiers  goto 111
+	qualifiers  goto 112
 	qualifier  goto 35
 
 
 state 79
-	sum : '\sum' sum_qualifiers number_subexpression .  (66)
+	sum : '\sum' sum_qualifiers number_subexpression .  (67)
 
-	.  reduce 66
+	.  reduce 67
 
 
 state 80
-	variable_map : VARIABLE '_' VARIABLE .  (59)
+	variable_map : VARIABLE '_' VARIABLE .  (60)
 
-	.  reduce 59
+	.  reduce 60
 
 
 state 81
-	variable_map : VARIABLE '_' '{' . indices '}'  (58)
+	variable_map : VARIABLE '_' '{' . indices '}'  (59)
 
 	VARIABLE  shift 43
 	'('  shift 44
 	'\{'  shift 45
 	.  error
 
-	indices  goto 112
-	element_expression  goto 113
+	indices  goto 113
+	element_expression  goto 114
 	element_subexpression  goto 47
 
 
 state 82
-	number_subexpression : '(' number_expression ')' . '^' '{' number_expression '}'  (52)
-	number_subexpression : '(' number_expression ')' .  (54)
+	number_subexpression : '(' number_expression ')' . '^' '{' number_expression '}'  (53)
+	number_subexpression : '(' number_expression ')' .  (55)
 
-	'^'  shift 114
-	'\sum'  reduce 54
-	'\ge'  reduce 54
-	'\le'  reduce 54
-	'='  reduce 54
-	VARIABLE  reduce 54
-	'+'  reduce 54
-	'-'  reduce 54
-	'/'  reduce 54
-	'*'  reduce 54
-	'}'  reduce 54
-	'('  reduce 54
-	')'  reduce 54
-	'|'  reduce 54
-	'\frac'  reduce 54
-	'>'  reduce 54
-	'<'  reduce 54
-	'\ne'  reduce 54
-	NUMBER  reduce 54
+	'^'  shift 115
+	'\sum'  reduce 55
+	'\ge'  reduce 55
+	'\le'  reduce 55
+	'='  reduce 55
+	VARIABLE  reduce 55
+	'+'  reduce 55
+	'-'  reduce 55
+	'/'  reduce 55
+	'*'  reduce 55
+	'}'  reduce 55
+	'('  reduce 55
+	')'  reduce 55
+	'|'  reduce 55
+	'\frac'  reduce 55
+	'>'  reduce 55
+	'<'  reduce 55
+	'\ne'  reduce 55
+	NUMBER  reduce 55
 
 
 state 83
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
-	element_subexpression : '(' element_expression . ')'  (48)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
+	element_subexpression : '(' element_expression . ')'  (49)
 
 	'\cap'  shift 86
 	'\cup'  shift 87
-	')'  shift 115
-	'\setminus'  shift 88
+	'+'  shift 88
+	')'  shift 116
+	'\setminus'  shift 89
 	.  error
 
 
 state 84
-	element_subexpression : '\{' VARIABLE . ':' qualifiers '\}'  (46)
-	element_subexpression : VARIABLE .  (49)
+	element_subexpression : '\{' VARIABLE . ':' qualifiers '\}'  (47)
+	element_subexpression : VARIABLE .  (50)
 
-	':'  shift 116
-	'\cap'  reduce 49
-	'\cup'  reduce 49
-	'\setminus'  reduce 49
-	'\}'  reduce 49
+	':'  shift 117
+	'\cap'  reduce 50
+	'\cup'  reduce 50
+	'+'  reduce 50
+	'\setminus'  reduce 50
+	'\}'  reduce 50
 
 
 state 85
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
-	element_subexpression : '\{' element_expression . '\}'  (47)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
+	element_subexpression : '\{' element_expression . '\}'  (48)
 
 	'\cap'  shift 86
 	'\cup'  shift 87
-	'\setminus'  shift 88
-	'\}'  shift 117
+	'+'  shift 88
+	'\setminus'  shift 89
+	'\}'  shift 118
 	.  error
 
 
 state 86
-	element_expression : element_expression '\cap' . element_subexpression  (42)
-
-	VARIABLE  shift 43
-	'('  shift 44
-	'\{'  shift 45
-	.  error
-
-	element_subexpression  goto 118
-
-
-state 87
-	element_expression : element_expression '\cup' . element_subexpression  (41)
+	element_expression : element_expression '\cap' . element_subexpression  (43)
 
 	VARIABLE  shift 43
 	'('  shift 44
@@ -1015,8 +1012,8 @@ state 87
 	element_subexpression  goto 119
 
 
-state 88
-	element_expression : element_expression '\setminus' . element_subexpression  (40)
+state 87
+	element_expression : element_expression '\cup' . element_subexpression  (42)
 
 	VARIABLE  shift 43
 	'('  shift 44
@@ -1026,16 +1023,38 @@ state 88
 	element_subexpression  goto 120
 
 
-state 89
-	number_subexpression : '|' element_expression '|' .  (51)
+state 88
+	element_expression : element_expression '+' . element_subexpression  (40)
 
-	.  reduce 51
+	VARIABLE  shift 43
+	'('  shift 44
+	'\{'  shift 45
+	.  error
+
+	element_subexpression  goto 121
+
+
+state 89
+	element_expression : element_expression '\setminus' . element_subexpression  (41)
+
+	VARIABLE  shift 43
+	'('  shift 44
+	'\{'  shift 45
+	.  error
+
+	element_subexpression  goto 122
 
 
 state 90
-	number_expression : number_expression . number_subexpression  (44)
-	number_expression : number_expression . number_operator number_subexpression  (45)
-	number_subexpression : '\frac' '{' number_expression . '}' '{' number_expression '}'  (53)
+	number_subexpression : '|' element_expression '|' .  (52)
+
+	.  reduce 52
+
+
+state 91
+	number_expression : number_expression . number_subexpression  (45)
+	number_expression : number_expression . number_operator number_subexpression  (46)
+	number_subexpression : '\frac' '{' number_expression . '}' '{' number_expression '}'  (54)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -1043,7 +1062,7 @@ state 90
 	'-'  shift 55
 	'/'  shift 56
 	'*'  shift 57
-	'}'  shift 121
+	'}'  shift 123
 	'('  shift 21
 	'|'  shift 22
 	'\frac'  shift 23
@@ -1056,17 +1075,17 @@ state 90
 	number_subexpression  goto 63
 
 
-state 91
+state 92
 	constraint : '\con' '{' variable_map '\in' '\mathbb{Z}' . '}'  (13)
 
-	'}'  shift 122
+	'}'  shift 124
 	.  error
 
 
-state 92
+state 93
 	equation : number_expression '=' number_expression .  (17)
-	number_expression : number_expression . number_subexpression  (44)
-	number_expression : number_expression . number_operator number_subexpression  (45)
+	number_expression : number_expression . number_subexpression  (45)
+	number_expression : number_expression . number_operator number_subexpression  (46)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -1086,10 +1105,10 @@ state 92
 	number_subexpression  goto 63
 
 
-state 93
+state 94
 	equation : number_expression inequality number_expression .  (16)
-	number_expression : number_expression . number_subexpression  (44)
-	number_expression : number_expression . number_operator number_subexpression  (45)
+	number_expression : number_expression . number_subexpression  (45)
+	number_expression : number_expression . number_operator number_subexpression  (46)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -1109,143 +1128,153 @@ state 93
 	number_subexpression  goto 63
 
 
-state 94
-	number_expression : number_expression number_operator number_subexpression .  (45)
-
-	.  reduce 45
-
-
 state 95
+	number_expression : number_expression number_operator number_subexpression .  (46)
+
+	.  reduce 46
+
+
+state 96
 	qualifier : VARIABLE '\in' element_expression .  (38)
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
 
 	'\cap'  shift 86
 	'\cup'  shift 87
-	'\setminus'  shift 88
+	'+'  shift 88
+	'\setminus'  shift 89
 	','  reduce 38
 	'}'  reduce 38
 	'\}'  reduce 38
 	']'  reduce 38
 
 
-state 96
+state 97
 	qualifier : VARIABLE '=' VARIABLE .  (30)
 
 	.  reduce 30
 
 
-state 97
+state 98
 	qualifier : VARIABLE '=' NUMBER . ',...,' element_expression  (35)
 	qualifier : VARIABLE '=' NUMBER . ',...,' NUMBER  (37)
 
-	',...,'  shift 123
+	',...,'  shift 125
 	.  error
 
 
-state 98
+state 99
 	qualifier : VARIABLE '\subseteq' element_expression .  (33)
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
 
 	'\cap'  shift 86
 	'\cup'  shift 87
-	'\setminus'  shift 88
+	'+'  shift 88
+	'\setminus'  shift 89
 	','  reduce 33
 	'}'  reduce 33
 	'\}'  reduce 33
 	']'  reduce 33
 
 
-state 99
+state 100
 	qualifier : VARIABLE '\subset' element_expression .  (32)
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
 
 	'\cap'  shift 86
 	'\cup'  shift 87
-	'\setminus'  shift 88
+	'+'  shift 88
+	'\setminus'  shift 89
 	','  reduce 32
 	'}'  reduce 32
 	'\}'  reduce 32
 	']'  reduce 32
 
 
-state 100
+state 101
 	qualifier : VARIABLE inequality VARIABLE .  (31)
 
 	.  reduce 31
 
 
-state 101
+state 102
 	tuple_indices : VARIABLE ',' . VARIABLE  (25)
 
-	VARIABLE  shift 124
-	.  error
-
-
-state 102
-	tuple_indices : tuple_indices ',' . VARIABLE  (26)
-
-	VARIABLE  shift 125
+	VARIABLE  shift 126
 	.  error
 
 
 state 103
-	qualifier : '(' tuple_indices ')' . '\in' element_expression  (27)
+	tuple_indices : tuple_indices ',' . VARIABLE  (26)
 
-	'\in'  shift 126
+	VARIABLE  shift 127
 	.  error
 
 
 state 104
+	qualifier : '(' tuple_indices ')' . '\in' element_expression  (27)
+
+	'\in'  shift 128
+	.  error
+
+
+state 105
 	qualifier : '\emptyset' '=' element_expression .  (28)
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
 
 	'\cap'  shift 86
 	'\cup'  shift 87
-	'\setminus'  shift 88
+	'+'  shift 88
+	'\setminus'  shift 89
 	','  reduce 28
 	'}'  reduce 28
 	'\}'  reduce 28
 	']'  reduce 28
 
 
-state 105
+state 106
 	qualifier : '\emptyset' '\ne' element_expression .  (29)
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
 
 	'\cap'  shift 86
 	'\cup'  shift 87
-	'\setminus'  shift 88
+	'+'  shift 88
+	'\setminus'  shift 89
 	','  reduce 29
 	'}'  reduce 29
 	'\}'  reduce 29
 	']'  reduce 29
 
 
-state 106
+state 107
 	qualifier : NUMBER '\le' VARIABLE . '\le' element_expression  (34)
 	qualifier : NUMBER '\le' VARIABLE . '\le' NUMBER  (36)
 
-	'\le'  shift 127
+	'\le'  shift 129
 	.  error
 
 
-state 107
+state 108
 	qualifiers : qualifiers ',' qualifier .  (24)
 
 	.  reduce 24
 
 
-state 108
+state 109
 	binary_constraint : '\con' '[' qualifiers ']' '{' . variable_map '\in' '\{0,1\}' '}'  (11)
 	constraint : '\con' '[' qualifiers ']' '{' . equation '}'  (14)
 	constraint : '\con' '[' qualifiers ']' '{' . variable_map '\in' '\mathbb{Z}' '}'  (15)
@@ -1258,17 +1287,17 @@ state 108
 	NUMBER  shift 24
 	.  error
 
-	variable_map  goto 128
-	equation  goto 129
+	variable_map  goto 130
+	equation  goto 131
 	sum  goto 27
 	number_expression  goto 28
 	number_subexpression  goto 29
 
 
-state 109
+state 110
 	objective : objective_type '{' program_variables '}' '{' number_expression . '}'  (2)
-	number_expression : number_expression . number_subexpression  (44)
-	number_expression : number_expression . number_operator number_subexpression  (45)
+	number_expression : number_expression . number_subexpression  (45)
+	number_expression : number_expression . number_operator number_subexpression  (46)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -1276,7 +1305,7 @@ state 109
 	'-'  shift 55
 	'/'  shift 56
 	'*'  shift 57
-	'}'  shift 130
+	'}'  shift 132
 	'('  shift 21
 	'|'  shift 22
 	'\frac'  shift 23
@@ -1289,7 +1318,7 @@ state 109
 	number_subexpression  goto 63
 
 
-state 110
+state 111
 	qualifier : VARIABLE . '=' VARIABLE  (30)
 	qualifier : VARIABLE . inequality VARIABLE  (31)
 	qualifier : VARIABLE . '\subset' element_expression  (32)
@@ -1297,13 +1326,13 @@ state 110
 	qualifier : VARIABLE . '=' NUMBER ',...,' element_expression  (35)
 	qualifier : VARIABLE . '=' NUMBER ',...,' NUMBER  (37)
 	qualifier : VARIABLE . '\in' element_expression  (38)
-	sum_qualifiers : '_' '{' VARIABLE . '=' NUMBER '}' '^' '{' element_expression '}'  (67)
-	sum_qualifiers : '_' '{' VARIABLE . '=' NUMBER '}' '^' '{' NUMBER '}'  (68)
+	sum_qualifiers : '_' '{' VARIABLE . '=' NUMBER '}' '^' '{' element_expression '}'  (68)
+	sum_qualifiers : '_' '{' VARIABLE . '=' NUMBER '}' '^' '{' NUMBER '}'  (69)
 
 	'\in'  shift 64
 	'\ge'  shift 51
 	'\le'  shift 52
-	'='  shift 131
+	'='  shift 133
 	'\subseteq'  shift 66
 	'\subset'  shift 67
 	'>'  shift 58
@@ -1314,52 +1343,54 @@ state 110
 	inequality  goto 68
 
 
-state 111
+state 112
 	qualifiers : qualifiers . ',' qualifier  (24)
-	sum_qualifiers : '_' '{' qualifiers . '}'  (69)
+	sum_qualifiers : '_' '{' qualifiers . '}'  (70)
 
 	','  shift 74
-	'}'  shift 132
-	.  error
-
-
-state 112
-	variable_map : VARIABLE '_' '{' indices . '}'  (58)
-	indices : indices . ',' element_expression  (65)
-
-	','  shift 133
 	'}'  shift 134
 	.  error
 
 
 state 113
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
-	indices : element_expression .  (64)
+	variable_map : VARIABLE '_' '{' indices . '}'  (59)
+	indices : indices . ',' element_expression  (66)
 
-	'\cap'  shift 86
-	'\cup'  shift 87
-	'\setminus'  shift 88
-	','  reduce 64
-	'}'  reduce 64
-
-
-state 114
-	number_subexpression : '(' number_expression ')' '^' . '{' number_expression '}'  (52)
-
-	'{'  shift 135
+	','  shift 135
+	'}'  shift 136
 	.  error
 
 
-state 115
-	element_subexpression : '(' element_expression ')' .  (48)
+state 114
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
+	indices : element_expression .  (65)
 
-	.  reduce 48
+	'\cap'  shift 86
+	'\cup'  shift 87
+	'+'  shift 88
+	'\setminus'  shift 89
+	','  reduce 65
+	'}'  reduce 65
+
+
+state 115
+	number_subexpression : '(' number_expression ')' '^' . '{' number_expression '}'  (53)
+
+	'{'  shift 137
+	.  error
 
 
 state 116
-	element_subexpression : '\{' VARIABLE ':' . qualifiers '\}'  (46)
+	element_subexpression : '(' element_expression ')' .  (49)
+
+	.  reduce 49
+
+
+state 117
+	element_subexpression : '\{' VARIABLE ':' . qualifiers '\}'  (47)
 
 	VARIABLE  shift 30
 	'('  shift 31
@@ -1367,74 +1398,80 @@ state 116
 	NUMBER  shift 33
 	.  error
 
-	qualifiers  goto 136
+	qualifiers  goto 138
 	qualifier  goto 35
 
 
-state 117
-	element_subexpression : '\{' element_expression '\}' .  (47)
-
-	.  reduce 47
-
-
 state 118
-	element_expression : element_expression '\cap' element_subexpression .  (42)
+	element_subexpression : '\{' element_expression '\}' .  (48)
+
+	.  reduce 48
+
+
+state 119
+	element_expression : element_expression '\cap' element_subexpression .  (43)
+
+	.  reduce 43
+
+
+state 120
+	element_expression : element_expression '\cup' element_subexpression .  (42)
 
 	.  reduce 42
 
 
-state 119
-	element_expression : element_expression '\cup' element_subexpression .  (41)
-
-	.  reduce 41
-
-
-state 120
-	element_expression : element_expression '\setminus' element_subexpression .  (40)
+state 121
+	element_expression : element_expression '+' element_subexpression .  (40)
 
 	.  reduce 40
 
 
-state 121
-	number_subexpression : '\frac' '{' number_expression '}' . '{' number_expression '}'  (53)
+state 122
+	element_expression : element_expression '\setminus' element_subexpression .  (41)
 
-	'{'  shift 137
+	.  reduce 41
+
+
+state 123
+	number_subexpression : '\frac' '{' number_expression '}' . '{' number_expression '}'  (54)
+
+	'{'  shift 139
 	.  error
 
 
-state 122
+state 124
 	constraint : '\con' '{' variable_map '\in' '\mathbb{Z}' '}' .  (13)
 
 	.  reduce 13
 
 
-state 123
+state 125
 	qualifier : VARIABLE '=' NUMBER ',...,' . element_expression  (35)
 	qualifier : VARIABLE '=' NUMBER ',...,' . NUMBER  (37)
 
 	VARIABLE  shift 43
 	'('  shift 44
 	'\{'  shift 45
-	NUMBER  shift 138
+	NUMBER  shift 140
 	.  error
 
-	element_expression  goto 139
+	element_expression  goto 141
 	element_subexpression  goto 47
 
 
-state 124
+state 126
 	tuple_indices : VARIABLE ',' VARIABLE .  (25)
 
 	.  reduce 25
 
 
-state 125
+state 127
 	tuple_indices : tuple_indices ',' VARIABLE .  (26)
 
 	.  reduce 26
 
 
-state 126
+state 128
 	qualifier : '(' tuple_indices ')' '\in' . element_expression  (27)
 
 	VARIABLE  shift 43
@@ -1442,125 +1479,99 @@ state 126
 	'\{'  shift 45
 	.  error
 
-	element_expression  goto 140
+	element_expression  goto 142
 	element_subexpression  goto 47
 
 
-state 127
+state 129
 	qualifier : NUMBER '\le' VARIABLE '\le' . element_expression  (34)
 	qualifier : NUMBER '\le' VARIABLE '\le' . NUMBER  (36)
 
 	VARIABLE  shift 43
 	'('  shift 44
 	'\{'  shift 45
-	NUMBER  shift 141
+	NUMBER  shift 143
 	.  error
 
-	element_expression  goto 142
+	element_expression  goto 144
 	element_subexpression  goto 47
 
 
-state 128
+state 130
 	binary_constraint : '\con' '[' qualifiers ']' '{' variable_map . '\in' '\{0,1\}' '}'  (11)
 	constraint : '\con' '[' qualifiers ']' '{' variable_map . '\in' '\mathbb{Z}' '}'  (15)
-	number_subexpression : variable_map .  (56)
+	number_subexpression : variable_map .  (57)
 
-	'\in'  shift 143
-	'\sum'  reduce 56
-	'\ge'  reduce 56
-	'\le'  reduce 56
-	'='  reduce 56
-	VARIABLE  reduce 56
-	'+'  reduce 56
-	'-'  reduce 56
-	'/'  reduce 56
-	'*'  reduce 56
-	'('  reduce 56
-	'|'  reduce 56
-	'\frac'  reduce 56
-	'>'  reduce 56
-	'<'  reduce 56
-	'\ne'  reduce 56
-	NUMBER  reduce 56
+	'\in'  shift 145
+	'\sum'  reduce 57
+	'\ge'  reduce 57
+	'\le'  reduce 57
+	'='  reduce 57
+	VARIABLE  reduce 57
+	'+'  reduce 57
+	'-'  reduce 57
+	'/'  reduce 57
+	'*'  reduce 57
+	'('  reduce 57
+	'|'  reduce 57
+	'\frac'  reduce 57
+	'>'  reduce 57
+	'<'  reduce 57
+	'\ne'  reduce 57
+	NUMBER  reduce 57
 
 
-state 129
+state 131
 	constraint : '\con' '[' qualifiers ']' '{' equation . '}'  (14)
 
-	'}'  shift 144
+	'}'  shift 146
 	.  error
 
 
-state 130
+state 132
 	objective : objective_type '{' program_variables '}' '{' number_expression '}' .  (2)
 
 	.  reduce 2
 
 
-state 131
+state 133
 	qualifier : VARIABLE '=' . VARIABLE  (30)
 	qualifier : VARIABLE '=' . NUMBER ',...,' element_expression  (35)
 	qualifier : VARIABLE '=' . NUMBER ',...,' NUMBER  (37)
-	sum_qualifiers : '_' '{' VARIABLE '=' . NUMBER '}' '^' '{' element_expression '}'  (67)
-	sum_qualifiers : '_' '{' VARIABLE '=' . NUMBER '}' '^' '{' NUMBER '}'  (68)
+	sum_qualifiers : '_' '{' VARIABLE '=' . NUMBER '}' '^' '{' element_expression '}'  (68)
+	sum_qualifiers : '_' '{' VARIABLE '=' . NUMBER '}' '^' '{' NUMBER '}'  (69)
 
-	VARIABLE  shift 96
-	NUMBER  shift 145
+	VARIABLE  shift 97
+	NUMBER  shift 147
 	.  error
 
 
-state 132
-	sum_qualifiers : '_' '{' qualifiers '}' .  (69)
+state 134
+	sum_qualifiers : '_' '{' qualifiers '}' .  (70)
 
-	.  reduce 69
+	.  reduce 70
 
 
-state 133
-	indices : indices ',' . element_expression  (65)
+state 135
+	indices : indices ',' . element_expression  (66)
 
 	VARIABLE  shift 43
 	'('  shift 44
 	'\{'  shift 45
 	.  error
 
-	element_expression  goto 146
+	element_expression  goto 148
 	element_subexpression  goto 47
 
 
-state 134
-	variable_map : VARIABLE '_' '{' indices '}' .  (58)
-
-	.  reduce 58
-
-
-state 135
-	number_subexpression : '(' number_expression ')' '^' '{' . number_expression '}'  (52)
-
-	'\sum'  shift 19
-	VARIABLE  shift 20
-	'('  shift 21
-	'|'  shift 22
-	'\frac'  shift 23
-	NUMBER  shift 24
-	.  error
-
-	variable_map  goto 41
-	sum  goto 27
-	number_expression  goto 147
-	number_subexpression  goto 29
-
-
 state 136
-	qualifiers : qualifiers . ',' qualifier  (24)
-	element_subexpression : '\{' VARIABLE ':' qualifiers . '\}'  (46)
+	variable_map : VARIABLE '_' '{' indices '}' .  (59)
 
-	','  shift 74
-	'\}'  shift 148
-	.  error
+	.  reduce 59
 
 
 state 137
-	number_subexpression : '\frac' '{' number_expression '}' '{' . number_expression '}'  (53)
+	number_subexpression : '(' number_expression ')' '^' '{' . number_expression '}'  (53)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -1577,113 +1588,19 @@ state 137
 
 
 state 138
-	qualifier : VARIABLE '=' NUMBER ',...,' NUMBER .  (37)
+	qualifiers : qualifiers . ',' qualifier  (24)
+	element_subexpression : '\{' VARIABLE ':' qualifiers . '\}'  (47)
 
-	.  reduce 37
+	','  shift 74
+	'\}'  shift 150
+	.  error
 
 
 state 139
-	qualifier : VARIABLE '=' NUMBER ',...,' element_expression .  (35)
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
-
-	'\cap'  shift 86
-	'\cup'  shift 87
-	'\setminus'  shift 88
-	','  reduce 35
-	'}'  reduce 35
-	'\}'  reduce 35
-	']'  reduce 35
-
-
-state 140
-	qualifier : '(' tuple_indices ')' '\in' element_expression .  (27)
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
-
-	'\cap'  shift 86
-	'\cup'  shift 87
-	'\setminus'  shift 88
-	','  reduce 27
-	'}'  reduce 27
-	'\}'  reduce 27
-	']'  reduce 27
-
-
-state 141
-	qualifier : NUMBER '\le' VARIABLE '\le' NUMBER .  (36)
-
-	.  reduce 36
-
-
-state 142
-	qualifier : NUMBER '\le' VARIABLE '\le' element_expression .  (34)
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
-
-	'\cap'  shift 86
-	'\cup'  shift 87
-	'\setminus'  shift 88
-	','  reduce 34
-	'}'  reduce 34
-	'\}'  reduce 34
-	']'  reduce 34
-
-
-state 143
-	binary_constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' . '\{0,1\}' '}'  (11)
-	constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' . '\mathbb{Z}' '}'  (15)
-
-	'\mathbb{Z}'  shift 150
-	'\{0,1\}'  shift 151
-	.  error
-
-
-state 144
-	constraint : '\con' '[' qualifiers ']' '{' equation '}' .  (14)
-
-	.  reduce 14
-
-
-state 145
-	qualifier : VARIABLE '=' NUMBER . ',...,' element_expression  (35)
-	qualifier : VARIABLE '=' NUMBER . ',...,' NUMBER  (37)
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER . '}' '^' '{' element_expression '}'  (67)
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER . '}' '^' '{' NUMBER '}'  (68)
-
-	'}'  shift 152
-	',...,'  shift 123
-	.  error
-
-
-state 146
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
-	indices : indices ',' element_expression .  (65)
-
-	'\cap'  shift 86
-	'\cup'  shift 87
-	'\setminus'  shift 88
-	','  reduce 65
-	'}'  reduce 65
-
-
-state 147
-	number_expression : number_expression . number_subexpression  (44)
-	number_expression : number_expression . number_operator number_subexpression  (45)
-	number_subexpression : '(' number_expression ')' '^' '{' number_expression . '}'  (52)
+	number_subexpression : '\frac' '{' number_expression '}' '{' . number_expression '}'  (54)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
-	'+'  shift 54
-	'-'  shift 55
-	'/'  shift 56
-	'*'  shift 57
-	'}'  shift 153
 	'('  shift 21
 	'|'  shift 22
 	'\frac'  shift 23
@@ -1691,21 +1608,119 @@ state 147
 	.  error
 
 	variable_map  goto 41
-	number_operator  goto 62
 	sum  goto 27
-	number_subexpression  goto 63
+	number_expression  goto 151
+	number_subexpression  goto 29
+
+
+state 140
+	qualifier : VARIABLE '=' NUMBER ',...,' NUMBER .  (37)
+
+	.  reduce 37
+
+
+state 141
+	qualifier : VARIABLE '=' NUMBER ',...,' element_expression .  (35)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
+
+	'\cap'  shift 86
+	'\cup'  shift 87
+	'+'  shift 88
+	'\setminus'  shift 89
+	','  reduce 35
+	'}'  reduce 35
+	'\}'  reduce 35
+	']'  reduce 35
+
+
+state 142
+	qualifier : '(' tuple_indices ')' '\in' element_expression .  (27)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
+
+	'\cap'  shift 86
+	'\cup'  shift 87
+	'+'  shift 88
+	'\setminus'  shift 89
+	','  reduce 27
+	'}'  reduce 27
+	'\}'  reduce 27
+	']'  reduce 27
+
+
+state 143
+	qualifier : NUMBER '\le' VARIABLE '\le' NUMBER .  (36)
+
+	.  reduce 36
+
+
+state 144
+	qualifier : NUMBER '\le' VARIABLE '\le' element_expression .  (34)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
+
+	'\cap'  shift 86
+	'\cup'  shift 87
+	'+'  shift 88
+	'\setminus'  shift 89
+	','  reduce 34
+	'}'  reduce 34
+	'\}'  reduce 34
+	']'  reduce 34
+
+
+state 145
+	binary_constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' . '\{0,1\}' '}'  (11)
+	constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' . '\mathbb{Z}' '}'  (15)
+
+	'\mathbb{Z}'  shift 152
+	'\{0,1\}'  shift 153
+	.  error
+
+
+state 146
+	constraint : '\con' '[' qualifiers ']' '{' equation '}' .  (14)
+
+	.  reduce 14
+
+
+state 147
+	qualifier : VARIABLE '=' NUMBER . ',...,' element_expression  (35)
+	qualifier : VARIABLE '=' NUMBER . ',...,' NUMBER  (37)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER . '}' '^' '{' element_expression '}'  (68)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER . '}' '^' '{' NUMBER '}'  (69)
+
+	'}'  shift 154
+	',...,'  shift 125
+	.  error
 
 
 state 148
-	element_subexpression : '\{' VARIABLE ':' qualifiers '\}' .  (46)
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
+	indices : indices ',' element_expression .  (66)
 
-	.  reduce 46
+	'\cap'  shift 86
+	'\cup'  shift 87
+	'+'  shift 88
+	'\setminus'  shift 89
+	','  reduce 66
+	'}'  reduce 66
 
 
 state 149
-	number_expression : number_expression . number_subexpression  (44)
-	number_expression : number_expression . number_operator number_subexpression  (45)
-	number_subexpression : '\frac' '{' number_expression '}' '{' number_expression . '}'  (53)
+	number_expression : number_expression . number_subexpression  (45)
+	number_expression : number_expression . number_operator number_subexpression  (46)
+	number_subexpression : '(' number_expression ')' '^' '{' number_expression . '}'  (53)
 
 	'\sum'  shift 19
 	VARIABLE  shift 20
@@ -1713,7 +1728,7 @@ state 149
 	'-'  shift 55
 	'/'  shift 56
 	'*'  shift 57
-	'}'  shift 154
+	'}'  shift 155
 	'('  shift 21
 	'|'  shift 22
 	'\frac'  shift 23
@@ -1727,104 +1742,136 @@ state 149
 
 
 state 150
-	constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' '\mathbb{Z}' . '}'  (15)
+	element_subexpression : '\{' VARIABLE ':' qualifiers '\}' .  (47)
 
-	'}'  shift 155
-	.  error
+	.  reduce 47
 
 
 state 151
-	binary_constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' '\{0,1\}' . '}'  (11)
+	number_expression : number_expression . number_subexpression  (45)
+	number_expression : number_expression . number_operator number_subexpression  (46)
+	number_subexpression : '\frac' '{' number_expression '}' '{' number_expression . '}'  (54)
 
+	'\sum'  shift 19
+	VARIABLE  shift 20
+	'+'  shift 54
+	'-'  shift 55
+	'/'  shift 56
+	'*'  shift 57
 	'}'  shift 156
+	'('  shift 21
+	'|'  shift 22
+	'\frac'  shift 23
+	NUMBER  shift 24
 	.  error
+
+	variable_map  goto 41
+	number_operator  goto 62
+	sum  goto 27
+	number_subexpression  goto 63
 
 
 state 152
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' . '^' '{' element_expression '}'  (67)
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' . '^' '{' NUMBER '}'  (68)
+	constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' '\mathbb{Z}' . '}'  (15)
 
-	'^'  shift 157
+	'}'  shift 157
 	.  error
 
 
 state 153
-	number_subexpression : '(' number_expression ')' '^' '{' number_expression '}' .  (52)
+	binary_constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' '\{0,1\}' . '}'  (11)
 
-	.  reduce 52
+	'}'  shift 158
+	.  error
 
 
 state 154
-	number_subexpression : '\frac' '{' number_expression '}' '{' number_expression '}' .  (53)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' . '^' '{' element_expression '}'  (68)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' . '^' '{' NUMBER '}'  (69)
+
+	'^'  shift 159
+	.  error
+
+
+state 155
+	number_subexpression : '(' number_expression ')' '^' '{' number_expression '}' .  (53)
 
 	.  reduce 53
 
 
-state 155
+state 156
+	number_subexpression : '\frac' '{' number_expression '}' '{' number_expression '}' .  (54)
+
+	.  reduce 54
+
+
+state 157
 	constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' '\mathbb{Z}' '}' .  (15)
 
 	.  reduce 15
 
 
-state 156
+state 158
 	binary_constraint : '\con' '[' qualifiers ']' '{' variable_map '\in' '\{0,1\}' '}' .  (11)
 
 	.  reduce 11
 
 
-state 157
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' . '{' element_expression '}'  (67)
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' . '{' NUMBER '}'  (68)
-
-	'{'  shift 158
-	.  error
-
-
-state 158
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' . element_expression '}'  (67)
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' . NUMBER '}'  (68)
-
-	VARIABLE  shift 43
-	'('  shift 44
-	'\{'  shift 45
-	NUMBER  shift 159
-	.  error
-
-	element_expression  goto 160
-	element_subexpression  goto 47
-
-
 state 159
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER . '}'  (68)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' . '{' element_expression '}'  (68)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' . '{' NUMBER '}'  (69)
 
-	'}'  shift 161
+	'{'  shift 160
 	.  error
 
 
 state 160
-	element_expression : element_expression . '\setminus' element_subexpression  (40)
-	element_expression : element_expression . '\cup' element_subexpression  (41)
-	element_expression : element_expression . '\cap' element_subexpression  (42)
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression . '}'  (67)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' . element_expression '}'  (68)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' . NUMBER '}'  (69)
 
-	'\cap'  shift 86
-	'\cup'  shift 87
-	'}'  shift 162
-	'\setminus'  shift 88
+	VARIABLE  shift 43
+	'('  shift 44
+	'\{'  shift 45
+	NUMBER  shift 161
 	.  error
+
+	element_expression  goto 162
+	element_subexpression  goto 47
 
 
 state 161
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}' .  (68)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER . '}'  (69)
+
+	'}'  shift 163
+	.  error
+
+
+state 162
+	element_expression : element_expression . '+' element_subexpression  (40)
+	element_expression : element_expression . '\setminus' element_subexpression  (41)
+	element_expression : element_expression . '\cup' element_subexpression  (42)
+	element_expression : element_expression . '\cap' element_subexpression  (43)
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression . '}'  (68)
+
+	'\cap'  shift 86
+	'\cup'  shift 87
+	'+'  shift 88
+	'}'  shift 164
+	'\setminus'  shift 89
+	.  error
+
+
+state 163
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' NUMBER '}' .  (69)
+
+	.  reduce 69
+
+
+state 164
+	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression '}' .  (68)
 
 	.  reduce 68
 
 
-state 162
-	sum_qualifiers : '_' '{' VARIABLE '=' NUMBER '}' '^' '{' element_expression '}' .  (67)
-
-	.  reduce 67
-
-
 52 terminals, 22 nonterminals
-70 grammar rules, 163 states
+71 grammar rules, 165 states

@@ -180,16 +180,16 @@ VA SE element_expression {
   $$=new Qualifier(string($1),"subsetequal",$3);
 }|
 NU LE VA LE element_expression {
-  $$=new Qualifier(string($3),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string($1),$5))));
+  $$=new Qualifier(string($3),"in",new ElementExpression(new ElementNumbers(string($1),$5)));
 }|
 VA EQ NU DD element_expression {
-  $$=new Qualifier(string($1),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string($3),$5))));
+  $$=new Qualifier(string($1),"in",new ElementExpression(new ElementNumbers(string($3),$5)));
 }|
 NU LE VA LE NU {
-  $$=new Qualifier(string($3),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string($1),string($5)))));
+  $$=new Qualifier(string($3),"in",new ElementExpression(new ElementNumbers(string($1),string($5))));
 }|
 VA EQ NU DD NU {
-  $$=new Qualifier(string($1),"in",new ElementExpression(new ElementSubexpression(new ElementNumbers(string($3),string($5)))));
+  $$=new Qualifier(string($1),"in",new ElementExpression(new ElementNumbers(string($3),string($5))));
 }|
 VA IN element_expression {
   $$=new Qualifier(string($1),"in",$3);
@@ -197,6 +197,9 @@ VA IN element_expression {
 element_expression:
 element_subexpression {
   $$=new ElementExpression($1);
+}|
+element_expression PL element_subexpression {
+  $$=new ElementExpression($1,new ElementOperator("+"),$3);
 }|
 element_expression SR element_subexpression {
   $$=new ElementExpression($1,new ElementOperator("reduce"),$3);
@@ -221,16 +224,16 @@ number_expression number_operator number_subexpression {
 };
 element_subexpression:
 LR VA CL qualifiers RR {
-  $$=new ElementSubexpression(new SetCreator(string($2),$4));
+  $$=new SetCreator(string($2),$4);
 }|
 LR element_expression RR {
-  $$=new ElementSubexpression(new ElementSet($2));
+  $$=new ElementSet($2);
 }|
 LP element_expression RP {
-  $$=new ElementSubexpression(new ElementParantheses($2));
+  $$=new ElementParantheses($2);
 }|
 VA {
-  $$=new ElementSubexpression(new ElementVariable(string($1)));
+  $$=new ElementVariable(string($1));
 };
 number_subexpression:
 sum {

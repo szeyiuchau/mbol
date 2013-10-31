@@ -41,9 +41,19 @@ class MbolElement {
     assert(0);
   }
 };
-class ElementSet : public MbolElement {
+class ElementSubexpression : public MbolElement {
   public:
   string value;
+ElementSubexpression() {}
+  string getName() {
+    return "ElementSubexpression";
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ElementSubexpression*)this);
+  }
+};
+class ElementSet : public ElementSubexpression {
+  public:
   ElementExpression* elementExpression;
   ElementSet(ElementExpression* a);
   string getName() {
@@ -58,9 +68,8 @@ class ElementSet : public MbolElement {
     visitor.visit((ElementSet*)this);
   }
 };
-class ElementParantheses : public MbolElement {
+class ElementParantheses : public ElementSubexpression {
   public:
-  string value;
   ElementExpression* elementExpression;
   ElementParantheses(ElementExpression* a);
   string getName() {
@@ -75,9 +84,8 @@ class ElementParantheses : public MbolElement {
     visitor.visit((ElementParantheses*)this);
   }
 };
-class ElementVariable : public MbolElement {
+class ElementVariable : public ElementSubexpression {
   public:
-  string value;
   ElementVariable(string a);
   string getName() {
     return "ElementVariable: " + value;
@@ -86,9 +94,8 @@ class ElementVariable : public MbolElement {
     visitor.visit((ElementVariable*)this);
   }
 };
-class ElementNumbers : public MbolElement {
+class ElementNumbers : public ElementSubexpression {
   public:
-  string value;
   string lb;
   string ub;
   ElementExpression* elementExpression;
@@ -115,35 +122,6 @@ class TupleIndices : public MbolElement {
   }
   virtual void visit(MbolElementVisitor& visitor) {
     visitor.visit((TupleIndices*)this);
-  }
-};
-class ElementSubexpression : public MbolElement {
-  public:
-  string value;
-  SetCreator* setCreator;
-  ElementSet* elementSet;
-  ElementParantheses* elementParantheses;
-  ElementVariable* elementVariable;
-  ElementNumbers* elementNumbers;
-  ElementSubexpression(SetCreator* a);
-  ElementSubexpression(ElementSet* a);
-  ElementSubexpression(ElementParantheses* a);
-  ElementSubexpression(ElementVariable* a);
-  ElementSubexpression(ElementNumbers* a);
-  string getName() {
-    return "ElementSubexpression";
-  }
-  list<MbolElement*> getChildren() {
-    list<MbolElement*> x;
-    x.push_back((MbolElement*)setCreator);
-    x.push_back((MbolElement*)elementSet);
-    x.push_back((MbolElement*)elementParantheses);
-    x.push_back((MbolElement*)elementVariable);
-    x.push_back((MbolElement*)elementNumbers);
-    return x;
-  }
-  virtual void visit(MbolElementVisitor& visitor) {
-    visitor.visit((ElementSubexpression*)this);
   }
 };
 class NumberSubexpression : public MbolElement {
@@ -333,9 +311,8 @@ class Qualifier : public MbolElement {
     visitor.visit((Qualifier*)this);
   }
 };
-class SetCreator : public MbolElement {
+class SetCreator : public ElementSubexpression {
   public:
-  string value;
   string variable;
   Qualifiers* qualifiers;
   SetCreator(string a, Qualifiers* b);

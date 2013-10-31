@@ -385,22 +385,26 @@ MbolElementVisitorCPLEX::MbolElementVisitorCPLEX(map<string, Type*> a, bool d, s
 void MbolElementVisitorCPLEX::visit(ElementExpression* elementExpression) {
   if(elementExpression->elementOperator != NULL) {
     code += types[elementExpression->value]->getCPLEXType() + " " + elementExpression->value + ";\n";
-    if(elementExpression->elementOperator->value == "reduce" || elementExpression->elementOperator->value == "union") {
-      code += elementExpression->value + "=" + elementExpression->elementExpression->value + ";\n";
-    }
-    code += "for(" + types[elementExpression->value]->getCPLEXType() + "::iterator iter=" + elementExpression->elementSubexpression->value + ".begin();iter!=" + elementExpression->elementSubexpression->value + ".end();iter++) {\n";
-    if(elementExpression->elementOperator->value == "intersect") {
-      code += "if(" + elementExpression->elementExpression->value + ".count(*iter)&&" + elementExpression->elementSubexpression->value + ".count(*iter)) {\n";
-      code += elementExpression->value + ".insert(*iter);\n";
+    if(elementExpression->elementOperator->value == "+") {
+      code += elementExpression->value + " = " + elementExpression->elementExpression->value + " + " + elementExpression->elementSubexpression->value + ";\n";
+    } else {
+      if(elementExpression->elementOperator->value == "reduce" || elementExpression->elementOperator->value == "union") {
+        code += elementExpression->value + "=" + elementExpression->elementExpression->value + ";\n";
+      }
+      code += "for(" + types[elementExpression->value]->getCPLEXType() + "::iterator iter=" + elementExpression->elementSubexpression->value + ".begin();iter!=" + elementExpression->elementSubexpression->value + ".end();iter++) {\n";
+      if(elementExpression->elementOperator->value == "intersect") {
+        code += "if(" + elementExpression->elementExpression->value + ".count(*iter)&&" + elementExpression->elementSubexpression->value + ".count(*iter)) {\n";
+        code += elementExpression->value + ".insert(*iter);\n";
+        code += "}\n";
+      }
+      if(elementExpression->elementOperator->value == "union") {
+        code += elementExpression->value + ".insert(*iter);\n";
+      }
+      if(elementExpression->elementOperator->value == "reduce") {
+        code += elementExpression->value + ".erase(*iter);\n";
+      }
       code += "}\n";
     }
-    if(elementExpression->elementOperator->value == "union") {
-      code += elementExpression->value + ".insert(*iter);\n";
-    }
-    if(elementExpression->elementOperator->value == "reduce") {
-      code += elementExpression->value + ".erase(*iter);\n";
-    }
-    code += "}\n";
   }
 }
 void MbolElementVisitorCPLEX::visit(NumberPower* numberPower) {
