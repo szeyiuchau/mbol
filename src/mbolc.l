@@ -11,6 +11,7 @@
 "[" return LS;
 "]" return RS;
 \\mcon return MC;
+\\exists return EX;
 \\intcon return IC;
 \\ne return NE;
 \\emptyset return ES;

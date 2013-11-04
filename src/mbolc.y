@@ -14,7 +14,7 @@
   #include<classes.hpp>
   using namespace std;
 %}
-%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR GT LT NE LJ CN CL ES IC MC LS RS BI
+%token SM IN CO GE LE EQ US SI SU VA MA MI ST PL SB DI MU LC RC LP RP AA BB CC DD EL AN UN SR RR LR LI ZC SE CT SS FR GT LT NE LJ CN CL ES IC MC LS RS BI EX
 %union {
   int ival;
   char* sval;
@@ -158,6 +158,9 @@ tuple_indices CO VA {
   $1->indices.push_back(string($3));
 };
 qualifier:
+EX VA IN element_expression {
+  $$ = new Qualifier(string($2), "exists", $4);
+}|
 LP tuple_indices RP IN element_expression {
   $$=new Qualifier($2,$5);
 }|
@@ -185,12 +188,12 @@ NU LE VA LE element_expression {
 VA EQ NU DD element_expression {
   $$=new Qualifier(string($1),"in",new ElementExpression(new ElementNumbers(string($3),$5)));
 }|
-NU LE VA LE NU {
+/*NU LE VA LE NU {
   $$=new Qualifier(string($3),"in",new ElementExpression(new ElementNumbers(string($1),string($5))));
 }|
 VA EQ NU DD NU {
   $$=new Qualifier(string($1),"in",new ElementExpression(new ElementNumbers(string($3),string($5))));
-}|
+}|*/
 VA IN element_expression {
   $$=new Qualifier(string($1),"in",$3);
 };
@@ -234,6 +237,9 @@ LP element_expression RP {
 }|
 VA {
   $$=new ElementVariable(string($1));
+}|
+NU {
+  $$=new ElementLiteral(string($1));
 };
 number_subexpression:
 sum {
@@ -295,9 +301,9 @@ sum_qualifiers:
 US LC VA EQ NU RC CT LC element_expression RC {
   $$=new SumQualifiers(string($3),string($5),$9);
 }|
-US LC VA EQ NU RC CT LC NU RC {
+/*US LC VA EQ NU RC CT LC NU RC {
   $$=new SumQualifiers(string($3),string($5),string($9));
-}|
+}|*/
 US LC qualifiers RC {
   $$=new SumQualifiers($3);
 };
@@ -483,7 +489,7 @@ int main(int argc,char* argv[]) {
     cout << "Program constants:" << endl;
     for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
       if(!getTemporaries().count(i->first)) {
-        if(i->second->isConstant) {
+        if(i->second->isConstant && !i->second->isLiteral) {
           cout << "  " << i->first << ": " << i->second->print() << endl;
         }
       }

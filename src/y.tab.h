@@ -47,7 +47,8 @@
 #define LS 303
 #define RS 304
 #define BI 305
-#define NU 306
+#define EX 306
+#define NU 307
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1

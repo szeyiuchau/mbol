@@ -15,6 +15,7 @@ set<string> getTemporaries();
 class Type {
   public:
   string name;
+bool isLiteral;
   bool isTemporary;
   bool isVariable;
   bool isConstant;

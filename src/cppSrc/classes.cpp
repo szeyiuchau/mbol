@@ -13,6 +13,10 @@ ElementParantheses::ElementParantheses(ElementExpression* a) {
   elementExpression = a;
   value = a->value;
 }
+ElementLiteral::ElementLiteral(string a) {
+  value = a;
+  isLiteral = true;
+}
 ElementVariable::ElementVariable(string a) {
   value = a;
 }

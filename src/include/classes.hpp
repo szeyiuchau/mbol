@@ -44,7 +44,8 @@ class MbolElement {
 class ElementSubexpression : public MbolElement {
   public:
   string value;
-ElementSubexpression() {}
+bool isLiteral;
+ElementSubexpression() {isLiteral = false;}
   string getName() {
     return "ElementSubexpression";
   }
@@ -82,6 +83,16 @@ class ElementParantheses : public ElementSubexpression {
   }
   virtual void visit(MbolElementVisitor& visitor) {
     visitor.visit((ElementParantheses*)this);
+  }
+};
+class ElementLiteral : public ElementSubexpression {
+  public:
+  ElementLiteral(string a);
+  string getName() {
+    return "ElementLiteral: " + value;
+  }
+  virtual void visit(MbolElementVisitor& visitor) {
+    visitor.visit((ElementLiteral*)this);
   }
 };
 class ElementVariable : public ElementSubexpression {

@@ -26,6 +26,7 @@ class ElementSet;
 class ElementOperator;
 class Fraction;
 class ElementVariable;
+class ElementLiteral;
 class NumberVariable;
 class NumberLiteral;
 class VariableMap;
@@ -106,6 +107,9 @@ class MbolElementVisitor {
   }
   virtual void visit(ElementParantheses* elementParantheses) {
     defaultVisit((MbolElement*)elementParantheses);
+  }
+  virtual void visit(ElementLiteral* elementLiteral) {
+    defaultVisit((MbolElement*)elementLiteral);
   }
   virtual void visit(ElementVariable* elementVariable) {
     defaultVisit((MbolElement*)elementVariable);
@@ -221,6 +225,7 @@ class MbolElementVisitorTypeHelper : public MbolElementVisitor {
   virtual void visit(Qualifier* qualifier);
   virtual void visit(ElementSet* elementSet);
   virtual void visit(ElementVariable* elementVariable);
+  virtual void visit(ElementLiteral* elementLiteral);
   virtual void visit(ElementNumbers* elementNumbers);
   virtual void visit(NumberVariable* numberVariable);
   virtual void visit(ProgramVariables* programVariables);

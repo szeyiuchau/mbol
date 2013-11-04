@@ -17,6 +17,7 @@ set<string> getTemporaries() {
 }
 SetType::SetType(string a) {
   name = a;
+  isLiteral = false;
   isReturn = false;
   isVariable = false;
   isTemporary = false;
@@ -30,7 +31,7 @@ string SetType::getCPLEXType() {
   string type = "";
   Type* base = setPaths.begin()->second.front().front();
   int length = setPaths.begin()->first;
-  if(length == 0) {
+  if (length == 0) {
     type = "int";
   } else {
     type = "set<Element,ElementCompare>";
@@ -60,15 +61,15 @@ string SetType::getCPLEXType() {
 }
 bool SetType::errorCheck() {
   bool ret = false;
-  if(isTemporary && isConstant) {
+  if (isTemporary && isConstant) {
     cout << "ERROR: " << name << " is used as a constant and temporary" << endl;
     ret = true;
   }
-  if(isTemporary && isVariable) {
+  if (isTemporary && isVariable) {
     cout << "ERROR: " << name << " is used as a variable and temporary" << endl;
     ret = true;
   }
-  if(setPaths.size() > 1) {
+  if (setPaths.size() > 1) {
     /* set<int> lines;
     string prev;
     prev="";
@@ -94,9 +95,9 @@ bool SetType::errorCheck() {
     }
     cout << endl;*/
     cout << "ERROR: inconsistent usage of element " << name << endl;
-    for(map<int, list<list<SetType*> > >::iterator i = setPaths.begin(); i != setPaths.end(); i++) {
+    for (map<int, list<list<SetType*> > >::iterator i = setPaths.begin(); i != setPaths.end(); i++) {
       cout << i->first << ":";
-      for(list<SetType*>::iterator j = i->second.front().begin(); j != i->second.front().end(); j++) {
+      for (list<SetType*>::iterator j = i->second.front().begin(); j != i->second.front().end(); j++) {
         cout << " " << (*j)->name;
       }
       cout << endl;
@@ -108,6 +109,7 @@ bool SetType::errorCheck() {
 
 NumberType::NumberType(string a) {
   name = a;
+  isLiteral = false;
   isReturn = false;
   isTemporary = false;
   isVariable = false;
@@ -120,36 +122,36 @@ NumberType::NumberType(string a) {
 string NumberType::getCPLEXType() {
   string pre = "";
   list<SetType*> example = indices.front();
-  for(list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
-    if((*j)->setPaths.begin()->first == 0) {
+  for (list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
+    if ((*j)->setPaths.begin()->first == 0) {
       pre += "map<int,";
     }
-    if((*j)->setPaths.begin()->first == 1) {
+    if ((*j)->setPaths.begin()->first == 1) {
       pre += "map<set<Element,ElementCompare>,";
       //pre+="map<set<int>,";
     }
   }
   string post = "";
-  for(list<SetType*>::reverse_iterator j = example.rbegin(); j != example.rend(); j++) {
-    if((*j)->setPaths.begin()->first == 0) {
-      if(post[post.size() - 1] == '>') {
+  for (list<SetType*>::reverse_iterator j = example.rbegin(); j != example.rend(); j++) {
+    if ((*j)->setPaths.begin()->first == 0) {
+      if (post[post.size() - 1] == '>') {
         post += " ";
       }
       post += ">";
     }
-    if((*j)->setPaths.begin()->first == 1) {
+    if ((*j)->setPaths.begin()->first == 1) {
       post += ",ElementCompare>";
       //post+=",set1comp>";
     }
   }
-  if(isVariable) {
-    if(isInteger) {
+  if (isVariable) {
+    if (isInteger) {
       return pre + "MBOLIntVar" + post;
     } else {
       return pre + "MBOLNumVar" + post;
     }
   } else {
-    if(isInteger) {
+    if (isInteger) {
       return pre + "int" + post;
     } else {
       return pre + "double" + post;
@@ -161,29 +163,29 @@ bool NumberType::errorCheck() {
   bool ret = false;
   bool A = true;
   bool B = true;
-  if(isTemporary && isConstant) {
+  if (isTemporary && isConstant) {
     cout << "ERROR: " << name << " is used as a constant and temporary" << endl;
     ret = true;
   }
-  if(isTemporary && isVariable) {
+  if (isTemporary && isVariable) {
     cout << "ERROR: " << name << " is used as a variable and temporary" << endl;
     ret = true;
   }
-  if(indices.empty()) {
+  if (indices.empty()) {
     cout << "ERROR: " << name << " no examples of indices for number??" << endl;
     return true;
   }
   list<SetType*> example = indices.front();
   //list<int>::iterator rs=mapTypeReasons[i->first].begin();
-  for(list<list<SetType*> >::iterator j = indices.begin(); j != indices.end(); j++) {
+  for (list<list<SetType*> >::iterator j = indices.begin(); j != indices.end(); j++) {
     bool different = false;
-    if(j->size() != example.size()) {
+    if (j->size() != example.size()) {
       different = true;
     } else {
       list<SetType*>::iterator kk = example.begin();
-      for(list<SetType*>::iterator k = j->begin(); k != j->end(); k++) {
-        if(!((*k)->isSet)) {
-          if(A) {
+      for (list<SetType*>::iterator k = j->begin(); k != j->end(); k++) {
+        if (!((*k)->isSet)) {
+          if (A) {
             cout << "ERROR: indice " << (*k)->name << " of " << name << " is not an element" << endl;
             ret = true;
             A = false;
@@ -191,13 +193,13 @@ bool NumberType::errorCheck() {
         }
         int depth1 = (*k)->setPaths.begin()->first;
         int depth2 = (*kk)->setPaths.begin()->first;
-        if(depth1 != depth2) {
+        if (depth1 != depth2) {
           different = true;
         }
         kk++;
       }
     }
-    if(different) {
+    if (different) {
       /*set<int> lines;
       lines.insert(mapTypeReasons[i->first].front());
       cout << "ERROR: inconsistent use of indices for "+stripVar(i->first)+" on line";
@@ -206,7 +208,7 @@ bool NumberType::errorCheck() {
         cout << "s " << first;
       }
       cout << " " << *rs << endl;*/
-      if(B) {
+      if (B) {
         cout << "ERROR: inconsistent use of indices for " << name << endl;
         ret = true;
         B = false;
@@ -218,29 +220,29 @@ bool NumberType::errorCheck() {
 
 string SetType::print(bool plural) {
   string val;
-  if(isTuple) {
-    if(plural) {
+  if (isTuple) {
+    if (plural) {
       val += "tuples with ";
     } else {
       val += "tuple with ";
     }
-    for(int i = 0; i < tupleIndices.size(); i++) {
-      if(i != 0) {
+    for (int i = 0; i < tupleIndices.size(); i++) {
+      if (i != 0) {
         val += " and ";
       }
       val += tupleIndices[i]->print();
     }
   } else {
     int setDepth = setPaths.begin()->first;
-    if(setDepth == 0) {
-      if(plural) {
+    if (setDepth == 0) {
+      if (plural) {
         val += "integers";
       } else {
         val += "integer";
       }
     } else {
-      for(int i = 0; i < setDepth; i++) {
-        if(i != 0 || plural) {
+      for (int i = 0; i < setDepth; i++) {
+        if (i != 0 || plural) {
           val += "sets of ";
         } else {
           val += "set of ";
@@ -254,12 +256,12 @@ string SetType::print(bool plural) {
 
 string NumberType::print(bool plural) {
   string val;
-  if(indices.begin()->size() == 0) {
+  if (indices.begin()->size() == 0) {
     val += "number";
   } else {
     val += "mapping from ";
-    for(list<SetType*>::iterator i = indices.begin()->begin(); i != indices.begin()->end(); i++) {
-      if(i != indices.begin()->begin()) {
+    for (list<SetType*>::iterator i = indices.begin()->begin(); i != indices.begin()->end(); i++) {
+      if (i != indices.begin()->begin()) {
         val += " and ";
       }
       val += (*i)->print();

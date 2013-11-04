@@ -55,29 +55,29 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
   
   // making arguments which are constants in the program
   code += "// Constants in the program that you must initialize\n";
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isConstant) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isConstant && !i->second->isLiteral) {
       code += i->second->getCPLEXType() + " " + i->first + ";\n";
     }
   }
   
   // declare CPLEX variables (actual variables in program)
   code += "// Variables used by the CPLEX program\n";
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isVariable) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isVariable) {
       code += i->second->getCPLEXType() + " " + i->first + ";\n";
     }
   }
   
   code += "// Variable results\n";
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isVariable) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isVariable) {
       string name = i->first + "_ret";
-      if(i->second->isSet) {
+      if (i->second->isSet) {
         types[name] = new SetType(name);
         ((SetType*)types[name])->setPaths = ((SetType*)i->second)->setPaths;
       }
-      if(i->second->isNumber) {
+      if (i->second->isNumber) {
         types[name] = new NumberType(name);
         ((NumberType*)types[name])->indices = ((NumberType*)i->second)->indices;
         types[name]->isInteger = i->second->isInteger;
@@ -87,16 +87,16 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
     }
   }
   
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isConstant) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isConstant && !i->second->isLiteral) {
       code += "void read_" + i->first + "(list<string>& tokens);\n";
     }
   }
   
   code += "void readAll(string f);\n";
   
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isVariable) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isVariable) {
       code += "void write_" + i->first + "(ofstream& out);\n";
     }
   }
@@ -111,9 +111,9 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
 //try {\n     }";
   
   // take care of simple variables
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isVariable && i->second->isNumber && ((NumberType*)i->second)->indices.front().size() == 0) {
-      if(i->second->isInteger) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isVariable && i->second->isNumber && ((NumberType*)i->second)->indices.front().size() == 0) {
+      if (i->second->isInteger) {
         code += "MBOLIntVar";
       } else {
         code += "MBOLNumVar";
@@ -128,43 +128,43 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
 
 void MbolElementVisitorCPLEX::visit(Program* program) {
   
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isVariable) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isVariable) {
       NumberType* t = (NumberType*)i->second;
       list<SetType*> example = t->indices.front();
       int tVal = 0;
       string prev = i->first;
       string indices = "";
-      for(int j = 0; j < example.size(); j++) {
+      for (int j = 0; j < example.size(); j++) {
         code += "for(";
         int temp = 0;
-        for(list<SetType*>::iterator k = example.begin(); k != example.end(); k++) {
+        for (list<SetType*>::iterator k = example.begin(); k != example.end(); k++) {
           temp++;
-          if(temp > j) {
-            if((*k)->setPaths.begin()->first == 0) {
+          if (temp > j) {
+            if ((*k)->setPaths.begin()->first == 0) {
               code += "map<int,";
             }
-            if((*k)->setPaths.begin()->first == 1) {
+            if ((*k)->setPaths.begin()->first == 1) {
               code += "map<set<Element,ElementCompare>,";
             }
           }
         }
-        if(t->isInteger) {
+        if (t->isInteger) {
           code += "MBOLIntVar";
         } else {
           code += "MBOLNumVar";
         }
         temp = example.size() - j;
-        for(list<SetType*>::reverse_iterator k = example.rbegin(); k != example.rend(); k++) {
+        for (list<SetType*>::reverse_iterator k = example.rbegin(); k != example.rend(); k++) {
           temp--;
-          if(temp >= 0) {
-            if((*k)->setPaths.begin()->first == 0) {
-              if(code[code.size() - 1] == '>') {
+          if (temp >= 0) {
+            if ((*k)->setPaths.begin()->first == 0) {
+              if (code[code.size() - 1] == '>') {
                 code += " ";
               }
               code += ">";
             }
-            if((*k)->setPaths.begin()->first == 1) {
+            if ((*k)->setPaths.begin()->first == 1) {
               code += ",ElementCompare>";
             }
           }
@@ -175,38 +175,38 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
         tVal++;
       }
       code += "variableConversion[" + prev + ".name] = string(\"" + i->first + "\")" + indices + ";\n";
-      for(list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
+      for (list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
         code += "}\n";
       }
     }
   }
   
   code += "MBOLSolver tempSolver(model);\nsolver = tempSolver;\n";
-  if(quiet) {
+  if (quiet) {
     //        code+="solver.setOut(env.getNullStream());\n";
     code += "solver.quiet();\n";
   }
   //    code+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\n";
   code += "hasInitialized = true;\nreturn true;\n}\n";
   
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isConstant) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isConstant && !i->second->isLiteral) {
       code += "void " + className + "::read_" + i->first + "(list<string>& tokens) {\n";
-      if(i->second->isSet) {
+      if (i->second->isSet) {
         SetType* sType = (SetType*)i->second;
-        if(sType->setPaths.begin()->first == 0) {
+        if (sType->setPaths.begin()->first == 0) {
           code += i->first + " = readIntegerElement(tokens);\n";
         } else {
           code += i->first + " = readSetElement(tokens);\n";
         }
         //code+="cout << Element("+i->first+").print() << endl;\n";
-      } else if(i->second->isNumber) {
+      } else if (i->second->isNumber) {
         NumberType* nType = (NumberType*)i->second;
         code += "while (!tokens.empty() && !isVariable(tokens.front())) {\n";
         list<SetType*> example = nType->indices.front();
         int num = 0;
-        for(list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
-          if((*j)->setPaths.begin()->first == 0) {
+        for (list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
+          if ((*j)->setPaths.begin()->first == 0) {
             code += "int index" + convert(num++) + " = readIntegerElement(tokens);\n";
           } else {
             code += "set<Element,ElementCompare> index" + convert(num++) + " = readSetElement(tokens);\n";
@@ -214,7 +214,7 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
         }
         num = 0;
         code += i->first;
-        for(list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
+        for (list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
           code += "[index" + convert(num++) + "]";
         }
         code += " = atof(tokens.front().c_str());\n";
@@ -229,8 +229,8 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
   code += "list<string> tokens = getTokens(f.c_str());\n";
   code += "while(!tokens.empty()) {\n";
   
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isConstant) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isConstant && !i->second->isLiteral) {
       code += "if (tokens.front() == \"" + i->first + "\") {\n";
       code += "tokens.pop_front();\n";
       code += "read_" + i->first + "(tokens);\n";
@@ -241,8 +241,8 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
   code += "}\n";
   code += "}\n";
   
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isVariable) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isVariable) {
       code += "void " + className + "::write_" + i->first + "(ofstream& out) {\n";
       code += "out << \"" + i->first + "\" << endl;\n";
       NumberType* t = (NumberType*)i->second;
@@ -250,36 +250,36 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
       int tVal = 0;
       string prev = i->first;
       string indices = "";
-      for(int j = 0; j < example.size(); j++) {
+      for (int j = 0; j < example.size(); j++) {
         code += "for (";
         int temp = 0;
-        for(list<SetType*>::iterator k = example.begin(); k != example.end(); k++) {
+        for (list<SetType*>::iterator k = example.begin(); k != example.end(); k++) {
           temp++;
-          if(temp > j) {
-            if((*k)->setPaths.begin()->first == 0) {
+          if (temp > j) {
+            if ((*k)->setPaths.begin()->first == 0) {
               code += "map<int,";
             }
-            if((*k)->setPaths.begin()->first == 1) {
+            if ((*k)->setPaths.begin()->first == 1) {
               code += "map<set<Element,ElementCompare>,";
             }
           }
         }
-        if(t->isInteger) {
+        if (t->isInteger) {
           code += "MBOLIntVar";
         } else {
           code += "MBOLNumVar";
         }
         temp = example.size() - j;
-        for(list<SetType*>::reverse_iterator k = example.rbegin(); k != example.rend(); k++) {
+        for (list<SetType*>::reverse_iterator k = example.rbegin(); k != example.rend(); k++) {
           temp--;
-          if(temp >= 0) {
-            if((*k)->setPaths.begin()->first == 0) {
-              if(code[code.size() - 1] == '>') {
+          if (temp >= 0) {
+            if ((*k)->setPaths.begin()->first == 0) {
+              if (code[code.size() - 1] == '>') {
                 code += " ";
               }
               code += ">";
             }
-            if((*k)->setPaths.begin()->first == 1) {
+            if ((*k)->setPaths.begin()->first == 1) {
               code += ",ElementCompare>";
             }
           }
@@ -289,8 +289,10 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
         prev = "iter" + convert(tVal) + "->second";
         tVal++;
       }
+      code += "if (solver.getValue(" + prev +") != 0) {\n";
       code += "out << " + indices + "solver.getValue(" + prev + ") << endl;\n";
-      for(list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
+      code += "}\n";
+      for (list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
         code += "}\n";
       }
       code += "}\n";
@@ -305,8 +307,8 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
   code += "void " + className + "::writeAll(string f) {\n";
   code += "ofstream out(f.c_str());\n";
   code += "writeObj(out);\n";
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isVariable) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isVariable) {
       code += "out << endl;\n";
       code += "write_" + i->first + "(out);\n";
     }
@@ -318,43 +320,43 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
 //try{\n     }
   code += "solver.solve();\nobjValue = solver.getValue(objExp);\n";
   
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isReturn) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isReturn) {
       NumberType* t = (NumberType*)i->second;
       list<SetType*> example = t->indices.front();
       int tVal = 0;
       string prev = i->first.substr(0, i->first.size() - 4);
       string indices = "";
-      for(int j = 0; j < example.size(); j++) {
+      for (int j = 0; j < example.size(); j++) {
         code += "for(";
         int temp = 0;
-        for(list<SetType*>::iterator k = example.begin(); k != example.end(); k++) {
+        for (list<SetType*>::iterator k = example.begin(); k != example.end(); k++) {
           temp++;
-          if(temp > j) {
-            if((*k)->setPaths.begin()->first == 0) {
+          if (temp > j) {
+            if ((*k)->setPaths.begin()->first == 0) {
               code += "map<int,";
             }
-            if((*k)->setPaths.begin()->first == 1) {
+            if ((*k)->setPaths.begin()->first == 1) {
               code += "map<set<Element,ElementCompare>,";
             }
           }
         }
-        if(t->isInteger) {
+        if (t->isInteger) {
           code += "MBOLIntVar";
         } else {
           code += "MBOLNumVar";
         }
         temp = example.size() - j;
-        for(list<SetType*>::reverse_iterator k = example.rbegin(); k != example.rend(); k++) {
+        for (list<SetType*>::reverse_iterator k = example.rbegin(); k != example.rend(); k++) {
           temp--;
-          if(temp >= 0) {
-            if((*k)->setPaths.begin()->first == 0) {
-              if(code[code.size() - 1] == '>') {
+          if (temp >= 0) {
+            if ((*k)->setPaths.begin()->first == 0) {
+              if (code[code.size() - 1] == '>') {
                 code += " ";
               }
               code += ">";
             }
-            if((*k)->setPaths.begin()->first == 1) {
+            if ((*k)->setPaths.begin()->first == 1) {
               code += ",ElementCompare>";
             }
           }
@@ -365,7 +367,7 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
         tVal++;
       }
       code += i->first + indices + "=solver.getValue(" + prev + ");\n";
-      for(list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
+      for (list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
         code += "}\n";
       }
     }
@@ -383,24 +385,24 @@ MbolElementVisitorCPLEX::MbolElementVisitorCPLEX(map<string, Type*> a, bool d, s
   code = "";
 }
 void MbolElementVisitorCPLEX::visit(ElementExpression* elementExpression) {
-  if(elementExpression->elementOperator != NULL) {
+  if (elementExpression->elementOperator != NULL) {
     code += types[elementExpression->value]->getCPLEXType() + " " + elementExpression->value + ";\n";
-    if(elementExpression->elementOperator->value == "+") {
+    if (elementExpression->elementOperator->value == "+") {
       code += elementExpression->value + " = " + elementExpression->elementExpression->value + " + " + elementExpression->elementSubexpression->value + ";\n";
     } else {
-      if(elementExpression->elementOperator->value == "reduce" || elementExpression->elementOperator->value == "union") {
+      if (elementExpression->elementOperator->value == "reduce" || elementExpression->elementOperator->value == "union") {
         code += elementExpression->value + "=" + elementExpression->elementExpression->value + ";\n";
       }
       code += "for(" + types[elementExpression->value]->getCPLEXType() + "::iterator iter=" + elementExpression->elementSubexpression->value + ".begin();iter!=" + elementExpression->elementSubexpression->value + ".end();iter++) {\n";
-      if(elementExpression->elementOperator->value == "intersect") {
+      if (elementExpression->elementOperator->value == "intersect") {
         code += "if(" + elementExpression->elementExpression->value + ".count(*iter)&&" + elementExpression->elementSubexpression->value + ".count(*iter)) {\n";
         code += elementExpression->value + ".insert(*iter);\n";
         code += "}\n";
       }
-      if(elementExpression->elementOperator->value == "union") {
+      if (elementExpression->elementOperator->value == "union") {
         code += elementExpression->value + ".insert(*iter);\n";
       }
-      if(elementExpression->elementOperator->value == "reduce") {
+      if (elementExpression->elementOperator->value == "reduce") {
         code += elementExpression->value + ".erase(*iter);\n";
       }
       code += "}\n";
@@ -411,24 +413,26 @@ void MbolElementVisitorCPLEX::visit(NumberPower* numberPower) {
   numberPower->value = "pow(" + numberPower->base->value + ", " + numberPower->power->value + ")";
 }
 void MbolElementVisitorCPLEX::visit(Qualifier* qualifier) {
-  if(qualifier->inequality != NULL) {
-    code += "if(" + qualifier->lhs + " " + qualifier->inequality->value + " " + qualifier->rhs + ") {\n";
+  if (qualifier->inequality != NULL) {
+    code += "if (" + qualifier->lhs + " " + qualifier->inequality->value + " " + qualifier->rhs + ") {\n";
   }
-  if(qualifier->elementExpression != NULL) {
-    if(qualifier->setCreator == "subset" || qualifier->setCreator == "subsetequal") {
+  if (qualifier->setCreator == "exists") {
+    code += "if (" + qualifier->elementExpression->value + ".count(" + qualifier->variable + ")) {\n";
+  } else if (qualifier->elementExpression != NULL) {
+    if (qualifier->setCreator == "subset" || qualifier->setCreator == "subsetequal") {
       code += types[qualifier->setToIter]->getCPLEXType() + " " + qualifier->setToIter + " = powerset(" + qualifier->elementExpression->value + ");\n";
-      if(qualifier->setCreator == "subset") {
+      if (qualifier->setCreator == "subset") {
         code += qualifier->setToIter + ".erase(" + qualifier->elementExpression->value + ");\n";
       }
     }
-    if(qualifier->setCreator == "in") {
+    if (qualifier->setCreator == "in") {
       code += types[qualifier->setToIter]->getCPLEXType() + " " + qualifier->setToIter + "=" + qualifier->elementExpression->value + ";\n";
     }
-    code += "for(" + types[qualifier->iter]->getCPLEXType() + "::iterator " + qualifier->iter + "=" + qualifier->setToIter + ".begin();" + qualifier->iter + "!=" + qualifier->setToIter + ".end();" + qualifier->iter + "++) {\n";
-    if(qualifier->tupleIndices == NULL) {
+    code += "for (" + types[qualifier->iter]->getCPLEXType() + "::iterator " + qualifier->iter + " = " + qualifier->setToIter + ".begin(); " + qualifier->iter + " != " + qualifier->setToIter + ".end(); " + qualifier->iter + "++) {\n";
+    if (qualifier->tupleIndices == NULL) {
       code += types[qualifier->variable]->getCPLEXType() + " " + qualifier->variable + "=*" + qualifier->iter + ";\n";
     } else {
-      for(int i = 0; i < qualifier->tupleIndices->indices.size(); i++) {
+      for (int i = 0; i < qualifier->tupleIndices->indices.size(); i++) {
         code += types[qualifier->tupleIndices->indices[i]]->getCPLEXType() + " " + qualifier->tupleIndices->indices[i] + "=" + qualifier->iter + "->tupleElement[" + convert(i) + "];\n";
       }
     }
@@ -439,7 +443,7 @@ void MbolElementVisitorCPLEX::specialVisit(SetCreator* setCreator) {
 }
 void MbolElementVisitorCPLEX::visit(SetCreator* setCreator) {
   code += setCreator->value + ".insert(" + setCreator->variable + ");\n";
-  for(list<Qualifier*>::iterator i = setCreator->qualifiers->qualifiers.begin(); i != setCreator->qualifiers->qualifiers.end(); i++) {
+  for (list<Qualifier*>::iterator i = setCreator->qualifiers->qualifiers.begin(); i != setCreator->qualifiers->qualifiers.end(); i++) {
     code += "}\n";
   }
 }
@@ -460,22 +464,20 @@ void MbolElementVisitorCPLEX::visit(VariableMap* variableMap) {
   }
   code += ";\n";*/
   variableMap->value = variableMap->variableName;
-  for(list<ElementExpression*>::iterator i = variableMap->indices->elementExpressions.begin(); i != variableMap->indices->elementExpressions.end(); i++) {
+  for (list<ElementExpression*>::iterator i = variableMap->indices->elementExpressions.begin(); i != variableMap->indices->elementExpressions.end(); i++) {
     variableMap->value += "[" + (*i)->value + "]";
   }
 }
 void MbolElementVisitorCPLEX::specialVisit(Sum* sum) {
-  code += "MBOLExpr " + sum->value + " = ";
-  if(sum->sumType == "+") {
-    code += "0";
+  if (sum->sumType == "+") {
+    code += "MBOLExpr " + sum->value + " = 0;\n";
   } else {
-    code += "1";
+    code += "double " + sum->value + " = 1;\n";
   }
-  code += ";\n";
 }
 void MbolElementVisitorCPLEX::visit(Sum* sum) {
   code += sum->value + " = " + sum->value + " " + sum->sumType + sum->numberExpression->value + ";\n";
-  for(list<Qualifier*>::iterator i = sum->sumQualifiers->qualifiers->qualifiers.begin(); i != sum->sumQualifiers->qualifiers->qualifiers.end(); i++) {
+  for (list<Qualifier*>::iterator i = sum->sumQualifiers->qualifiers->qualifiers.begin(); i != sum->sumQualifiers->qualifiers->qualifiers.end(); i++) {
     code += "}\n";
   }
 }
@@ -492,8 +494,8 @@ void MbolElementVisitorCPLEX::visit(NumberExpression* numberExpression) {
   code += numberExpression->value + "=" + numberExpression->value + "+";*/
   numberExpression->value = "";
   list<NumberOperator*>::const_iterator j = numberExpression->numberOperators.begin();
-  for(list<NumberSubexpression*>::const_iterator i = numberExpression->numberSubexpressions.begin(); i != numberExpression->numberSubexpressions.end(); i++) {
-    if(i != numberExpression->numberSubexpressions.begin()) {
+  for (list<NumberSubexpression*>::const_iterator i = numberExpression->numberSubexpressions.begin(); i != numberExpression->numberSubexpressions.end(); i++) {
+    if (i != numberExpression->numberSubexpressions.begin()) {
       numberExpression->value += " " + (*j)->value + " ";
       j++;
     }
@@ -504,10 +506,10 @@ void MbolElementVisitorCPLEX::visit(NumberExpression* numberExpression) {
 void MbolElementVisitorCPLEX::visit(Objective* objective) {
   code += "objExp=" + objective->numberExpression->value + ";\n";
   code += "model.";
-  if(objective->objectiveType->value == "max") {
+  if (objective->objectiveType->value == "max") {
     code += "maximize";
   }
-  if(objective->objectiveType->value == "min") {
+  if (objective->objectiveType->value == "min") {
     code += "minimize";
   }
   code += "(objExp);\n";
@@ -529,11 +531,11 @@ void MbolElementVisitorCPLEX::visit(ElementNumbers* elementNumbers) {
   code += "}\n";
 }
 void MbolElementVisitorCPLEX::visit(Constraint* constraint) {
-  if(constraint->equation != NULL) {
+  if (constraint->equation != NULL) {
     code += "model.add(" + constraint->equation->lhs->value + " " + constraint->equation->inequality->value + " " + constraint->equation->rhs->value + ");\n";
   }
-  if(constraint->qualifiers != NULL) {
-    for(list<Qualifier*>::iterator i = constraint->qualifiers->qualifiers.begin(); i != constraint->qualifiers->qualifiers.end(); i++) {
+  if (constraint->qualifiers != NULL) {
+    for (list<Qualifier*>::iterator i = constraint->qualifiers->qualifiers.begin(); i != constraint->qualifiers->qualifiers.end(); i++) {
       code += "}\n";
     }
   }
@@ -543,36 +545,39 @@ void MbolElementVisitorCPLEX::visit(Constraint* constraint) {
 
 MbolElementVisitorTypeHelper::MbolElementVisitorTypeHelper() {
   set<string> tempTemporaries = getTemporaries();
-  for(set<string>::iterator i = tempTemporaries.begin(); i != tempTemporaries.end(); i++) {
+  for (set<string>::iterator i = tempTemporaries.begin(); i != tempTemporaries.end(); i++) {
     temporaries.insert(*i);
   }
 }
 void MbolElementVisitorTypeHelper::visit(Program* program) {
-  for(map<string, map<string, edge> >::iterator i = graph.begin(); i != graph.end(); i++) {
+  for (map<string, map<string, edge> >::iterator i = graph.begin(); i != graph.end(); i++) {
     types[i->first] = new SetType(i->first);
-    if(mapTypes.count(i->first)) {
+    if (mapTypes.count(i->first)) {
       //           cout << "ERROR: " << i->first << " used as an element and a number" << endl;
       //           exit(1);
     }
+    if (isdigit(i->first.c_str()[0])) {
+      types[i->first]->isLiteral = true;
+    }
   }
-  for(map<string, list<list<string> > >::iterator i = mapTypes.begin(); i != mapTypes.end(); i++) {
-    if(graph.count(i->first) == 0) {
+  for (map<string, list<list<string> > >::iterator i = mapTypes.begin(); i != mapTypes.end(); i++) {
+    if (graph.count(i->first) == 0) {
       types[i->first] = new NumberType(i->first);
     }
   }
   bfs();
-  for(map<string, vector<string> >::iterator i = tupleTypes.begin(); i != tupleTypes.end(); i++) {
+  for (map<string, vector<string> >::iterator i = tupleTypes.begin(); i != tupleTypes.end(); i++) {
     types[i->first]->isTuple = true;
-    for(int j = 0; j < i->second.size(); j++) {
+    for (int j = 0; j < i->second.size(); j++) {
       ((SetType*)types[i->first])->tupleIndices.push_back((SetType*)types[i->second[j]]);
     }
   }
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->isNumber) {
-      for(list<list<string> >::iterator j = mapTypes[i->first].begin(); j != mapTypes[i->first].end(); j++) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->isNumber) {
+      for (list<list<string> >::iterator j = mapTypes[i->first].begin(); j != mapTypes[i->first].end(); j++) {
         list<SetType*> temp;
-        for(list<string>::iterator k = (*j).begin(); k != (*j).end(); k++) {
-          if(!types[*k]->isSet) {
+        for (list<string>::iterator k = (*j).begin(); k != (*j).end(); k++) {
+          if (!types[*k]->isSet) {
             cout << "ERROR: indice " << (*k) << " of " << i->second->name << " is not an element" << endl;
             exit(1);
           }
@@ -582,32 +587,32 @@ void MbolElementVisitorTypeHelper::visit(Program* program) {
       }
     }
   }
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(integerConstraints.count(i->first)) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (integerConstraints.count(i->first)) {
       types[i->first]->isInteger = true;
     }
-    if(variables.count(i->first)) {
+    if (variables.count(i->first)) {
       types[i->first]->isVariable = true;
     }
-    if(temporaries.count(i->first)) {
+    if (temporaries.count(i->first)) {
       types[i->first]->isTemporary = true;
     }
-    if(used.count(i->first) && !variables.count(i->first) && !temporaries.count(i->first)) {
+    if (used.count(i->first) && !variables.count(i->first) && !temporaries.count(i->first)) {
       types[i->first]->isConstant = true;
     }
   }
   bool isError = false;
-  for(map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
-    if(i->second->errorCheck()) {
+  for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+    if (i->second->errorCheck()) {
       isError = true;
     }
   }
-  if(isError) {
+  if (isError) {
     exit(1);
   }
 }
 void MbolElementVisitorTypeHelper::visit(Qualifier* qualifier) {
-  if(qualifier->elementExpression != NULL) {
+  if (qualifier->elementExpression != NULL) {
     /*cout << qualifier << endl;
     cout << qualifier->variable << endl;
     cout << qualifier->setToIter << endl;*/
@@ -615,19 +620,19 @@ void MbolElementVisitorTypeHelper::visit(Qualifier* qualifier) {
     graph[qualifier->variable][qualifier->iter].weight = 1;
     graph[qualifier->iter][qualifier->setToIter].weight = 0;
     graph[qualifier->setToIter][qualifier->iter].weight = 0;
-    if(qualifier->setCreator == "subset" || qualifier->setCreator == "subsetequal") {
+    if (qualifier->setCreator == "subset" || qualifier->setCreator == "subsetequal") {
       graph[qualifier->variable][qualifier->elementExpression->value].weight = 0;
       graph[qualifier->elementExpression->value][qualifier->variable].weight = 0;
     }
-    if(qualifier->setCreator == "in") {
+    if (qualifier->setCreator == "in" || qualifier->setCreator == "exists") {
       graph[qualifier->variable][qualifier->elementExpression->value].weight = 1;
     }
   }
-  if(qualifier->tupleIndices != NULL) {
-    if(!tupleTypes[qualifier->variable].empty()) {
+  if (qualifier->tupleIndices != NULL) {
+    if (!tupleTypes[qualifier->variable].empty()) {
       cout << "bad usage of tuples, something terribly wrong has occured" << endl;
     }
-    for(int i = 0; i < qualifier->tupleIndices->indices.size(); i++) {
+    for (int i = 0; i < qualifier->tupleIndices->indices.size(); i++) {
       temporaries.insert(qualifier->tupleIndices->indices[i]);
       tupleTypes[qualifier->variable].push_back(qualifier->tupleIndices->indices[i]);
     }
@@ -643,17 +648,21 @@ void MbolElementVisitorTypeHelper::visit(SetCreator* setCreator) {
 void MbolElementVisitorTypeHelper::visit(ElementSet* elementSet) {
   graph[elementSet->elementExpression->value][elementSet->value].weight = 1;
 }
+void MbolElementVisitorTypeHelper::visit(ElementLiteral* elementLiteral) {
+  graph[elementLiteral->value];
+  used.insert(elementLiteral->value);
+}
 void MbolElementVisitorTypeHelper::visit(ElementVariable* elementVariable) {
   graph[elementVariable->value];
   used.insert(elementVariable->value);
 }
 void MbolElementVisitorTypeHelper::visit(ProgramVariables* programVariables) {
-  for(list<string>::const_iterator i = programVariables->variables.begin(); i != programVariables->variables.end(); i++) {
+  for (list<string>::const_iterator i = programVariables->variables.begin(); i != programVariables->variables.end(); i++) {
     variables.insert(*i);
   }
 }
 void MbolElementVisitorTypeHelper::visit(Constraint* constraint) {
-  if(constraint->integerConstraint != "") {
+  if (constraint->integerConstraint != "") {
     integerConstraints.insert(constraint->integerConstraint);
   }
 }
@@ -666,7 +675,7 @@ void MbolElementVisitorTypeHelper::visit(ElementNumbers* elementNumbers) {
   graph[elementNumbers->value];
 }
 void MbolElementVisitorTypeHelper::visit(ElementExpression* elementExpression) {
-  if(elementExpression->elementOperator != NULL) {
+  if (elementExpression->elementOperator != NULL) {
     graph[elementExpression->value][elementExpression->elementExpression->value].weight = 0;
     graph[elementExpression->elementExpression->value][elementExpression->elementSubexpression->value].weight = 0;
     graph[elementExpression->elementSubexpression->value][elementExpression->value].weight = 0;
@@ -674,7 +683,7 @@ void MbolElementVisitorTypeHelper::visit(ElementExpression* elementExpression) {
 }
 void MbolElementVisitorTypeHelper::visit(VariableMap* variableMap) {
   list<string> indices;
-  for(list<ElementExpression*>::iterator i = variableMap->indices->elementExpressions.begin(); i != variableMap->indices->elementExpressions.end(); i++) {
+  for (list<ElementExpression*>::iterator i = variableMap->indices->elementExpressions.begin(); i != variableMap->indices->elementExpressions.end(); i++) {
     indices.push_back((*i)->value);
   }
   mapTypes[variableMap->variableName].push_back(indices);
@@ -682,71 +691,71 @@ void MbolElementVisitorTypeHelper::visit(VariableMap* variableMap) {
 }
 void MbolElementVisitorTypeHelper::bfs() {
   set<string> startNodes;
-  for(map<string, map<string, edge> >::iterator i = graph.begin(); i != graph.end(); i++) {
+  for (map<string, map<string, edge> >::iterator i = graph.begin(); i != graph.end(); i++) {
     startNodes.insert(i->first);
-    for(map<string, edge>::iterator j = i->second.begin(); j != i->second.end(); j++) {
+    for (map<string, edge>::iterator j = i->second.begin(); j != i->second.end(); j++) {
       startNodes.insert(j->first);
     }
   }
   set<string> toRemove;
-  for(set<string>::iterator i = startNodes.begin(); i != startNodes.end(); i++) {
+  for (set<string>::iterator i = startNodes.begin(); i != startNodes.end(); i++) {
     map<int, list<list<string> > > toVisit;
     set<string> visited;
     list<string> initialPath;
     initialPath.push_back(*i);
     toVisit[0].push_back(initialPath);
-    while(!toVisit.empty()) {
+    while (!toVisit.empty()) {
       list<string> x = toVisit.begin()->second.front();
       int length = toVisit.begin()->first;
       toVisit.begin()->second.pop_front();
-      while(!toVisit.empty() && toVisit.begin()->second.empty()) {
+      while (!toVisit.empty() && toVisit.begin()->second.empty()) {
         toVisit.erase(toVisit.begin());
       }
-      if(length != 0) {
+      if (length != 0) {
         toRemove.insert(x.back());
       }
-      if(visited.count(x.back())) {
+      if (visited.count(x.back())) {
         continue;
       }
       visited.insert(x.back());
-      for(map<string, edge>::iterator i = graph[x.back()].begin(); i != graph[x.back()].end(); i++) {
+      for (map<string, edge>::iterator i = graph[x.back()].begin(); i != graph[x.back()].end(); i++) {
         list<string> y = x;
         y.push_back(i->first);
         toVisit[length + i->second.weight].push_back(y);
       }
     }
   }
-  for(set<string>::iterator i = toRemove.begin(); i != toRemove.end(); i++) {
+  for (set<string>::iterator i = toRemove.begin(); i != toRemove.end(); i++) {
     startNodes.erase(*i);
   }
   map<int, list<list<string> > > toVisit;
   set<string> visited;
-  for(set<string>::iterator i = startNodes.begin(); i != startNodes.end(); i++) {
+  for (set<string>::iterator i = startNodes.begin(); i != startNodes.end(); i++) {
     list<string> temp;
     temp.push_back(*i);
     toVisit[0].push_back(temp);
   }
-  while(!toVisit.empty()) {
+  while (!toVisit.empty()) {
     list<string> x = toVisit.begin()->second.front();
     int length = toVisit.begin()->first;
     toVisit.begin()->second.pop_front();
-    while(!toVisit.empty() && toVisit.begin()->second.empty()) {
+    while (!toVisit.empty() && toVisit.begin()->second.empty()) {
       toVisit.erase(toVisit.begin());
     }
     list<SetType*> path;
-    for(list<string>::iterator i = x.begin(); i != x.end(); i++) {
-      if(!types[*i]->isSet) {
+    for (list<string>::iterator i = x.begin(); i != x.end(); i++) {
+      if (!types[*i]->isSet) {
         cout << "ERROR: unknown something bad about " << types[*i]->name << endl;
         exit(1);
       }
       path.push_back((SetType*)types[*i]);
     }
     ((SetType*)(types[x.back()]))->setPaths[length].push_back(path);
-    if(visited.count(x.back())) {
+    if (visited.count(x.back())) {
       continue;
     }
     visited.insert(x.back());
-    for(map<string, edge>::iterator i = graph[x.back()].begin(); i != graph[x.back()].end(); i++) {
+    for (map<string, edge>::iterator i = graph[x.back()].begin(); i != graph[x.back()].end(); i++) {
       list<string> y = x;
       y.push_back(i->first);
       toVisit[length + i->second.weight].push_back(y);
