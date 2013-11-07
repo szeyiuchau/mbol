@@ -519,7 +519,7 @@ void MbolElementVisitorCPLEX::visit(ElementSet* elementSet) {
   code += elementSet->value + ".insert(" + elementSet->elementExpression->value + ");\n";
 }
 void MbolElementVisitorCPLEX::visit(Fraction* fraction) {
-  fraction->value = "(" + fraction->numerator->value + ") / (" + fraction->denominator->value + ")";
+  fraction->value = "1.0 * (" + fraction->numerator->value + ") / (" + fraction->denominator->value + ")";
 }
 void MbolElementVisitorCPLEX::visit(SetSize* setSize) {
   setSize->value = "(int)" + setSize->elementExpression->value + ".size()";

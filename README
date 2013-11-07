@@ -2,7 +2,7 @@ ABOUT:
 
 Math-Based Optimization Language (MBOL) is a programming language for optimization problems which aims to be identical to the high-level math-based representation of the optimization program. This repository includes a compiler that converts latex source of an optimization problem into C++ code which can be compiled and executed with the popular optimizer, CPLEX.
 
-This tool was initially created by me (Andrew Newell) to more efficiently create mathematical programs to run on CPLEX. This tool has been exteremely useful in my research at Purdue University, and I wanted to share the tool with others.
+This tool was initially created by me (Andrew Newell) to quickly specify optimization programs to run on CPLEX. I've found this tool to be exteremely useful in my research at Purdue University, and I wanted to share the tool with others.
 
 
 AUTHOR:
@@ -12,17 +12,28 @@ Andrew Newell is currently the only author. You can send me comments or suggesti
 
 DEPENDENCIES:
 
-Only g++ is necessary to compile mbolc (MBOL compiler). The compiler uses lex and yacc, so if you want to modify the compiler you will need lex and yacc.
+g++ is necessary to compile mbolc (MBOL compiler). The compiler uses lex and yacc, so if you want to modify the compiler you will need lex and yacc. You will need COIN-OR symphony (open-source) or CPLEX (free academic license) to solve the created optimization program.
 
 The tool pdflatex is highly recommended as the most important advantage of using MBOL is that the MBOL source is compilable by pdflatex into publishable typesetted mathematics.
 
-Currently, mbolc only creates c++ code which requires the CPLEX library. This library is currently part of IBM's Academic Initiative, so other researchers are able to freely obtain this library. Also, companies can purchase this software. Future plans to create other backends for the mbolc compiler such that code can be generated which can be used by other solvers which may be easier to obtain.
 
-
-GETTING STARTED:
+GETTING STARTED, CPLEX USERS:
 
 CPLEX_HOME should be set to the home directory of CPLEX, e.g.:
 export EXPORT_HOME=~/ILOG/CPLEX/
+
+Use the -cpx argument with mbolc for CPLEX
+
+
+GETTING STARTED, COIN-OR USERS:
+
+Install COIN-OR Symphony, here is the command for Ubuntu users:
+sudo apt-get install coinor-libsymphony0
+
+mbolc by default uses symphony
+
+
+GETTING STARTED, ALL USERS AFTER SETTING UP SOLVER:
 
 To compile mbolc as well as the samples just call make:
 make
@@ -30,27 +41,16 @@ make
 The binary mbolc is created in the bin directory, you may optionally decide to install it if you have root privilages:
 sudo make install
 
-To understand what this tool does, look at samples/X.tex and the created samples/X.hpp (for some X, there are several examples). Try running the created binary samples/main. Running samples/main shows you the result of the samples. Examining samples/main.cpp shows what you as the user must provide in addition to the mathematical representation of the optimization program.
-
-If you have pdflatex you can try the following to see the pdf version of the optimization programs:
+To observe what mbolc is doing, you look at the samples consisting mostly of graph theory and SVM optimizations:
 cd samples
-make main.pdf
-
-If you have graphviz you can try the following to see the graph that the samples use:
-cd samples
-make graph.pdf
+make
+./main
+make svm
 
 
 USING MBOLC:
 
 The initial step is always to write an optimization problem in MBOL which is simply a subset of latex using the mbol latex environment (many examples shown in samples/mbol-source). Then, you have choices what to do with this MBOL source that describes an optimization program. First, with the mbolc's -pdf flag you can produce the nice typesetted latex output. Second, with mbolc's -hpp flag you can produce c++ code that invokes CPLEX to solve the optimization program, and this c++ code can be integrated into your own project. Finally, with mbolc's -bin flag you can produce a binary that invokes CPLEX to solve the optimization program while using files as I/O.
-
-
-COMING SOON:
-
-Full documentation has not been created yet.
-
-Type checking is lacking. Typically, if you use a variable as two different types, something bad will happen either in the mbolc execution or when the resulting c++ code is attempted to be compiled.
 
 
 ADVANCED:

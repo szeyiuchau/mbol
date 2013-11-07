@@ -438,7 +438,7 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 312 "mbolc.y"
+#line 311 "mbolc.y"
 Program* program;
 extern FILE* yyin;
 extern char* yytext;
@@ -453,34 +453,34 @@ void yyerror(const char *str) {
 int yywrap() {
   return 1;
 }
-string replaceAll(string a,string b,string c) {
-  while(a.find(b)!=string::npos) {
-    a=a.substr(0,a.find(b))+c+a.substr(a.find(b)+b.size());
+string replaceAll(string a, string b, string c) {
+  while (a.find(b) != string::npos) {
+    a = a.substr(0, a.find(b)) + c + a.substr(a.find(b) + b.size());
   }
   return a;
 }
-int countStr(string a,string b) {
-  int x=0;
-  while(a.find(b)!=string::npos) {
+int countStr(string a, string b) {
+  int x = 0;
+  while (a.find(b) != string::npos) {
     x++;
-    a=a.substr(0,a.find(b))+a.substr(a.find(b)+b.size());
+    a = a.substr(0, a.find(b)) + a.substr(a.find(b) + b.size());
   }
   return x;
 }
 bool quiet;
-map<string,string> options;
+map<string, string> options;
 void usage() {
   cout << "Usage: mbolc [options] input_file" << endl;
   cout << "Options:" << endl;
-  int msize=0;
-  for(map<string,string>::iterator i=options.begin();i!=options.end();i++) {
-    if(i->first.size()>msize) {
-      msize=i->first.size();
+  int msize = 0;
+  for (map<string, string>::iterator i = options.begin(); i != options.end(); i++) {
+    if (i->first.size() > msize) {
+      msize = i->first.size();
     }
   }
-  for(map<string,string>::iterator i=options.begin();i!=options.end();i++) {
+  for (map<string, string>::iterator i = options.begin(); i != options.end(); i++) {
     cout << "  " << i->first;
-    for(int j=0;j<msize+2-i->first.size();j++) {
+    for (int j = 0; j < msize + 2 - i->first.size(); j++) {
       cout << " ";
     }
     cout << i->second << endl;
@@ -500,213 +500,217 @@ void badArgs() {
   exit(1);
 }
 string indentCode(string code) {
-  string indentedCode="";
-  int depth=0;
-  while(!code.empty()) {
+  string indentedCode = "";
+  int depth = 0;
+  while (!code.empty()) {
     string line;
-    line=code.substr(0,code.find("\n")+1);
-    code=code.substr(code.find("\n")+1);
-    if(line.find("}")!=string::npos) {
+    line = code.substr(0, code.find("\n") + 1);
+    code = code.substr(code.find("\n") + 1);
+    if (line.find("}") != string::npos) {
       depth--;
     }
-    for(int j=0;j<depth;j++) {
-      indentedCode+="  ";
+    for (int j = 0; j < depth; j++) {
+      indentedCode += "  ";
     }
-    indentedCode+=line;
-    if(line.find("{")!=string::npos) {
+    indentedCode += line;
+    if (line.find("{") != string::npos) {
       depth++;
     }
   }
   return indentedCode;
 }
-int main(int argc,char* argv[]) {
-  bool inputRead=false;
-  quiet=false;
+int main(int argc, char* argv[]) {
+  bool inputRead = false;
+  quiet = false;
   string inputName;
-  string outputDirectory="./";
+  string outputDirectory = "./";
   string className;
   bool ast = false;
-  bool hpp=false;
-  bool bin=false;
-  bool pdf=false;
-  bool typ=false;
-  bool cpx=false;
-  options["-v"]="Print version information and exit";
-  options["-h"]="Print help information and exit";
-  options["-q"]="Put CPLEX in quiet mode";
-  options["-d <arg>"]="Use <arg> as output directory";
-  options["-typ"]="Print types inferred by mbolc";
-  options["-bin"]="Compile a binary for default file I/O";
-  options["-pdf"]="Compile a pdf of the program";
-  options["-hpp"]="Compile a hpp header of the program";
-  options["-cpx"]="User CPLEX as solver (COIN-OR symphony is deafult)";
-  options["-ast"]="Graphviz abstract syntax tree";
-  for(int i=1;i<argc;i++) {
-    if(string(argv[i])=="-q") {
-      quiet=true;
-    } else if(string(argv[i])=="-v") {
+  bool hpp = false;
+  bool bin = false;
+  bool pdf = false;
+  bool typ = false;
+  bool cpx = false;
+  options["-v"] = "Print version information and exit";
+  options["-h"] = "Print help information and exit";
+  options["-q"] = "Put CPLEX in quiet mode";
+  options["-d <arg>"] = "Use <arg> as output directory";
+  options["-typ"] = "Print types inferred by mbolc";
+  options["-bin"] = "Compile a binary for default file I/O";
+  options["-pdf"] = "Compile a pdf of the program";
+  options["-hpp"] = "Compile a hpp header of the program";
+  options["-cpx"] = "User CPLEX as solver (COIN-OR symphony is deafult)";
+  options["-ast"] = "Graphviz abstract syntax tree";
+  for (int i = 1; i < argc; i++) {
+    if (string(argv[i]) == "-q") {
+      quiet = true;
+    } else if (string(argv[i]) == "-v") {
       version();
-    } else if(string(argv[i])=="-h") {
+    } else if (string(argv[i]) == "-h") {
       help();
-    } else if(string(argv[i])=="-cpx") {
-      cpx=true;
-    } else if(string(argv[i])=="-typ") {
-      typ=true;
-    } else if(string(argv[i])=="-ast") {
-      ast=true;
-    } else if(string(argv[i])=="-pdf") {
-      pdf=true;
-    } else if(string(argv[i])=="-bin") {
-      bin=true;
-    } else if(string(argv[i])=="-hpp") {
-      hpp=true;
-    } else if(string(argv[i])=="-d") {
+    } else if (string(argv[i]) == "-cpx") {
+      cpx = true;
+    } else if (string(argv[i]) == "-typ") {
+      typ = true;
+    } else if (string(argv[i]) == "-ast") {
+      ast = true;
+    } else if (string(argv[i]) == "-pdf") {
+      pdf = true;
+    } else if (string(argv[i]) == "-bin") {
+      bin = true;
+    } else if (string(argv[i]) == "-hpp") {
+      hpp = true;
+    } else if (string(argv[i]) == "-d") {
       i++;
-      if(i<argc) {
-        outputDirectory=string(argv[i]);
-        if(outputDirectory[outputDirectory.size()-1]!='/') {
-          outputDirectory+="/";
+      if (i < argc) {
+        outputDirectory = string(argv[i]);
+        if (outputDirectory[outputDirectory.size() - 1] != '/') {
+          outputDirectory += "/";
         }
       } else {
         badArgs();
       }
-    } else if(!inputRead) {
-      inputRead=true;
-      inputName=string(argv[i]);
-      if(inputName.find(".tex")!=inputName.size()-4) {
+    } else if (!inputRead) {
+      inputRead = true;
+      inputName = string(argv[i]);
+      if (inputName.find(".tex") != inputName.size() - 4) {
         cout << "Input file must be of the form *.tex" << endl;
         exit(1);
       }
-      className=inputName.substr(0,inputName.size()-4);
-      if(className.find("/")!=string::npos) {
-        className=className.substr(className.rfind("/")+1);
+      className = inputName.substr(0, inputName.size() - 4);
+      if (className.find("/") != string::npos) {
+        className = className.substr(className.rfind("/") + 1);
       }
     } else {
       badArgs();
     }
   }
   
-  if(!inputRead) {
+  if (!inputRead) {
     badArgs();
   }
   
-  map<string,Type*> types;
+  map<string, Type*> types;
   if (hpp || bin || typ || ast) {
-    yyin=fopen(inputName.c_str(),"r");
+    yyin = fopen(inputName.c_str(), "r");
     yyparse();
     fclose(yyin);
-    MbolElementVisitor* vTypes=new MbolElementVisitorTypeHelper();
+    MbolElementVisitor* vTypes = new MbolElementVisitorTypeHelper();
     program->accept(*vTypes);
-    types=((MbolElementVisitorTypeHelper*)vTypes)->types;
+    types = ((MbolElementVisitorTypeHelper*)vTypes)->types;
   }
-
+  
   if (ast) {
     MbolElementVisitorPrinter* dot = new MbolElementVisitorPrinter();
     program->accept(*dot);
     dot->end();
   }
   
-  if(typ) {
+  if (typ) {
     cout << "Program variables:" << endl;
-    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
-      if(!getTemporaries().count(i->first)) {
-        if(i->second->isVariable) {
+    for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+      if (!getTemporaries().count(i->first)) {
+        if (i->second->isVariable) {
           cout << "  " << i->first << ": " << i->second->print() << endl;
         }
       }
     }
     cout << endl;
     cout << "Program constants:" << endl;
-    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
-      if(!getTemporaries().count(i->first)) {
-        if(i->second->isConstant && !i->second->isLiteral) {
+    for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+      if (!getTemporaries().count(i->first)) {
+        if (i->second->isConstant && !i->second->isLiteral) {
           cout << "  " << i->first << ": " << i->second->print() << endl;
         }
       }
     }
     cout << endl;
     cout << "Program constant temporaries:" << endl;
-    for(map<string,Type*>::iterator i=types.begin();i!=types.end();i++) {
-      if(!getTemporaries().count(i->first)) {
-        if(i->second->isTemporary) {
+    for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
+      if (!getTemporaries().count(i->first)) {
+        if (i->second->isTemporary) {
           cout << "  " << i->first << ": " << i->second->print() << endl;
         }
       }
     }
   }
   
-  if(hpp||bin) {   
-    string code;    
-    MbolElementVisitor* vCplex=new MbolElementVisitorCPLEX(types,quiet,className);
+  if (hpp || bin) {
+    string code;
+    MbolElementVisitor* vCplex = new MbolElementVisitorCPLEX(types, quiet, className);
     program->accept(*vCplex);
-    code=((MbolElementVisitorCPLEX*)vCplex)->code;
-    if(cpx) {
-      code="#define CPLEX\n"+code;
+    code = ((MbolElementVisitorCPLEX*)vCplex)->code;
+    if (cpx) {
+      code = "#define CPLEX\n" + code;
     }
-    code=indentCode(code);
-    ofstream out((outputDirectory+className+".hpp").c_str());
+    code = indentCode(code);
+    ofstream out((outputDirectory + className + ".hpp").c_str());
     out << code;
     out.close();
   }
   
-  if(bin) {
-    char* mbolHomeC=getenv("MBOL_HOME");
-    if(mbolHomeC==NULL) {
+  if (bin) {
+    char* mbolHomeC = getenv("MBOL_HOME");
+    if (mbolHomeC == NULL) {
       cout << "ERROR: must set environment variable \"MBOL_HOME\" to create binary for default file I/O" << endl;
       exit(1);
     }
     string mbolHome(mbolHomeC);
-    if(mbolHome[mbolHome.size()-1]!='/') {
-      mbolHome+="/";
+    if (mbolHome[mbolHome.size() - 1] != '/') {
+      mbolHome += "/";
     }
-    char* cplexHomeC=getenv("CPLEX_HOME");
-    if(cplexHomeC==NULL) {
+    char* cplexHomeC = getenv("CPLEX_HOME");
+    if (cplexHomeC == NULL) {
       cout << "ERROR: must set environment variable \"CPLEX_HOME\" to create binary for default file I/O" << endl;
       exit(1);
     }
     string cplexHome(cplexHomeC);
-    if(cplexHome[cplexHome.size()-1]!='/') {
-      cplexHome+="/";
+    if (cplexHome[cplexHome.size() - 1] != '/') {
+      cplexHome += "/";
     }
-    string cppName=outputDirectory+className+".cpp";
-    string cppCode="#include<"+className+".hpp>\nusing namespace std;\nint main(int argc,char* argv[]) {\n"+className+" x;\nstring input,output;\nif(argc>=2) {\ninput=string(argv[1]);\n} else {\ninput=\"input.txt\";\n}\nif(argc>=3) {\noutput=string(argv[2]);\n} else {\noutput=\"output.txt\";\n}\nx.readAll(input);\nx.solve();\nx.writeAll(output);\n}\n";
+    string cppName = outputDirectory + className + ".cpp";
+    string cppCode = "#include<" + className + ".hpp>\nusing namespace std;\nint main(int argc,char* argv[]) {\n" + className + " x;\nstring input,output;\nif(argc>=2) {\ninput=string(argv[1]);\n} else {\ninput=\"input.txt\";\n}\nif(argc>=3) {\noutput=string(argv[2]);\n} else {\noutput=\"output.txt\";\n}\nx.readAll(input);\nx.solve();\nx.writeAll(output);\n}\n";
     ofstream cpp(cppName.c_str());
     cpp << indentCode(cppCode);
     cpp.close();
     
-    string compileCmd="g++ -O3 -fopenmp -m64 -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I"+mbolHome+"include -I"+cplexHome+"cplex/include -I"+cplexHome+"concert/include -I"+outputDirectory+" "+cppName+" -o "+outputDirectory+className+" -L"+cplexHome+"cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L"+cplexHome+"concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
-    //       cout << compileCmd << endl; 
+    string compileCmd = "g++ -O3 -fopenmp -m64 -fPIC -static -static-libstdc++ -static-libgcc -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I" + mbolHome + "include -I" + cplexHome + "cplex/include -I" + cplexHome + "concert/include -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className + " -L" + cplexHome + "cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L" + cplexHome + "concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
+    //       cout << compileCmd << endl;
     system(compileCmd.c_str());
   }
   
-  if(pdf) {
-    char* mbolHomeC=getenv("MBOL_HOME");
-    if(mbolHomeC==NULL) {
+  if (pdf) {
+    char* mbolHomeC = getenv("MBOL_HOME");
+    if (mbolHomeC == NULL) {
       cout << "ERROR: must set environment variable \"MBOL_HOME\" to create pdf" << endl;
       exit(1);
     }
     string mbolHome(mbolHomeC);
-    if(mbolHome[mbolHome.size()-1]!='/') {
-      mbolHome+="/";
+    if (mbolHome[mbolHome.size() - 1] != '/') {
+      mbolHome += "/";
     }
-    string texMainName=outputDirectory+className+"_main";
-    ofstream texMain((texMainName+".tex").c_str());
+    string texMainName = outputDirectory + className + "_main";
+    ofstream texMain((texMainName + ".tex").c_str());
     texMain << "\\documentclass{article}" << endl;
-    texMain << "\\usepackage{fullpage}" << endl;
     texMain << "\\input{" << mbolHome << "include/mbol.tex}" << endl;
+    texMain << "\\usepackage[paperwidth=20in,paperheight=8in]{geometry}" << endl;
     texMain << "\\begin{document}" << endl;
-    texMain << "\\input{"+inputName+"}" << endl;
+    texMain << "\\pagenumbering{gobble}" << endl;
+    texMain << "\\input{" + inputName + "}" << endl;
     texMain << "\\end{document}" << endl;
     texMain.close();
-    system(("pdflatex -output-directory "+outputDirectory+" "+texMainName+".tex > /dev/null").c_str());
-    system(("rm -rf "+texMainName+".log").c_str());
-    system(("rm -rf "+texMainName+".aux").c_str());
-    system(("rm -rf "+texMainName+".tex").c_str());
-    system(("mv "+texMainName+".pdf "+texMainName.substr(0,texMainName.size()-5)+".pdf").c_str());
-  }    
+    system(("pdflatex -output-directory " + outputDirectory + " " + texMainName + ".tex > /dev/null").c_str());
+    system(("convert -quality 100 -density 300 -trim " + texMainName + ".pdf " + texMainName + ".jpeg").c_str());
+    system(("convert " + texMainName + ".jpeg " + texMainName + ".pdf").c_str());
+    system(("rm -rf " + texMainName + ".log").c_str());
+    system(("rm -rf " + texMainName + ".aux").c_str());
+    system(("rm -rf " + texMainName + ".tex").c_str());
+    system(("rm -rf " + texMainName + ".jpeg").c_str());
+    system(("mv " + texMainName + ".pdf " + texMainName.substr(0, texMainName.size() - 5) + ".pdf").c_str());
+  }
   return 0;
 }
-#line 709 "y.tab.c"
+#line 713 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -915,20 +919,20 @@ yyreduce:
 case 1:
 #line 68 "mbolc.y"
 	{
-  program=new Program(yystack.l_mark[-2].objectiveVal,yystack.l_mark[-1].constraintsVal);
-  yyval.programVal=program;
+  program = new Program(yystack.l_mark[-2].objectiveVal, yystack.l_mark[-1].constraintsVal);
+  yyval.programVal = program;
 }
 break;
 case 2:
 #line 73 "mbolc.y"
 	{
-  yyval.objectiveVal=new Objective(yystack.l_mark[-6].objectiveTypeVal,yystack.l_mark[-4].programVariablesVal,yystack.l_mark[-1].numberExpressionVal);
+  yyval.objectiveVal = new Objective(yystack.l_mark[-6].objectiveTypeVal, yystack.l_mark[-4].programVariablesVal, yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 3:
 #line 77 "mbolc.y"
 	{
-  yyval.programVariablesVal=new ProgramVariables(string(yystack.l_mark[0].sval));
+  yyval.programVariablesVal = new ProgramVariables(string(yystack.l_mark[0].sval));
 }
 break;
 case 4:
@@ -940,25 +944,25 @@ break;
 case 5:
 #line 84 "mbolc.y"
 	{
-  yyval.objectiveTypeVal=new ObjectiveType("max");
+  yyval.objectiveTypeVal = new ObjectiveType("max");
 }
 break;
 case 6:
 #line 87 "mbolc.y"
 	{
-  yyval.objectiveTypeVal=new ObjectiveType("min");
+  yyval.objectiveTypeVal = new ObjectiveType("min");
 }
 break;
 case 7:
 #line 91 "mbolc.y"
 	{
-  yyval.constraintsVal=yystack.l_mark[0].binaryConstraintVal;
+  yyval.constraintsVal = yystack.l_mark[0].binaryConstraintVal;
 }
 break;
 case 8:
 #line 94 "mbolc.y"
 	{
-  yyval.constraintsVal=new Constraints(yystack.l_mark[0].constraintVal);
+  yyval.constraintsVal = new Constraints(yystack.l_mark[0].constraintVal);
 }
 break;
 case 9:
@@ -970,7 +974,7 @@ break;
 case 10:
 #line 100 "mbolc.y"
 	{
-  for(list<Constraint*>::iterator i=yystack.l_mark[0].binaryConstraintVal->constraints.begin();i!=yystack.l_mark[0].binaryConstraintVal->constraints.end();i++) {
+  for (list<Constraint*>::iterator i = yystack.l_mark[0].binaryConstraintVal->constraints.begin(); i != yystack.l_mark[0].binaryConstraintVal->constraints.end(); i++) {
     yystack.l_mark[-1].constraintsVal->constraints.push_back(*i);
   }
 }
@@ -978,80 +982,80 @@ break;
 case 11:
 #line 106 "mbolc.y"
 	{
-  yyval.binaryConstraintVal=new Constraints(new Constraint(yystack.l_mark[-3].variableMap->variableName));
-  yyval.binaryConstraintVal->constraints.push_back(new Constraint(new Equation(new NumberExpression(yystack.l_mark[-3].variableMap),new Inequality("<="),new NumberExpression(new NumberLiteral("1"))),new Equation(new NumberExpression(yystack.l_mark[-3].variableMap),new Inequality(">="),new NumberExpression(new NumberLiteral("0"))),yystack.l_mark[-6].qualifiersVal));
+  yyval.binaryConstraintVal = new Constraints(new Constraint(yystack.l_mark[-3].variableMap->variableName));
+  yyval.binaryConstraintVal->constraints.push_back(new Constraint(new Equation(new NumberExpression(yystack.l_mark[-3].variableMap), new Inequality("<="), new NumberExpression(new NumberLiteral("1"))), new Equation(new NumberExpression(yystack.l_mark[-3].variableMap), new Inequality(">="), new NumberExpression(new NumberLiteral("0"))), yystack.l_mark[-6].qualifiersVal));
 }
 break;
 case 12:
 #line 111 "mbolc.y"
 	{
-  yyval.constraintVal=new Constraint(yystack.l_mark[-1].equationVal);
+  yyval.constraintVal = new Constraint(yystack.l_mark[-1].equationVal);
 }
 break;
 case 13:
 #line 114 "mbolc.y"
 	{
-  yyval.constraintVal=new Constraint(yystack.l_mark[-3].variableMap->variableName);
+  yyval.constraintVal = new Constraint(yystack.l_mark[-3].variableMap->variableName);
 }
 break;
 case 14:
 #line 117 "mbolc.y"
 	{
-  yyval.constraintVal=new Constraint(yystack.l_mark[-1].equationVal,yystack.l_mark[-4].qualifiersVal);
+  yyval.constraintVal = new Constraint(yystack.l_mark[-1].equationVal, yystack.l_mark[-4].qualifiersVal);
 }
 break;
 case 15:
 #line 120 "mbolc.y"
 	{
-  yyval.constraintVal=new Constraint(yystack.l_mark[-3].variableMap->variableName);
+  yyval.constraintVal = new Constraint(yystack.l_mark[-3].variableMap->variableName);
 }
 break;
 case 16:
 #line 124 "mbolc.y"
 	{
-  yyval.equationVal=new Equation(yystack.l_mark[-2].numberExpressionVal,yystack.l_mark[-1].inequalityVal,yystack.l_mark[0].numberExpressionVal);
+  yyval.equationVal = new Equation(yystack.l_mark[-2].numberExpressionVal, yystack.l_mark[-1].inequalityVal, yystack.l_mark[0].numberExpressionVal);
 }
 break;
 case 17:
 #line 127 "mbolc.y"
 	{
-  yyval.equationVal=new Equation(yystack.l_mark[-2].numberExpressionVal,new Inequality("=="),yystack.l_mark[0].numberExpressionVal);
+  yyval.equationVal = new Equation(yystack.l_mark[-2].numberExpressionVal, new Inequality("=="), yystack.l_mark[0].numberExpressionVal);
 }
 break;
 case 18:
 #line 131 "mbolc.y"
 	{
-  yyval.inequalityVal=new Inequality(">");
+  yyval.inequalityVal = new Inequality(">");
 }
 break;
 case 19:
 #line 134 "mbolc.y"
 	{
-  yyval.inequalityVal=new Inequality("<");
+  yyval.inequalityVal = new Inequality("<");
 }
 break;
 case 20:
 #line 137 "mbolc.y"
 	{
-  yyval.inequalityVal=new Inequality("!=");
+  yyval.inequalityVal = new Inequality("!=");
 }
 break;
 case 21:
 #line 140 "mbolc.y"
 	{
-  yyval.inequalityVal=new Inequality("<=");
+  yyval.inequalityVal = new Inequality("<=");
 }
 break;
 case 22:
 #line 143 "mbolc.y"
 	{
-  yyval.inequalityVal=new Inequality(">=");
+  yyval.inequalityVal = new Inequality(">=");
 }
 break;
 case 23:
 #line 147 "mbolc.y"
 	{
-  yyval.qualifiersVal=new Qualifiers(yystack.l_mark[0].qualifierVal);
+  yyval.qualifiersVal = new Qualifiers(yystack.l_mark[0].qualifierVal);
 }
 break;
 case 24:
@@ -1063,7 +1067,7 @@ break;
 case 25:
 #line 154 "mbolc.y"
 	{
-  yyval.tupleIndicesVal=new TupleIndices(yystack.l_mark[-2].sval,yystack.l_mark[0].sval);
+  yyval.tupleIndicesVal = new TupleIndices(yystack.l_mark[-2].sval, yystack.l_mark[0].sval);
 }
 break;
 case 26:
@@ -1081,97 +1085,97 @@ break;
 case 28:
 #line 164 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier(yystack.l_mark[-3].tupleIndicesVal,yystack.l_mark[0].elementExpressionVal);
+  yyval.qualifierVal = new Qualifier(yystack.l_mark[-3].tupleIndicesVal, yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 29:
 #line 167 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier("0",new Inequality("=="),new SetSize(yystack.l_mark[0].elementExpressionVal));
+  yyval.qualifierVal = new Qualifier("0", new Inequality("=="), new SetSize(yystack.l_mark[0].elementExpressionVal));
 }
 break;
 case 30:
 #line 170 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier("0",new Inequality("!="),new SetSize(yystack.l_mark[0].elementExpressionVal));
+  yyval.qualifierVal = new Qualifier("0", new Inequality("!="), new SetSize(yystack.l_mark[0].elementExpressionVal));
 }
 break;
 case 31:
 #line 173 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),new Inequality("=="),string(yystack.l_mark[0].sval));
+  yyval.qualifierVal = new Qualifier(string(yystack.l_mark[-2].sval), new Inequality("=="), string(yystack.l_mark[0].sval));
 }
 break;
 case 32:
 #line 176 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),yystack.l_mark[-1].inequalityVal,string(yystack.l_mark[0].sval));
+  yyval.qualifierVal = new Qualifier(string(yystack.l_mark[-2].sval), yystack.l_mark[-1].inequalityVal, string(yystack.l_mark[0].sval));
 }
 break;
 case 33:
 #line 179 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),"subset",yystack.l_mark[0].elementExpressionVal);
+  yyval.qualifierVal = new Qualifier(string(yystack.l_mark[-2].sval), "subset", yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 34:
 #line 182 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),"subsetequal",yystack.l_mark[0].elementExpressionVal);
+  yyval.qualifierVal = new Qualifier(string(yystack.l_mark[-2].sval), "subsetequal", yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 35:
 #line 185 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),"in",new ElementExpression(new ElementNumbers(string(yystack.l_mark[-4].sval),yystack.l_mark[0].elementExpressionVal)));
+  yyval.qualifierVal = new Qualifier(string(yystack.l_mark[-2].sval), "in", new ElementExpression(new ElementNumbers(string(yystack.l_mark[-4].sval), yystack.l_mark[0].elementExpressionVal)));
 }
 break;
 case 36:
 #line 188 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-4].sval),"in",new ElementExpression(new ElementNumbers(string(yystack.l_mark[-2].sval),yystack.l_mark[0].elementExpressionVal)));
+  yyval.qualifierVal = new Qualifier(string(yystack.l_mark[-4].sval), "in", new ElementExpression(new ElementNumbers(string(yystack.l_mark[-2].sval), yystack.l_mark[0].elementExpressionVal)));
 }
 break;
 case 37:
 #line 197 "mbolc.y"
 	{
-  yyval.qualifierVal=new Qualifier(string(yystack.l_mark[-2].sval),"in",yystack.l_mark[0].elementExpressionVal);
+  yyval.qualifierVal = new Qualifier(string(yystack.l_mark[-2].sval), "in", yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 38:
 #line 201 "mbolc.y"
 	{
-  yyval.elementExpressionVal=new ElementExpression(yystack.l_mark[0].elementSubexpressionVal);
+  yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 39:
 #line 204 "mbolc.y"
 	{
-  yyval.elementExpressionVal=new ElementExpression(yystack.l_mark[-2].elementExpressionVal,new ElementOperator("+"),yystack.l_mark[0].elementSubexpressionVal);
+  yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[-2].elementExpressionVal, new ElementOperator("+"), yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 40:
 #line 207 "mbolc.y"
 	{
-  yyval.elementExpressionVal=new ElementExpression(yystack.l_mark[-2].elementExpressionVal,new ElementOperator("reduce"),yystack.l_mark[0].elementSubexpressionVal);
+  yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[-2].elementExpressionVal, new ElementOperator("reduce"), yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 41:
 #line 210 "mbolc.y"
 	{
-  yyval.elementExpressionVal=new ElementExpression(yystack.l_mark[-2].elementExpressionVal,new ElementOperator("union"),yystack.l_mark[0].elementSubexpressionVal);
+  yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[-2].elementExpressionVal, new ElementOperator("union"), yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 42:
 #line 213 "mbolc.y"
 	{
-  yyval.elementExpressionVal=new ElementExpression(yystack.l_mark[-2].elementExpressionVal,new ElementOperator("intersect"),yystack.l_mark[0].elementSubexpressionVal);
+  yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[-2].elementExpressionVal, new ElementOperator("intersect"), yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 43:
 #line 217 "mbolc.y"
 	{
-  yyval.numberExpressionVal=new NumberExpression(yystack.l_mark[0].numberSubexpressionVal);
+  yyval.numberExpressionVal = new NumberExpression(yystack.l_mark[0].numberSubexpressionVal);
 }
 break;
 case 44:
@@ -1191,121 +1195,121 @@ break;
 case 46:
 #line 229 "mbolc.y"
 	{
-  yyval.elementSubexpressionVal=new SetCreator(string(yystack.l_mark[-3].sval),yystack.l_mark[-1].qualifiersVal);
+  yyval.elementSubexpressionVal = new SetCreator(string(yystack.l_mark[-3].sval), yystack.l_mark[-1].qualifiersVal);
 }
 break;
 case 47:
 #line 232 "mbolc.y"
 	{
-  yyval.elementSubexpressionVal=new ElementSet(yystack.l_mark[-1].elementExpressionVal);
+  yyval.elementSubexpressionVal = new ElementSet(yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 48:
 #line 235 "mbolc.y"
 	{
-  yyval.elementSubexpressionVal=new ElementParantheses(yystack.l_mark[-1].elementExpressionVal);
+  yyval.elementSubexpressionVal = new ElementParantheses(yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 49:
 #line 238 "mbolc.y"
 	{
-  yyval.elementSubexpressionVal=new ElementVariable(string(yystack.l_mark[0].sval));
+  yyval.elementSubexpressionVal = new ElementVariable(string(yystack.l_mark[0].sval));
 }
 break;
 case 50:
 #line 241 "mbolc.y"
 	{
-  yyval.elementSubexpressionVal=new ElementLiteral(string(yystack.l_mark[0].sval));
+  yyval.elementSubexpressionVal = new ElementLiteral(string(yystack.l_mark[0].sval));
 }
 break;
 case 51:
 #line 245 "mbolc.y"
 	{
-  yyval.numberSubexpressionVal=yystack.l_mark[0].sumVal;
+  yyval.numberSubexpressionVal = yystack.l_mark[0].sumVal;
 }
 break;
 case 52:
 #line 248 "mbolc.y"
 	{
-  yyval.numberSubexpressionVal=new SetSize(yystack.l_mark[-1].elementExpressionVal);
+  yyval.numberSubexpressionVal = new SetSize(yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 53:
 #line 251 "mbolc.y"
 	{
-  yyval.numberSubexpressionVal=new NumberPower(yystack.l_mark[-5].numberExpressionVal,yystack.l_mark[-1].numberExpressionVal);
+  yyval.numberSubexpressionVal = new NumberPower(yystack.l_mark[-5].numberExpressionVal, yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 54:
 #line 254 "mbolc.y"
 	{
-  yyval.numberSubexpressionVal=new Fraction(yystack.l_mark[-4].numberExpressionVal,yystack.l_mark[-1].numberExpressionVal);
+  yyval.numberSubexpressionVal = new Fraction(yystack.l_mark[-4].numberExpressionVal, yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 55:
 #line 257 "mbolc.y"
 	{
-  yyval.numberSubexpressionVal=new NumberParantheses(yystack.l_mark[-1].numberExpressionVal);
+  yyval.numberSubexpressionVal = new NumberParantheses(yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 56:
 #line 260 "mbolc.y"
 	{
-  yyval.numberSubexpressionVal=new NumberLiteral(string(yystack.l_mark[0].sval));
+  yyval.numberSubexpressionVal = new NumberLiteral(string(yystack.l_mark[0].sval));
 }
 break;
 case 57:
 #line 263 "mbolc.y"
 	{
-  yyval.numberSubexpressionVal=yystack.l_mark[0].variableMap;
+  yyval.numberSubexpressionVal = yystack.l_mark[0].variableMap;
 }
 break;
 case 58:
 #line 267 "mbolc.y"
 	{
-  yyval.variableMap=new VariableMap(string(yystack.l_mark[0].sval));
+  yyval.variableMap = new VariableMap(string(yystack.l_mark[0].sval));
 }
 break;
 case 59:
 #line 270 "mbolc.y"
 	{
-  yyval.variableMap=new VariableMap(string(yystack.l_mark[-4].sval),yystack.l_mark[-1].indicesVal);
+  yyval.variableMap = new VariableMap(string(yystack.l_mark[-4].sval), yystack.l_mark[-1].indicesVal);
 }
 break;
 case 60:
 #line 273 "mbolc.y"
 	{
-  yyval.variableMap=new VariableMap(string(yystack.l_mark[-2].sval),string(yystack.l_mark[0].sval));
+  yyval.variableMap = new VariableMap(string(yystack.l_mark[-2].sval), string(yystack.l_mark[0].sval));
 }
 break;
 case 61:
 #line 277 "mbolc.y"
 	{
-  yyval.numberOperatorVal=new NumberOperator("+");
+  yyval.numberOperatorVal = new NumberOperator("+");
 }
 break;
 case 62:
 #line 280 "mbolc.y"
 	{
-  yyval.numberOperatorVal=new NumberOperator("-");
+  yyval.numberOperatorVal = new NumberOperator("-");
 }
 break;
 case 63:
 #line 283 "mbolc.y"
 	{
-  yyval.numberOperatorVal=new NumberOperator("/");
+  yyval.numberOperatorVal = new NumberOperator("/");
 }
 break;
 case 64:
 #line 286 "mbolc.y"
 	{
-  yyval.numberOperatorVal=new NumberOperator("*");
+  yyval.numberOperatorVal = new NumberOperator("*");
 }
 break;
 case 65:
 #line 290 "mbolc.y"
 	{
-  yyval.indicesVal=new Indices(yystack.l_mark[0].elementExpressionVal);
+  yyval.indicesVal = new Indices(yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 66:
@@ -1317,22 +1321,22 @@ break;
 case 67:
 #line 297 "mbolc.y"
 	{
-  yyval.sumVal=new Sum(string(yystack.l_mark[-2].sval),yystack.l_mark[-1].sumQualifiersVal,new NumberExpression(yystack.l_mark[0].numberSubexpressionVal));
+  yyval.sumVal = new Sum(string(yystack.l_mark[-2].sval), yystack.l_mark[-1].sumQualifiersVal, new NumberExpression(yystack.l_mark[0].numberSubexpressionVal));
 }
 break;
 case 68:
 #line 301 "mbolc.y"
 	{
-  yyval.sumQualifiersVal=new SumQualifiers(string(yystack.l_mark[-7].sval),string(yystack.l_mark[-5].sval),yystack.l_mark[-1].elementExpressionVal);
+  yyval.sumQualifiersVal = new SumQualifiers(string(yystack.l_mark[-7].sval), string(yystack.l_mark[-5].sval), yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 69:
 #line 307 "mbolc.y"
 	{
-  yyval.sumQualifiersVal=new SumQualifiers(yystack.l_mark[-1].qualifiersVal);
+  yyval.sumQualifiersVal = new SumQualifiers(yystack.l_mark[-1].qualifiersVal);
 }
 break;
-#line 1335 "y.tab.c"
+#line 1339 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
