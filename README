@@ -35,13 +35,17 @@ mbolc by default uses symphony
 
 GETTING STARTED, ALL USERS AFTER SETTING UP SOLVER:
 
-To compile mbolc as well as the samples just call make:
+Compile mbolc:
 make
 
 The binary mbolc is created in the bin directory, you may optionally decide to install it if you have root privilages:
 sudo make install
 
-To observe what mbolc is doing, you look at the samples consisting mostly of graph theory and SVM optimizations:
+Setup the environment variable MBOL_HOME manually or use the following in the same directory as this README:
+make env
+source ~/.bashrc
+
+To try out mbolc, you can look at the samples consisting mostly of graph theory and SVM optimizations:
 cd samples
 make
 ./main

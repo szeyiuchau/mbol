@@ -438,7 +438,7 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 311 "mbolc.y"
+#line 302 "mbolc.y"
 Program* program;
 extern FILE* yyin;
 extern char* yytext;
@@ -530,6 +530,7 @@ int main(int argc, char* argv[]) {
   bool bin = false;
   bool pdf = false;
   bool typ = false;
+  bool img = false;
   bool cpx = false;
   options["-v"] = "Print version information and exit";
   options["-h"] = "Print help information and exit";
@@ -538,6 +539,7 @@ int main(int argc, char* argv[]) {
   options["-typ"] = "Print types inferred by mbolc";
   options["-bin"] = "Compile a binary for default file I/O";
   options["-pdf"] = "Compile a pdf of the program";
+  options["-img"] = "Compile a formatted pdf using imagemagick";
   options["-hpp"] = "Compile a hpp header of the program";
   options["-cpx"] = "User CPLEX as solver (COIN-OR symphony is deafult)";
   options["-ast"] = "Graphviz abstract syntax tree";
@@ -556,6 +558,8 @@ int main(int argc, char* argv[]) {
       ast = true;
     } else if (string(argv[i]) == "-pdf") {
       pdf = true;
+    } else if (string(argv[i]) == "-img") {
+      img = true;
     } else if (string(argv[i]) == "-bin") {
       bin = true;
     } else if (string(argv[i]) == "-hpp") {
@@ -669,17 +673,22 @@ int main(int argc, char* argv[]) {
       cplexHome += "/";
     }
     string cppName = outputDirectory + className + ".cpp";
-    string cppCode = "#include<" + className + ".hpp>\nusing namespace std;\nint main(int argc,char* argv[]) {\n" + className + " x;\nstring input,output;\nif(argc>=2) {\ninput=string(argv[1]);\n} else {\ninput=\"input.txt\";\n}\nif(argc>=3) {\noutput=string(argv[2]);\n} else {\noutput=\"output.txt\";\n}\nx.readAll(input);\nx.solve();\nx.writeAll(output);\n}\n";
+    string cppCode = "#include<" + className + ".hpp>\nusing namespace std;\nint main(int argc,char* argv[]) {\n" + className + " x;\nstring input,output;\nif(argc >= 2) {\ninput = string(argv[1]);\n} else {\ninput = \"input.txt\";\n}\nif (argc >= 3) {\noutput = string(argv[2]);\n} else {\noutput = \"output.txt\";\n}\nx.readAll(input);\nx.solve();\nx.writeAll(output);\n}\n";
     ofstream cpp(cppName.c_str());
     cpp << indentCode(cppCode);
     cpp.close();
     
-    string compileCmd = "g++ -O3 -fopenmp -m64 -fPIC -static -static-libstdc++ -static-libgcc -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I" + mbolHome + "include -I" + cplexHome + "cplex/include -I" + cplexHome + "concert/include -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className + " -L" + cplexHome + "cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L" + cplexHome + "concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
-    //       cout << compileCmd << endl;
+    string compileCmd;
+    if (cpx) {
+      compileCmd = "g++ -O3 -fopenmp -m64 -fPIC -static -static-libstdc++ -static-libgcc -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I" + mbolHome + "include -I" + cplexHome + "cplex/include -I" + cplexHome + "concert/include -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className + " -L" + cplexHome + "cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L" + cplexHome + "concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
+    } else {
+      compileCmd = "g++ -I" + mbolHome + "include" + " -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className;
+    }
+    //cout << compileCmd << endl;
     system(compileCmd.c_str());
   }
   
-  if (pdf) {
+  if (pdf || img) {
     char* mbolHomeC = getenv("MBOL_HOME");
     if (mbolHomeC == NULL) {
       cout << "ERROR: must set environment variable \"MBOL_HOME\" to create pdf" << endl;
@@ -693,15 +702,21 @@ int main(int argc, char* argv[]) {
     ofstream texMain((texMainName + ".tex").c_str());
     texMain << "\\documentclass{article}" << endl;
     texMain << "\\input{" << mbolHome << "include/mbol.tex}" << endl;
-    texMain << "\\usepackage[paperwidth=20in,paperheight=8in]{geometry}" << endl;
+    if (img) {
+      texMain << "\\usepackage[paperwidth=20in,paperheight=8in]{geometry}" << endl;
+    } else {
+      texMain << "\\usepackage{fullpage}" << endl;
+    }
     texMain << "\\begin{document}" << endl;
     texMain << "\\pagenumbering{gobble}" << endl;
     texMain << "\\input{" + inputName + "}" << endl;
     texMain << "\\end{document}" << endl;
     texMain.close();
     system(("pdflatex -output-directory " + outputDirectory + " " + texMainName + ".tex > /dev/null").c_str());
-    system(("convert -quality 100 -density 300 -trim " + texMainName + ".pdf " + texMainName + ".jpeg").c_str());
-    system(("convert " + texMainName + ".jpeg " + texMainName + ".pdf").c_str());
+    if (img) {
+      system(("convert -quality 100 -density 300 -trim " + texMainName + ".pdf " + texMainName + ".jpeg").c_str());
+      system(("convert " + texMainName + ".jpeg " + texMainName + ".pdf").c_str());
+    }
     system(("rm -rf " + texMainName + ".log").c_str());
     system(("rm -rf " + texMainName + ".aux").c_str());
     system(("rm -rf " + texMainName + ".tex").c_str());
@@ -710,7 +725,7 @@ int main(int argc, char* argv[]) {
   }
   return 0;
 }
-#line 713 "y.tab.c"
+#line 728 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1137,206 +1152,206 @@ case 36:
 }
 break;
 case 37:
-#line 197 "mbolc.y"
+#line 191 "mbolc.y"
 	{
   yyval.qualifierVal = new Qualifier(string(yystack.l_mark[-2].sval), "in", yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 38:
-#line 201 "mbolc.y"
+#line 195 "mbolc.y"
 	{
   yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 39:
-#line 204 "mbolc.y"
+#line 198 "mbolc.y"
 	{
   yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[-2].elementExpressionVal, new ElementOperator("+"), yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 40:
-#line 207 "mbolc.y"
+#line 201 "mbolc.y"
 	{
   yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[-2].elementExpressionVal, new ElementOperator("reduce"), yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 41:
-#line 210 "mbolc.y"
+#line 204 "mbolc.y"
 	{
   yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[-2].elementExpressionVal, new ElementOperator("union"), yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 42:
-#line 213 "mbolc.y"
+#line 207 "mbolc.y"
 	{
   yyval.elementExpressionVal = new ElementExpression(yystack.l_mark[-2].elementExpressionVal, new ElementOperator("intersect"), yystack.l_mark[0].elementSubexpressionVal);
 }
 break;
 case 43:
-#line 217 "mbolc.y"
+#line 211 "mbolc.y"
 	{
   yyval.numberExpressionVal = new NumberExpression(yystack.l_mark[0].numberSubexpressionVal);
 }
 break;
 case 44:
-#line 220 "mbolc.y"
+#line 214 "mbolc.y"
 	{
   yystack.l_mark[-1].numberExpressionVal->numberSubexpressions.push_back(yystack.l_mark[0].numberSubexpressionVal);
   yystack.l_mark[-1].numberExpressionVal->numberOperators.push_back(new NumberOperator("*"));
 }
 break;
 case 45:
-#line 224 "mbolc.y"
+#line 218 "mbolc.y"
 	{
   yystack.l_mark[-2].numberExpressionVal->numberSubexpressions.push_back(yystack.l_mark[0].numberSubexpressionVal);
   yystack.l_mark[-2].numberExpressionVal->numberOperators.push_back(yystack.l_mark[-1].numberOperatorVal);
 }
 break;
 case 46:
-#line 229 "mbolc.y"
+#line 223 "mbolc.y"
 	{
   yyval.elementSubexpressionVal = new SetCreator(string(yystack.l_mark[-3].sval), yystack.l_mark[-1].qualifiersVal);
 }
 break;
 case 47:
-#line 232 "mbolc.y"
+#line 226 "mbolc.y"
 	{
   yyval.elementSubexpressionVal = new ElementSet(yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 48:
-#line 235 "mbolc.y"
+#line 229 "mbolc.y"
 	{
   yyval.elementSubexpressionVal = new ElementParantheses(yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 49:
-#line 238 "mbolc.y"
+#line 232 "mbolc.y"
 	{
   yyval.elementSubexpressionVal = new ElementVariable(string(yystack.l_mark[0].sval));
 }
 break;
 case 50:
-#line 241 "mbolc.y"
+#line 235 "mbolc.y"
 	{
   yyval.elementSubexpressionVal = new ElementLiteral(string(yystack.l_mark[0].sval));
 }
 break;
 case 51:
-#line 245 "mbolc.y"
+#line 239 "mbolc.y"
 	{
   yyval.numberSubexpressionVal = yystack.l_mark[0].sumVal;
 }
 break;
 case 52:
-#line 248 "mbolc.y"
+#line 242 "mbolc.y"
 	{
   yyval.numberSubexpressionVal = new SetSize(yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 53:
-#line 251 "mbolc.y"
+#line 245 "mbolc.y"
 	{
   yyval.numberSubexpressionVal = new NumberPower(yystack.l_mark[-5].numberExpressionVal, yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 54:
-#line 254 "mbolc.y"
+#line 248 "mbolc.y"
 	{
   yyval.numberSubexpressionVal = new Fraction(yystack.l_mark[-4].numberExpressionVal, yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 55:
-#line 257 "mbolc.y"
+#line 251 "mbolc.y"
 	{
   yyval.numberSubexpressionVal = new NumberParantheses(yystack.l_mark[-1].numberExpressionVal);
 }
 break;
 case 56:
-#line 260 "mbolc.y"
+#line 254 "mbolc.y"
 	{
   yyval.numberSubexpressionVal = new NumberLiteral(string(yystack.l_mark[0].sval));
 }
 break;
 case 57:
-#line 263 "mbolc.y"
+#line 257 "mbolc.y"
 	{
   yyval.numberSubexpressionVal = yystack.l_mark[0].variableMap;
 }
 break;
 case 58:
-#line 267 "mbolc.y"
+#line 261 "mbolc.y"
 	{
   yyval.variableMap = new VariableMap(string(yystack.l_mark[0].sval));
 }
 break;
 case 59:
-#line 270 "mbolc.y"
+#line 264 "mbolc.y"
 	{
   yyval.variableMap = new VariableMap(string(yystack.l_mark[-4].sval), yystack.l_mark[-1].indicesVal);
 }
 break;
 case 60:
-#line 273 "mbolc.y"
+#line 267 "mbolc.y"
 	{
   yyval.variableMap = new VariableMap(string(yystack.l_mark[-2].sval), string(yystack.l_mark[0].sval));
 }
 break;
 case 61:
-#line 277 "mbolc.y"
+#line 271 "mbolc.y"
 	{
   yyval.numberOperatorVal = new NumberOperator("+");
 }
 break;
 case 62:
-#line 280 "mbolc.y"
+#line 274 "mbolc.y"
 	{
   yyval.numberOperatorVal = new NumberOperator("-");
 }
 break;
 case 63:
-#line 283 "mbolc.y"
+#line 277 "mbolc.y"
 	{
   yyval.numberOperatorVal = new NumberOperator("/");
 }
 break;
 case 64:
-#line 286 "mbolc.y"
+#line 280 "mbolc.y"
 	{
   yyval.numberOperatorVal = new NumberOperator("*");
 }
 break;
 case 65:
-#line 290 "mbolc.y"
+#line 284 "mbolc.y"
 	{
   yyval.indicesVal = new Indices(yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 66:
-#line 293 "mbolc.y"
+#line 287 "mbolc.y"
 	{
   yystack.l_mark[-2].indicesVal->elementExpressions.push_back(yystack.l_mark[0].elementExpressionVal);
 }
 break;
 case 67:
-#line 297 "mbolc.y"
+#line 291 "mbolc.y"
 	{
   yyval.sumVal = new Sum(string(yystack.l_mark[-2].sval), yystack.l_mark[-1].sumQualifiersVal, new NumberExpression(yystack.l_mark[0].numberSubexpressionVal));
 }
 break;
 case 68:
-#line 301 "mbolc.y"
+#line 295 "mbolc.y"
 	{
   yyval.sumQualifiersVal = new SumQualifiers(string(yystack.l_mark[-7].sval), string(yystack.l_mark[-5].sval), yystack.l_mark[-1].elementExpressionVal);
 }
 break;
 case 69:
-#line 307 "mbolc.y"
+#line 298 "mbolc.y"
 	{
   yyval.sumQualifiersVal = new SumQualifiers(yystack.l_mark[-1].qualifiersVal);
 }
 break;
-#line 1339 "y.tab.c"
+#line 1354 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

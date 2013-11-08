@@ -1,12 +1,12 @@
-This directory contains a variety of samples to help you understand MBOL syntax along with the different ways to use MBOL.
+This directory contains a variety of samples to help you understand MBOL syntax along with the different ways to use MBOL. See the README directions in the root directory first to compile mbolc and setup environment parameters.
 
-Setup CPLEX_HOME and MBOL_HOME environment variables before attempting to run these samples!
-
-You can view the pdfs of the programs in mbol-source:
-evince pdfs/*.pdf
+The directory mbol-source constains several sample programs written in MBOL.
 
 Just make will create a main binary from main.cpp, create pdfs for all of the programs in mbol-source, and create a file I/O binary example for Maxflow:
 make
+
+You can view the pdfs of the programs in mbol-source:
+evince pdfs/*.pdf
 
 You can try running the main binary created which runs all a version of all programs in mbol-source. Note that the graph theory algorithms are un on the graph in graph.pdf:
 ./main
@@ -18,3 +18,5 @@ cd maxflow
 With gnuplot you can see the data which the SVM optimization program was applied to along with the resulting hypeplane:
 make svm
 evince *eps
+
+CPLEX users can uncomment the two commented lines in the Makefile and replace the lines just above to compile these examples to work with CPLEX. The default compiles for COIN-OR's symphony solver.

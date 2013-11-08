@@ -390,6 +390,7 @@ int main(int argc, char* argv[]) {
   bool bin = false;
   bool pdf = false;
   bool typ = false;
+  bool img = false;
   bool cpx = false;
   options["-v"] = "Print version information and exit";
   options["-h"] = "Print help information and exit";
@@ -398,6 +399,7 @@ int main(int argc, char* argv[]) {
   options["-typ"] = "Print types inferred by mbolc";
   options["-bin"] = "Compile a binary for default file I/O";
   options["-pdf"] = "Compile a pdf of the program";
+  options["-img"] = "Compile a formatted pdf using imagemagick";
   options["-hpp"] = "Compile a hpp header of the program";
   options["-cpx"] = "User CPLEX as solver (COIN-OR symphony is deafult)";
   options["-ast"] = "Graphviz abstract syntax tree";
@@ -416,6 +418,8 @@ int main(int argc, char* argv[]) {
       ast = true;
     } else if (string(argv[i]) == "-pdf") {
       pdf = true;
+    } else if (string(argv[i]) == "-img") {
+      img = true;
     } else if (string(argv[i]) == "-bin") {
       bin = true;
     } else if (string(argv[i]) == "-hpp") {
@@ -529,17 +533,22 @@ int main(int argc, char* argv[]) {
       cplexHome += "/";
     }
     string cppName = outputDirectory + className + ".cpp";
-    string cppCode = "#include<" + className + ".hpp>\nusing namespace std;\nint main(int argc,char* argv[]) {\n" + className + " x;\nstring input,output;\nif(argc>=2) {\ninput=string(argv[1]);\n} else {\ninput=\"input.txt\";\n}\nif(argc>=3) {\noutput=string(argv[2]);\n} else {\noutput=\"output.txt\";\n}\nx.readAll(input);\nx.solve();\nx.writeAll(output);\n}\n";
+    string cppCode = "#include<" + className + ".hpp>\nusing namespace std;\nint main(int argc,char* argv[]) {\n" + className + " x;\nstring input,output;\nif(argc >= 2) {\ninput = string(argv[1]);\n} else {\ninput = \"input.txt\";\n}\nif (argc >= 3) {\noutput = string(argv[2]);\n} else {\noutput = \"output.txt\";\n}\nx.readAll(input);\nx.solve();\nx.writeAll(output);\n}\n";
     ofstream cpp(cppName.c_str());
     cpp << indentCode(cppCode);
     cpp.close();
     
-    string compileCmd = "g++ -O3 -fopenmp -m64 -fPIC -static -static-libstdc++ -static-libgcc -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I" + mbolHome + "include -I" + cplexHome + "cplex/include -I" + cplexHome + "concert/include -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className + " -L" + cplexHome + "cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L" + cplexHome + "concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
-    //       cout << compileCmd << endl;
+    string compileCmd;
+    if (cpx) {
+      compileCmd = "g++ -O3 -fopenmp -m64 -fPIC -static -static-libstdc++ -static-libgcc -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I" + mbolHome + "include -I" + cplexHome + "cplex/include -I" + cplexHome + "concert/include -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className + " -L" + cplexHome + "cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L" + cplexHome + "concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
+    } else {
+      compileCmd = "g++ -I" + mbolHome + "include" + " -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className;
+    }
+    //cout << compileCmd << endl;
     system(compileCmd.c_str());
   }
   
-  if (pdf) {
+  if (pdf || img) {
     char* mbolHomeC = getenv("MBOL_HOME");
     if (mbolHomeC == NULL) {
       cout << "ERROR: must set environment variable \"MBOL_HOME\" to create pdf" << endl;
@@ -553,15 +562,21 @@ int main(int argc, char* argv[]) {
     ofstream texMain((texMainName + ".tex").c_str());
     texMain << "\\documentclass{article}" << endl;
     texMain << "\\input{" << mbolHome << "include/mbol.tex}" << endl;
-    texMain << "\\usepackage[paperwidth=20in,paperheight=8in]{geometry}" << endl;
+    if (img) {
+      texMain << "\\usepackage[paperwidth=20in,paperheight=8in]{geometry}" << endl;
+    } else {
+      texMain << "\\usepackage{fullpage}" << endl;
+    }
     texMain << "\\begin{document}" << endl;
     texMain << "\\pagenumbering{gobble}" << endl;
     texMain << "\\input{" + inputName + "}" << endl;
     texMain << "\\end{document}" << endl;
     texMain.close();
     system(("pdflatex -output-directory " + outputDirectory + " " + texMainName + ".tex > /dev/null").c_str());
-    system(("convert -quality 100 -density 300 -trim " + texMainName + ".pdf " + texMainName + ".jpeg").c_str());
-    system(("convert " + texMainName + ".jpeg " + texMainName + ".pdf").c_str());
+    if (img) {
+      system(("convert -quality 100 -density 300 -trim " + texMainName + ".pdf " + texMainName + ".jpeg").c_str());
+      system(("convert " + texMainName + ".jpeg " + texMainName + ".pdf").c_str());
+    }
     system(("rm -rf " + texMainName + ".log").c_str());
     system(("rm -rf " + texMainName + ".aux").c_str());
     system(("rm -rf " + texMainName + ".tex").c_str());
