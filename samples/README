@@ -2,10 +2,11 @@ This directory contains a variety of samples to help you understand MBOL syntax 
 
 The directory mbol-source constains several sample programs written in MBOL.
 
-Just make will create a main binary from main.cpp, create pdfs for all of the programs in mbol-source, and create a file I/O binary example for Maxflow:
+Just make will create a main binary from main.cpp and a file I/O binary example for Maxflow:
 make
 
-You can view the pdfs of the programs in mbol-source:
+You can create pdfs for all programs and view them with:
+make pdfs
 evince pdfs/*.pdf
 
 You can try running the main binary created which runs all a version of all programs in mbol-source. Note that the graph theory algorithms are un on the graph in graph.pdf:

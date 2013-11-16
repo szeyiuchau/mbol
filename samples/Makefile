@@ -1,4 +1,5 @@
-all: $(patsubst mbol-source/%.tex,pdfs/%.pdf,$(wildcard mbol-source/*.tex)) main maxflow/AltMaxFlow
+all: main maxflow/AltMaxFlow
+pdfs: $(patsubst mbol-source/%.tex,pdfs/%.pdf,$(wildcard mbol-source/*.tex)) 
 maxflow/AltMaxFlow: ../bin/mbolc mbol-source/AltMaxFlow.tex
 	mkdir -p maxflow
 	../bin/mbolc -bin -d maxflow mbol-source/AltMaxFlow.tex

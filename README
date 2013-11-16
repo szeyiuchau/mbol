@@ -14,7 +14,8 @@ DEPENDENCIES:
 
 g++ is necessary to compile mbolc (MBOL compiler). The compiler uses lex and yacc, so if you want to modify the compiler you will need lex and yacc. You will need COIN-OR symphony (open-source) or CPLEX (free academic license) to solve the created optimization program.
 
-The tool pdflatex is highly recommended as the most important advantage of using MBOL is that the MBOL source is compilable by pdflatex into publishable typesetted mathematics.
+The tool pdflatex is highly recommended as the most important advantage of using MBOL is that the MBOL source is compilable by pdflatex into publishable typesetted mathematics. On Ubuntu, the following package can install the necessary latex components:
+sudo apt-get install texlive-latex-extra
 
 
 GETTING STARTED, CPLEX USERS:
