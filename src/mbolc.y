@@ -327,7 +327,7 @@ int countStr(string a, string b) {
   }
   return x;
 }
-bool quiet;
+bool cplex_model_print;
 map<string, string> options;
 void usage() {
   cout << "Usage: mbolc [options] input_file" << endl;
@@ -381,7 +381,7 @@ string indentCode(string code) {
 }
 int main(int argc, char* argv[]) {
   bool inputRead = false;
-  quiet = false;
+  bool quiet = false;
   string inputName;
   string outputDirectory = "./";
   string className;
@@ -391,6 +391,7 @@ int main(int argc, char* argv[]) {
   bool pdf = false;
   bool typ = false;
   bool img = false;
+  bool cpm = false;
   bool cpx = false;
   options["-v"] = "Print version information and exit";
   options["-h"] = "Print help information and exit";
@@ -401,6 +402,7 @@ int main(int argc, char* argv[]) {
   options["-pdf"] = "Compile a pdf of the program";
   options["-img"] = "Compile a formatted pdf using imagemagick";
   options["-hpp"] = "Compile a hpp header of the program";
+  options["-cpm"] = "CPLEX model printing for debugging";
   options["-cpx"] = "User CPLEX as solver (COIN-OR symphony is deafult)";
   options["-ast"] = "Graphviz abstract syntax tree";
   for (int i = 1; i < argc; i++) {
@@ -416,6 +418,8 @@ int main(int argc, char* argv[]) {
       typ = true;
     } else if (string(argv[i]) == "-ast") {
       ast = true;
+    } else if (string(argv[i]) == "-cpm") {
+      cpm = true;
     } else if (string(argv[i]) == "-pdf") {
       pdf = true;
     } else if (string(argv[i]) == "-img") {
@@ -501,7 +505,7 @@ int main(int argc, char* argv[]) {
   
   if (hpp || bin) {
     string code;
-    MbolElementVisitor* vCplex = new MbolElementVisitorCPLEX(types, quiet, className);
+    MbolElementVisitor* vCplex = new MbolElementVisitorCPLEX(types, quiet, className, cpm);
     program->accept(*vCplex);
     code = ((MbolElementVisitorCPLEX*)vCplex)->code;
     if (cpx) {
@@ -540,9 +544,9 @@ int main(int argc, char* argv[]) {
     
     string compileCmd;
     if (cpx) {
-      compileCmd = "g++ -O3 -fopenmp -m64 -fPIC -static -static-libstdc++ -static-libgcc -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I" + mbolHome + "include -I" + cplexHome + "cplex/include -I" + cplexHome + "concert/include -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className + " -L" + cplexHome + "cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L" + cplexHome + "concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
+      compileCmd = "g++ -g -fopenmp -m64 -fPIC -static -static-libstdc++ -static-libgcc -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I" + mbolHome + "include -I" + cplexHome + "cplex/include -I" + cplexHome + "concert/include -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className + " -L" + cplexHome + "cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L" + cplexHome + "concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
     } else {
-      compileCmd = "g++ -I" + mbolHome + "include" + " -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className;
+      compileCmd = "g++ -g -I" + mbolHome + "include" + " -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className;
     }
     //cout << compileCmd << endl;
     system(compileCmd.c_str());

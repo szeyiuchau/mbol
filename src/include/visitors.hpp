@@ -179,7 +179,8 @@ class MbolElementVisitorCPLEX : public MbolElementVisitor {
   map<string,Type*> types;
   string className;
   bool quiet;
-  MbolElementVisitorCPLEX(map<string,Type*> a,bool d,string e);
+  bool cpm;
+  MbolElementVisitorCPLEX(map<string,Type*> a,bool d,string e,bool f);
   virtual void visit(NumberPower* numberPower);
   virtual void visit(ElementExpression* elementExpression);
   virtual void visit(Program* program);

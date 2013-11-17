@@ -43,7 +43,7 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
   // start making all the code
   //#include<ilcplex/ilocplex.h>\n
   code = "#include<set>\n#include<map>\n#include<mbol.hpp>\nusing namespace std;\n#ifndef MBOL_" + className + "\n#define MBOL_" + className + "\nclass " + className + " {\npublic:\nbool init();\nbool solve();\n" + className + "();\n~" + className + "();\nbool hasInitialized;\nMBOLSolver solver;\ndouble objValue;\nMBOLExpr objExp;\n";
-  
+
   // create struct for returning variables
   /*
   code+="// Variable results\n";
@@ -52,7 +52,7 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
       code+=i->second->getCPLEXType()+" "+i->first+"_ret;\n";
     }
   }*/
-  
+
   // making arguments which are constants in the program
   code += "// Constants in the program that you must initialize\n";
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
@@ -60,7 +60,7 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
       code += i->second->getCPLEXType() + " " + i->first + ";\n";
     }
   }
-  
+
   // declare CPLEX variables (actual variables in program)
   code += "// Variables used by the CPLEX program\n";
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
@@ -68,7 +68,7 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
       code += i->second->getCPLEXType() + " " + i->first + ";\n";
     }
   }
-  
+
   code += "// Variable results\n";
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isVariable) {
@@ -86,30 +86,30 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
       code += types[name]->getCPLEXType() + " " + name + ";\n";
     }
   }
-  
+
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isConstant && !i->second->isLiteral) {
       code += "void read_" + i->first + "(list<string>& tokens);\n";
     }
   }
-  
+
   code += "void readAll(string f);\n";
-  
+
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isVariable) {
       code += "void write_" + i->first + "(ofstream& out);\n";
     }
   }
-  
+
   code += "void writeObj(ofstream& out);\n";
-  
+
   code += "void writeAll(string f);\n";
-  
+
   code += "};\n#endif\n";
   code += className + "::" + className + "() {\nhasInitialized = false;\n}\nbool " + className + "::init() {\n";
   code += "MBOLModel model;\n";
 //try {\n     }";
-  
+
   // take care of simple variables
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isVariable && i->second->isNumber && ((NumberType*)i->second)->indices.front().size() == 0) {
@@ -121,13 +121,13 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
       code += " temp" + i->first + ";\n" + i->first + "=temp" + i->first + ";\n";
     }
   }
-  
+
   code += "MBOLExpr tempObj;\n";
   code += "objExp = tempObj;\n";
 }
 
 void MbolElementVisitorCPLEX::visit(Program* program) {
-  
+
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isVariable) {
       NumberType* t = (NumberType*)i->second;
@@ -180,7 +180,11 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
       }
     }
   }
-  
+
+  if (cpm) {
+    code += "cout << model << endl;\n";
+  }
+
   code += "MBOLSolver tempSolver(model);\nsolver = tempSolver;\n";
   if (quiet) {
     //        code+="solver.setOut(env.getNullStream());\n";
@@ -188,7 +192,7 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
   }
   //    code+="}\ncatch(IloException& ex) {\ncout << ex << endl;\nreturn false;\n}\n";
   code += "hasInitialized = true;\nreturn true;\n}\n";
-  
+
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isConstant && !i->second->isLiteral) {
       code += "void " + className + "::read_" + i->first + "(list<string>& tokens) {\n";
@@ -224,11 +228,11 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
       code += "}\n";
     }
   }
-  
+
   code += "void " + className + "::readAll(string f) {\n";
   code += "list<string> tokens = getTokens(f.c_str());\n";
   code += "while(!tokens.empty()) {\n";
-  
+
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isConstant && !i->second->isLiteral) {
       code += "if (tokens.front() == \"" + i->first + "\") {\n";
@@ -237,10 +241,10 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
       code += "}\n";
     }
   }
-  
+
   code += "}\n";
   code += "}\n";
-  
+
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isVariable) {
       code += "void " + className + "::write_" + i->first + "(ofstream& out) {\n";
@@ -289,7 +293,7 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
         prev = "iter" + convert(tVal) + "->second";
         tVal++;
       }
-      code += "if (solver.getValue(" + prev +") != 0) {\n";
+      code += "if (solver.getValue(" + prev + ") != 0) {\n";
       code += "out << " + indices + "solver.getValue(" + prev + ") << endl;\n";
       code += "}\n";
       for (list<SetType*>::iterator j = example.begin(); j != example.end(); j++) {
@@ -298,12 +302,12 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
       code += "}\n";
     }
   }
-  
+
   code += "void " + className + "::writeObj(ofstream& out) {\n";
   code += "out << \"objValue\" << endl;\n";
   code += "out << objValue << endl;\n";
   code += "}\n";
-  
+
   code += "void " + className + "::writeAll(string f) {\n";
   code += "ofstream out(f.c_str());\n";
   code += "writeObj(out);\n";
@@ -313,13 +317,13 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
       code += "write_" + i->first + "(out);\n";
     }
   }
-  
+
   code += "}\n";
-  
+
   code += "bool " + className + "::solve() {\nif (!hasInitialized) {\ninit();\n}\nif (!hasInitialized) {\nreturn false;\n}\n";
 //try{\n     }
   code += "solver.solve();\nobjValue = solver.getValue(objExp);\n";
-  
+
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isReturn) {
       NumberType* t = (NumberType*)i->second;
@@ -371,17 +375,18 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
         code += "}\n";
       }
     }
-    
+
   }
-  
+
   code += "return true;\n}\n" + className + "::~" + className + "() {\n}\n";
-  
+
 }
-MbolElementVisitorCPLEX::MbolElementVisitorCPLEX(map<string, Type*> a, bool d, string e) {
+MbolElementVisitorCPLEX::MbolElementVisitorCPLEX(map<string, Type*> a, bool d, string e, bool f) {
   types = a;
   quiet = d;
   className = e;
   justDouble = false;
+  cpm = f;
   code = "";
 }
 void MbolElementVisitorCPLEX::visit(ElementExpression* elementExpression) {
