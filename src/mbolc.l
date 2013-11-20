@@ -84,7 +84,7 @@
   yylval.sval=buf;
   return VA;
 };
-(\+|-){0,1}[0-9]+(\.[0-9]*){0,1} {
+-{0,1}[0-9]+(\.[0-9]*){0,1} {
   char* buf=new char[strlen(yytext)+1];
   strcpy(buf,yytext);
   yylval.sval=buf;

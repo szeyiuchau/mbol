@@ -118,7 +118,7 @@ void MbolElementVisitorCPLEX::specialVisit(Program* program) {
       } else {
         code += "MBOLNumVar";
       }
-      code += " temp" + i->first + ";\n" + i->first + "=temp" + i->first + ";\n";
+      code += " temp" + i->first + ";\n" + i->first + " = temp" + i->first + ";\n";
     }
   }
 
@@ -510,7 +510,7 @@ void MbolElementVisitorCPLEX::visit(NumberExpression* numberExpression) {
   //  code += ";\n";
 }
 void MbolElementVisitorCPLEX::visit(Objective* objective) {
-  code += "objExp=" + objective->numberExpression->value + ";\n";
+  code += "objExp = (MBOLExpr)(" + objective->numberExpression->value + ");\n";
   code += "model.";
   if (objective->objectiveType->value == "max") {
     code += "maximize";

@@ -213,7 +213,11 @@ number_subexpression {
 } |
 number_expression number_subexpression {
   $1->numberSubexpressions.push_back($2);
-  $1->numberOperators.push_back(new NumberOperator("*"));
+  if ($2->isNegativeLiteral()) {
+    $1->numberOperators.push_back(new NumberOperator("+"));
+  } else {
+    $1->numberOperators.push_back(new NumberOperator("*"));
+  }
 } |
 number_expression number_operator number_subexpression {
   $1->numberSubexpressions.push_back($3);
@@ -549,7 +553,11 @@ int main(int argc, char* argv[]) {
       compileCmd = "g++ -g -I" + mbolHome + "include" + " -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className;
     }
     //cout << compileCmd << endl;
-    system(compileCmd.c_str());
+    int ret = system(compileCmd.c_str());
+    if (ret != 0) {
+      cout << "Unknown error" << endl;
+      return 1;
+    }
   }
   
   if (pdf || img) {
@@ -576,7 +584,11 @@ int main(int argc, char* argv[]) {
     texMain << "\\input{" + inputName + "}" << endl;
     texMain << "\\end{document}" << endl;
     texMain.close();
-    system(("pdflatex -output-directory " + outputDirectory + " " + texMainName + ".tex > /dev/null").c_str());
+    int ret = system(("pdflatex -halt-on-error -output-directory " + outputDirectory + " " + texMainName + ".tex > /dev/null").c_str());
+    if (ret != 0) {
+      cout << "Latex error" << endl;
+      return 1;
+    }
     if (img) {
       system(("convert -quality 100 -density 300 -trim " + texMainName + ".pdf " + texMainName + ".jpeg").c_str());
       system(("convert " + texMainName + ".jpeg " + texMainName + ".pdf").c_str());

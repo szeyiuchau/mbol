@@ -142,6 +142,9 @@ NumberSubexpression() {}
   string getName() {
     return "NumberSubexpression";
   }
+  virtual bool isNegativeLiteral() {
+    return false;
+  }
   virtual void visit(MbolElementVisitor& visitor) {
     visitor.visit((NumberSubexpression*)this);
   }
@@ -227,6 +230,7 @@ class NumberLiteral : public NumberSubexpression {
   string getName() {
     return "NumberLiteral: " + number;
   }
+  virtual bool isNegativeLiteral();
   virtual void visit(MbolElementVisitor& visitor) {
     visitor.visit((NumberLiteral*)this);
   }

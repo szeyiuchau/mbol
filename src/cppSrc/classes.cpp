@@ -69,6 +69,11 @@ NumberLiteral::NumberLiteral(string a) {
   number = a;
   value = a;
 }
+bool NumberLiteral::isNegativeLiteral() {
+  if (atoi(number.c_str()) < 0) {
+    return true;
+  }
+}
 NumberParantheses::NumberParantheses(NumberExpression* a) {
   numberExpression = a;
 }
