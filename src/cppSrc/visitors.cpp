@@ -238,7 +238,7 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
       code += "if (tokens.front() == \"" + i->first + "\") {\n";
       code += "tokens.pop_front();\n";
       code += "read_" + i->first + "(tokens);\n";
-      code += "break;\n";
+      code += "continue;\n";
       code += "}\n";
     }
   }
