@@ -231,7 +231,9 @@ void MbolElementVisitorCPLEX::visit(Program* program) {
 
   code += "void " + className + "::readAll(string f) {\n";
   code += "list<string> tokens = getTokens(f.c_str());\n";
-  code += "while(!tokens.empty()) {\n";
+  code += "int lastSize = tokens.size() + 1;\n";
+  code += "while(!tokens.empty() && lastSize > tokens.size()) {\n";
+  code += "lastSize = tokens.size();\n";
 
   for (map<string, Type*>::iterator i = types.begin(); i != types.end(); i++) {
     if (i->second->isConstant && !i->second->isLiteral) {
