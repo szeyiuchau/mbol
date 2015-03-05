@@ -487,7 +487,7 @@ void usage() {
   }
 }
 void version() {
-  cout << "MBOLC Version 0.3.0" << endl;
+  cout << "MBOLC Version 0.3.0.2" << endl;
   exit(0);
 }
 void help() {
@@ -667,6 +667,15 @@ int main(int argc, char* argv[]) {
     if (mbolHome[mbolHome.size() - 1] != '/') {
       mbolHome += "/";
     }
+    char *cplexArchC = getenv("CPLEX_ARCH");
+    if (cplexArchC == NULL){
+    	cout << "ERROR: must set environment variable \"CPLEX_ARCH\" to create binary for default file I/O" << endl;
+    	exit(1);
+    }
+    string cplexArch(cplexArchC);
+    if (cplexArch[cplexArch.size() - 1] != '/') {
+      cplexArch += "/";
+    }    
     char* cplexHomeC = getenv("CPLEX_HOME");
     if (cplexHomeC == NULL) {
       cout << "ERROR: must set environment variable \"CPLEX_HOME\" to create binary for default file I/O" << endl;
@@ -684,7 +693,7 @@ int main(int argc, char* argv[]) {
     
     string compileCmd;
     if (cpx) {
-      compileCmd = "g++ -g -fopenmp -m64 -fPIC -static -static-libstdc++ -static-libgcc -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I" + mbolHome + "include -I" + cplexHome + "cplex/include -I" + cplexHome + "concert/include -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className + " -L" + cplexHome + "cplex/lib/x86-64_sles10_4.1/static_pic -lilocplex -lcplex -L" + cplexHome + "concert/lib/x86-64_sles10_4.1/static_pic -lconcert -lm -pthread";
+      compileCmd = "g++ -g -fopenmp -m64 -fPIC -static -static-libstdc++ -static-libgcc -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -I" + mbolHome + "include -I" + cplexHome + "cplex/include -I" + cplexHome + "concert/include -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className + " -L" + cplexHome + "cplex/lib/"+ cplexArch + "static_pic -lilocplex -lcplex -L" + cplexHome + "concert/lib/"+ cplexArch + "static_pic -lconcert -lm -pthread";
     } else {
       compileCmd = "g++ -g -I" + mbolHome + "include" + " -I" + outputDirectory + " " + cppName + " -o " + outputDirectory + className;
     }
